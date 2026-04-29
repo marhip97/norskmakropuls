@@ -1,0 +1,78 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+
+# Linters and type checkers
+.ruff_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Node / Next.js (for dashboard-aksel/)
+node_modules/
+.next/
+out/
+.npm
+.yarn/
+*.log
+
+# Build output
+dist/
+build/
+
+# Data and cache files
+# Note: vintager i data/raw/ committes (følger SMART-praksis); kun midlertidige
+# filer ekskluderes:
+*.tmp
+*.bak
+
+# Local secrets (skal aldri committes)
+.env.local
+.env.*.local
+secrets.yaml
+*.pem
