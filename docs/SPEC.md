@@ -313,3 +313,67 @@ Dato-format i seed: kvartalsnøkkel (`YYYY-QN`) konverteres til kvartalets førs
 |---|---|---|---|
 | norges_bank_mpr | 2025-12-19 | styringsrente, kpi, kpi_jae, produksjonsgap | til 2028-Q4 |
 | norges_bank_mpr | 2026-03-26 | styringsrente, kpi, kpi_jae, produksjonsgap | til 2029-Q4 |
+
+---
+
+## 8. Revisjonsmodeller
+
+### 8.1 News-motor
+
+Implementert i `src/news/__init__.py`.
+
+#### Definisjon
+
+```
+news_t = faktisk_t - forventet_t
+```
+
+`forventet_t` er ankerprognosens verdi for periode `t`, der ankeret er det siste offisielle publisert senest ved `t` (punkt-i-tid-korrekt).
+
+#### Dataklasse: News
+
+```python
+@dataclass
+class News:
+    series_id: str
+    observation_date: date
+    actual: float
+    expected: float
+    surprise: float                # actual - expected
+    standardised_surprise: float   # surprise / rolling_std(surprise, 36 perioder)
+    anchor_publication: date       # hvilken ankervintagedato ble brukt
+```
+
+#### Klasse: NewsEngine
+
+```python
+class NewsEngine:
+    def compute_news(series_id, since, as_of=None) -> list[News]
+    def latest_news(series_id) -> News | None
+    def news_dataframe(series_id, since) -> pd.DataFrame
+```
+
+`as_of`-parameteren er nøkkelen til punkt-i-tid-korrekthet. For historisk analyse: sett `as_of` til datoen du vil analysere fra. Standard er `date.today()`.
+
+#### Standardisering
+
+`standardised_surprise = surprise / rolling_std(diff(value), window=36, min_periods=6)`
+
+Standardiseringen bruker rullende standardavvik på 36 perioder av første-differansen til serien (ikke av selve serien). Dette gir dimensjonsløs størrelse der ±1 tilsvarer ett historisk standardavvik i månedlig variasjon.
+
+Produserer `NaN` der det er færre enn 6 perioder tilgjengelig for estimatet.
+
+#### Datomatching mellom observasjon og anker
+
+Ankerprognoser er kvartalsvise. Observasjoner er oftest månedlige. Matching-regel:
+1. Eksakt match på dato (etter normalisering til midnatt UTC).
+2. Nærmeste ankerpunkt innenfor 95 dager aksepteres.
+3. Observasjoner uten ankertreff hoppes over med advarsel i logg.
+
+#### Observert funn (2026-04-30)
+
+Første situasjonsbilde mot PPR 1/2026 (publisert 2026-03-26):
+- KPI: nær anker for siste tilgjengelige observasjon (des. 2025)
+- KPI-JAE: nær anker
+- USD/NOK: -0.36 NOK fra ankerbanen (NOK styrket seg)
+- EUR/NOK: -0.26 NOK fra ankerbanen
