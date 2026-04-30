@@ -1,6 +1,6 @@
 # Status
 
-Sist oppdatert: 2026-04-30
+Sist oppdatert: 2026-04-30 (Fase 0 ferdig)
 
 Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne leses på under ett minutt før hver arbeidsøkt og oppdateres etter hver økt der noe vesentlig endres.
 
@@ -8,15 +8,15 @@ Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne le
 
 ## Nåværende fase
 
-**Fase 0 — Repo-oppsett og verifisering.**
+**Fase 1 — Datakatalog og kildeutvidelse.**
 
-norskmakropuls er nylig opprettet som etterfølger til SMART-repoet. Datalaget, testene og CI/CD-mønstrene er kopiert fra SMART, men ingen kode er verifisert å fungere i dette nye repoet ennå. Pipeline har ikke kjørt her én eneste gang. Tester har ikke kjørt på CI. Vi vet ikke om SSB-filtrene i `config/variables.yaml` fortsatt er gyldige (SSB endrer dimensjonskoder).
+Fase 0 er fullført 2026-04-30. Pipeline kjørte 12/12 variabler uten feil på GitHub Actions. Tester kjører grønt på CI (33/33). To kalibreringsnoteringer er dokumentert nedenfor, men blokkerer ikke Fase 1.
 
-Første mål er å bevise at datalaget fungerer her. Først etter det går vi inn i Fase 1.
+Fase 1 pågår: 5 nye variabler implementert og verifisert (2026-04-30). 4 Norges Bank-variabler gjenstår og krever discovery (`i44`, `nowa`, `gov_yield_2y_no`, `gov_yield_10y_no`).
 
-## Hva er på plass i repoet (kopiert fra SMART, ikke verifisert her)
+## Hva er på plass i repoet (verifisert)
 
-**Datalag — kode finnes, ikke testet i dette repoet:**
+**Datalag — verifisert og fungerende:**
 - [x] `src/data/base.py`: DataSource-grensesnitt med fetch/validate/store/run
 - [x] `src/data/ssb.py`: SSB Statbank-klient med metadata-validering
 - [x] `src/data/norges_bank.py`: SDMX-JSON-klient
@@ -27,89 +27,87 @@ Første mål er å bevise at datalaget fungerer her. Først etter det går vi in
 - [x] `scripts/discover_api.py`: bredt discovery-skript
 
 **Konfigurasjon:**
-- [x] `config/variables.yaml` med 12 variabler (oppføringer kopiert fra SMART)
-- [x] `data_catalog.yaml` opprettet med samme 12 variabler, status `B_VERIFY` på alle
+- [x] `config/variables.yaml` med 12 variabler
+- [x] `data_catalog.yaml` med 12 variabler, alle satt til `A_PROD` etter verifisering
 
 **Tester:**
-- [x] `tests/test_ssb.py`, `test_fred.py`, `test_norges_bank.py`, `test_pipeline.py`, `conftest.py`
-- Note: `test_pipeline.py` linje 47 asserter at `registrert_ledige` finnes i config. Det stemmer ikke med faktisk `variables.yaml` (kun 12 variabler, ingen NAV-oppføring). Denne testen vil feile på første kjøring.
+- [x] 33/33 tester grønne på CI (`tests.yml`)
+- [x] Ruff linting passerer
 
-**Repo-skjelett:**
-- [x] `PROJECT_PLAN.md`, `STATUS.md`, `CLAUDE.md`
-- [x] `requirements.txt`, `requirements-dev.txt`, `.gitignore`, `LICENSE`
-- [x] README-filer som forklarer plan i `src/anchors/`, `src/news/`, `src/models/`, `src/dashboard/`
-- [x] CI/CD-workflows (`.github/workflows/`)
+**CI/CD:**
+- [x] `tests.yml`: kjører ved push til `main` og `claude/**`
+- [x] `data_pipeline.yml`: kjører ukentlig og ved push til `main` (kun `fetch-data`-jobben)
+- [x] `deploy_dashboard.yml`: manuell trigger (reaktiveres i Fase 4)
 
-**Kjente problemer i workflows som må fikses før første grønne run:**
-- `.github/workflows/data_pipeline.yml` har et `run-models`-jobb som kjører `python -m src.runner` — den filen finnes ikke (hentes i Fase 5). Workflow vil feile på dette steget.
-- `.github/workflows/deploy_dashboard.yml` refererer til `dashboard/index.html` etc. som ikke finnes. Workflow vil feile.
-- `tests/tests/__init__.py` ligger i feil mappe (skulle vært `tests/__init__.py`).
+**Første pipeline-kjøring:**
+- [x] 12/12 variabler hentet 2026-04-30 via GitHub Actions
+- [x] `data/raw/<serie_id>/2026-04-30.parquet` finnes for alle 12 variabler
 
-## Hva er IKKE gjort
+## Kalibreringsnoteringer (ikke blokkere)
 
-- Ingen pipeline-kjøring har skjedd i dette repoet.
-- Ingen tester har kjørt på CI.
-- `data/raw/` er tom — ingen vintage er hentet ennå.
-- Modeller (ARIMA, VAR, BVAR, DFM, AR-X, ML-baseline) er **ikke** kopiert fra SMART. De hentes i Fase 5 som kryssjekk mot ankerbanen.
-- `src/anchors/`, `src/news/`, `src/models/`, `src/dashboard/`, `dashboard-aksel/` er tomme mapper med kun en README som beskriver plan.
+**`ledighet_aku` (SSB 05111):** Returnerer årsgjennomsnitt (54 rader, 1972–2025), ikke månedlig/kvartalsvis data. Tabellen leverer årsaggregater for lang historikk. For kortsiktig oppfølging (kvartalsvis AKU) må riktig tabell og filtre identifiseres via discovery i Fase 1. Nåværende data er nyttig for historisk kontekst.
+
+**`lonnsvekst` (SSB 11417):** Returnerer 9 rader (2017–2025), ikke fra 1997 som katalogen angir. `ContentsCode: "ArslonnEndring"` er kun tilgjengelig fra 2017 i denne konfigurasjonen. For lengre historikk trengs alternativt filter eller tabell.
+
+## Hva er IKKE gjort ennå
+
+- `src/anchors/`, `src/news/`, `src/models/`, `src/dashboard/`, `dashboard-aksel/` er tomme mapper med kun README som beskriver plan.
 - `README.md` på topp-nivå er tom.
 - `docs/data-sources.md` er tom.
-- `docs/SPEC.md` finnes ikke. Brukeren har en lokal SPEC-fil som må kopieres inn ved behov.
+- `docs/SPEC.md` finnes ikke i repoet.
+- 9 manglende MVP-variabler er ikke implementert (se Fase 1 nedenfor).
+- Modeller (ARIMA, VAR, BVAR, DFM, AR-X, ML-baseline) hentes i Fase 5.
 
 ## Hva er under arbeid
 
-Ingenting aktivt. Repoet er nettopp opprettet og venter på Fase 0-verifisering.
+Fase 1 — discovery for de 4 gjenstående Norges Bank-variablene.
 
-## Hva står for tur — Fase 0 (gjør disse i rekkefølge)
+## Hva står for tur — Fase 1 (gjenstående)
 
-1. **Fiks workflow-blokkere før første push:**
-   - Fjern `run-models`-jobben fra `data_pipeline.yml` (eller kommentér den ut til Fase 5).
-   - Bytt `deploy_dashboard.yml`-trigger til `workflow_dispatch` så den ikke kjører automatisk og feiler.
-   - Fjern `tests/tests/`-undermappen.
+1. **Discovery for 4 Norges Bank-variabler** — series keys ukjent, kan ikke gjettes:
+   - `i44` (importveid valutakursindeks, 44 land)
+   - `nowa` (Norwegian Overnight Weighted Average)
+   - `gov_yield_2y_no` (statsobligasjonsrente 2 år)
+   - `gov_yield_10y_no` (statsobligasjonsrente 10 år)
 
-2. **Verifiser tester lokalt:**
+   Trigger `discover_api.yml`-workflowen på GitHub Actions, eller kjør lokalt:
    ```
-   pip install -r requirements-dev.txt
-   pytest tests/ -v
+   python -m src.data.discover_api --source norges_bank
    ```
-   Forventet: alle tester passerer bortsett fra `test_load_config_returnerer_alle_variabler` som vil feile på `assert "registrert_ledige" in ids`. Fiks: oppdater testen til å sjekke variabler som faktisk finnes (`bnp_fastland`, `kpi`, `styringsrente`, `oljepris`).
 
-3. **Verifiser pipeline lokalt:**
-   ```
-   python -m src.data.pipeline kpi
-   ```
-   Forventet: én vintage skrives til `data/raw/kpi/<dato>.parquet`.
-   
-   Hvis SSB returnerer feil pga. dimensjonskoder (kjent risiko etter SMART-erfaring): bruk `python -m src.data.discover_api --table 03013` for å finne riktige koder, oppdater `variables.yaml`.
+2. **Implementer de 4 variablene** i `norges_bank.py` (`_SERIES_MAP`) og legg til i `config/variables.yaml`.
 
-4. **Kjør hele pipeline lokalt:**
-   ```
-   python -m src.data.pipeline
-   ```
-   Mål: 12/12 variabler henter uten feil.
+3. **Verifiser** via pipeline og sett `A_PROD` i `data_catalog.yaml`.
 
-5. **Push første grønne run til GitHub** og verifiser at `tests.yml`-workflow kjører grønt.
-
-6. **Når Fase 0 er ferdig:** oppdater dette dokumentet med faktisk status per variabel, sett A_PROD eller passende klassifisering i `data_catalog.yaml`, og gå over til Fase 1.
+4. Vurder om Fase 2 (ankerbane-infrastruktur) kan starte parallelt.
 
 ## Datakildestatus
 
-Alle 12 variabler står som **B_VERIFY** i `data_catalog.yaml` inntil pipeline har kjørt grønt i dette repoet. Når en variabel er verifisert hentet (en parquet-fil i `data/raw/<id>/`), oppdater status til `A_PROD` her og i katalogen.
+Pipeline kjørt to ganger: 2026-04-30 (Fase 0) og 2026-04-30 (Fase 1).
 
-| Variabel | Kilde | Status | Sist verifisert |
-|---|---|---|---|
-| bnp_fastland | SSB 09190 | B_VERIFY | — |
-| kpi | SSB 03013 | B_VERIFY | — |
-| kpi_jae | SSB 05327 | B_VERIFY | — |
-| ledighet_aku | SSB 05111 | B_VERIFY | — |
-| lonnsvekst | SSB 11417 | B_VERIFY | — |
-| boligprisvekst | SSB 07230 | B_VERIFY | — |
-| k2_kredittvekst | SSB 11599 | B_VERIFY | — |
-| styringsrente | Norges Bank SIREN | B_VERIFY | — |
-| eurnok | Norges Bank EXR/B.EUR.NOK.SP | B_VERIFY | — |
-| oljepris | FRED DCOILBRENTEU | B_VERIFY | — |
-| ecb_rente | FRED ECBDFR | B_VERIFY | — |
-| handelspartnervekst | FRED CLVMNACSCAB1GQEA19 | B_VERIFY | — |
+| Variabel | Kilde | Status | Sist verifisert | Notat |
+|---|---|---|---|---|
+| bnp_fastland | SSB 09190 | A_PROD | 2026-04-30 | 188 rader, 1979–2025 |
+| kpi | SSB 03013 | A_PROD | 2026-04-30 | 564 rader, 1979–2025 |
+| kpi_jae | SSB 05327 | A_PROD | 2026-04-30 | 265 rader, 2003–2025 |
+| ledighet_aku | SSB 05111 | A_PROD | 2026-04-30 | 54 rader årsdata 1972–2025. Månedlig/kvartal krever discovery |
+| lonnsvekst | SSB 11417 | A_PROD | 2026-04-30 | 9 rader 2017–2025. Historikk fra 1997 krever nytt filter |
+| boligprisvekst | SSB 07230 | A_PROD | 2026-04-30 | 34 rader, 1992–2025 |
+| k2_kredittvekst | SSB 11599 | A_PROD | 2026-04-30 | 472 rader, 1986–2026 |
+| styringsrente | Norges Bank SHORT_RATES | A_PROD | 2026-04-30 | 176 rader, 2011–2026 |
+| eurnok | Norges Bank EXR | A_PROD | 2026-04-30 | 6881 rader, 1999–2026 |
+| oljepris | FRED DCOILBRENTEU | A_PROD | 2026-04-30 | 10159 rader, 1987–2026, 280 nulls (normalt) |
+| ecb_rente | FRED ECBDFR | A_PROD | 2026-04-30 | 9982 rader, 1999–2026 |
+| handelspartnervekst | FRED CLVMNACSCAB1GQEA19 | A_PROD | 2026-04-30 | 125 rader, 1995–2026 |
+| **usd_nok** | Norges Bank EXR | **A_PROD** | 2026-04-30 | 9151 rader, 1990–2026 |
+| **us_10y_yield** | FRED DGS10 | **A_PROD** | 2026-04-30 | 16781 rader, 1962–2026, 716 nulls (normalt) |
+| **us_2y_yield** | FRED DGS2 | **A_PROD** | 2026-04-30 | 13021 rader, 1976–2026, 548 nulls (normalt) |
+| **fed_funds** | FRED FEDFUNDS | **A_PROD** | 2026-04-30 | 861 rader, 1954–2026 |
+| **us_cpi** | FRED CPIAUCSL | **A_PROD** | 2026-04-30 | 951 rader, 1947–2026 |
+| i44 | Norges Bank | B_TEST | — | Trenger discovery |
+| nowa | Norges Bank | B_TEST | — | Trenger discovery |
+| gov_yield_2y_no | Norges Bank | B_TEST | — | Trenger discovery |
+| gov_yield_10y_no | Norges Bank | B_TEST | — | Trenger discovery |
 
 ## Blokkeringer og åpne spørsmål
 
@@ -146,6 +144,8 @@ Følgende er ekskludert fra dagens repo og hentes senere:
 
 | Dato | Endring | Av |
 |---|---|---|
+| 2026-04-30 | Fase 1 (delvis): 5 nye variabler verifisert og A_PROD. 4 NB-variabler venter på discovery. | Claude Code |
+| 2026-04-30 | Fase 0 ferdig: 12/12 variabler verifisert, CI grønn, alle A_PROD i data_catalog.yaml. | Claude Code |
 | 2026-04-30 | STATUS.md korrigert: fjernet falske SMART-status-rester, lagt inn ærlig Fase 0-plan. | Plan-fase |
 | 2026-04-29 | Initial opprettelse av norskmakropuls-repo. Datalag og dokumenter fra zip lagt inn. | Plan-fase |
 

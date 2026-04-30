@@ -19,6 +19,8 @@
 
 version: 1
 last_updated: 2026-04-30
+phase0_verified: 2026-04-30
+phase0_result: "12/12 variabler hentet uten feil via GitHub Actions"
 default_license_norway: NLOD-2.0
 default_license_us: public_domain
 
@@ -39,7 +41,7 @@ sources:
     seasonal_adjustment: sa
     release_lag: ca. 60 dager etter kvartalsslutt
     license: NLOD-2.0
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations:
       - type: yoy_pct
@@ -64,7 +66,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: ca. 10 dager etter månedslutt
     license: NLOD-2.0
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -87,7 +89,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: ca. 10 dager etter månedslutt
     license: NLOD-2.0
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -114,7 +116,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: ca. 30 dager etter månedslutt
     license: NLOD-2.0
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -126,7 +128,12 @@ sources:
       Kjonn: ["0"]
       Alder: ["15-74"]
       ContentsCode: ["Prosent"]
-    notes: AKU-ledighet er hovedindikator i ankerprognosene for arbeidsmarked.
+    notes: |
+      AKU-ledighet er hovedindikator i ankerprognosene for arbeidsmarked.
+      KALIBRERING: Nåværende konfigurasjon returnerer årsgjennomsnitt (54 rader 1972–2025),
+      ikke månedlig/kvartalsvis data. For kortere perioders oppfølging må riktig tabell
+      og filtre identifiseres via discovery (python -m src.data.discover_api --table 05111).
+      Verifisert hentet: 2026-04-30.
 
   - series_id: lonnsvekst
     name: Årslønnsvekst, alle næringer
@@ -139,7 +146,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: ca. 6 måneder etter årets slutt
     license: NLOD-2.0
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations:
       - type: yoy_pct
@@ -151,7 +158,11 @@ sources:
     config_filters:
       NACE2007: ["A-S"]
       ContentsCode: ["ArslonnEndring"]
-    notes: Suppleres senere med TBU-tall.
+    notes: |
+      Suppleres senere med TBU-tall.
+      KALIBRERING: ContentsCode "ArslonnEndring" returnerer kun 9 rader (2017–2025).
+      For historikk fra 1997 må alternativt filter eller tabell identifiseres via discovery.
+      Verifisert hentet: 2026-04-30.
 
   - series_id: boligprisvekst
     name: Boligprisindeks, hele landet
@@ -164,7 +175,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: ca. 1 måned etter kvartalsslutt
     license: NLOD-2.0
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations:
       - type: yoy_pct
@@ -190,7 +201,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: ca. 6 uker etter månedslutt
     license: NLOD-2.0
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -218,7 +229,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: daglig oppdatering, månedssnitt beregnes i pipeline
     license: norges_bank_terms
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations:
       - type: resample_monthly_mean
@@ -245,7 +256,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: samme dag (etter kursfastsettelse)
     license: norges_bank_terms
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -271,7 +282,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: ca. 1 uke
     license: fred_public
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -293,7 +304,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: samme dag
     license: fred_public
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -315,7 +326,7 @@ sources:
     seasonal_adjustment: sa
     release_lag: ca. 60 dager etter kvartalsslutt
     license: fred_public
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -327,28 +338,231 @@ sources:
     notes: Erstattes med vektet handelspartnerindeks i senere fase.
 
   # ============================================================================
-  # Variabler som skal legges til i Fase 1 (ikke implementert ennå)
+  # Norges Bank — Fase 1 (implementert)
   # ============================================================================
-  # Følgende variabler er identifisert som nødvendige for MVP men venter på
-  # discovery og implementering. Legges inn etter Fase 0 er ferdig:
-  #
-  # Norges Bank (krever discovery):
-  #   - usd_nok            (EXR, B.USD.NOK.SP - må verifiseres)
-  #   - i44                (importveid valutakurs)
-  #   - nowa               (NOWA-rente)
-  #   - gov_yield_2y_no    (statsobligasjonsrente 2 år)
-  #   - gov_yield_10y_no   (statsobligasjonsrente 10 år)
-  #
-  # FRED (kan implementeres direkte med eksisterende klient):
-  #   - us_10y_yield       (DGS10)
-  #   - us_2y_yield        (DGS2)
-  #   - fed_funds          (FEDFUNDS)
-  #   - us_cpi             (CPIAUCSL)
-  #
-  # NAV via SSB:
-  #   - registrert_ledige  (SSB tabell 05111, ContentsCode "Ledige2")
-  #     Note: NAVDataSource finnes i src/data/nav.py, men var ikke registrert
-  #     i config/variables.yaml ved repo-opprettelse. Legges inn når NAV-broen
-  #     bygges i Fase 3.
-  #
-  # Se PROJECT_PLAN.md seksjon 5 og STATUS.md "Hva står for tur".
+
+  - series_id: usd_nok
+    name: Valutakurs USD/NOK (spot)
+    source: norges_bank
+    source_type: sdmx_json
+    endpoint: https://data.norges-bank.no/api/data/EXR/B.USD.NOK.SP
+    source_table: EXR
+    frequency: daily
+    unit: nok_per_usd
+    seasonal_adjustment: not_sa
+    release_lag: samme dag (etter kursfastsettelse)
+    license: norges_bank_terms
+    status: A_PROD
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 1999-01-04
+      expected_frequency: daily_business
+      max_missing_recent: 5
+    config_filters:
+      series: USDNOK
+    notes: |
+      Spotkurs USD/NOK. Series key B.USD.NOK.SP følger samme mønster som
+      EUR/NOK (B.EUR.NOK.SP) som er verifisert. Sett til A_PROD etter
+      første grønne pipeline-kjøring.
+      Verifisert hentet: 2026-04-30. 9151 rader, 1990–2026, nulls=0.
+
+  # ============================================================================
+  # Norges Bank — Fase 1 (trenger discovery)
+  # ============================================================================
+  # Disse variablene er identifisert som nødvendige for MVP men series keys
+  # er ikke verifisert. Kjør discovery for å finne riktige dataflow og series key:
+  #   python -m src.data.discover_api --source norges_bank
+  # eller sjekk https://data.norges-bank.no/api/data/
+
+  - series_id: i44
+    name: Importveid valutakursindeks (I-44)
+    source: norges_bank
+    source_type: sdmx_json
+    endpoint: https://data.norges-bank.no/api/data/
+    source_table: ukjent — krever discovery
+    frequency: daily
+    unit: index
+    seasonal_adjustment: not_sa
+    release_lag: samme dag
+    license: norges_bank_terms
+    status: B_TEST
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 1999-01-01
+      expected_frequency: daily_business
+      max_missing_recent: 5
+    config_filters: {}
+    notes: |
+      DISCOVERY NØDVENDIG. Norges Banks importveide valutakursindeks (44 land).
+      Mulig dataflow: EXR eller TWI. Series key ukjent — kjør discovery før implementering.
+
+  - series_id: nowa
+    name: Norwegian Overnight Weighted Average (NOWA)
+    source: norges_bank
+    source_type: sdmx_json
+    endpoint: https://data.norges-bank.no/api/data/
+    source_table: ukjent — krever discovery
+    frequency: daily
+    unit: pct
+    seasonal_adjustment: not_sa
+    release_lag: neste dag
+    license: norges_bank_terms
+    status: B_TEST
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 2011-01-01
+      expected_frequency: daily_business
+      max_missing_recent: 5
+    config_filters: {}
+    notes: |
+      DISCOVERY NØDVENDIG. NOWA er Norges Banks pengemarkedsrente for
+      overnight-lån. Mulig dataflow: NOWA eller SHORT_RATES.
+
+  - series_id: gov_yield_2y_no
+    name: Norsk statsobligasjonsrente, 2 år
+    source: norges_bank
+    source_type: sdmx_json
+    endpoint: https://data.norges-bank.no/api/data/
+    source_table: ukjent — krever discovery
+    frequency: daily
+    unit: pct
+    seasonal_adjustment: not_sa
+    release_lag: samme dag
+    license: norges_bank_terms
+    status: B_TEST
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 1990-01-01
+      expected_frequency: daily_business
+      max_missing_recent: 5
+    config_filters: {}
+    notes: |
+      DISCOVERY NØDVENDIG. Norsk statsobligasjonsrente 2-årig løpetid.
+      Mulig dataflow: YIELDS eller GOVT_BONDS.
+
+  - series_id: gov_yield_10y_no
+    name: Norsk statsobligasjonsrente, 10 år
+    source: norges_bank
+    source_type: sdmx_json
+    endpoint: https://data.norges-bank.no/api/data/
+    source_table: ukjent — krever discovery
+    frequency: daily
+    unit: pct
+    seasonal_adjustment: not_sa
+    release_lag: samme dag
+    license: norges_bank_terms
+    status: B_TEST
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 1990-01-01
+      expected_frequency: daily_business
+      max_missing_recent: 5
+    config_filters: {}
+    notes: |
+      DISCOVERY NØDVENDIG. Norsk statsobligasjonsrente 10-årig løpetid.
+      Mulig dataflow: YIELDS eller GOVT_BONDS.
+
+  # ============================================================================
+  # FRED — Fase 1 (implementert)
+  # ============================================================================
+
+  - series_id: us_10y_yield
+    name: US 10-årig statsobligasjonsrente (Treasury Constant Maturity)
+    source: FRED
+    source_type: csv
+    endpoint: https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS10
+    source_table: DGS10
+    frequency: daily
+    unit: pct
+    seasonal_adjustment: not_sa
+    release_lag: 1 virkedag
+    license: fred_public
+    status: A_PROD
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 1962-01-02
+      expected_frequency: daily_business
+      max_missing_recent: 5
+    config_filters:
+      series_id: DGS10
+    notes: Benchmark for langrente internasjonalt. Sett til A_PROD etter første grønne kjøring.
+
+  - series_id: us_2y_yield
+    name: US 2-årig statsobligasjonsrente (Treasury Constant Maturity)
+    source: FRED
+    source_type: csv
+    endpoint: https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS2
+    source_table: DGS2
+    frequency: daily
+    unit: pct
+    seasonal_adjustment: not_sa
+    release_lag: 1 virkedag
+    license: fred_public
+    status: A_PROD
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 1976-06-01
+      expected_frequency: daily_business
+      max_missing_recent: 5
+    config_filters:
+      series_id: DGS2
+    notes: Indikator for forventede kortsiktige renter internasjonalt.
+
+  - series_id: fed_funds
+    name: Federal Funds Effective Rate
+    source: FRED
+    source_type: csv
+    endpoint: https://fred.stlouisfed.org/graph/fredgraph.csv?id=FEDFUNDS
+    source_table: FEDFUNDS
+    frequency: monthly
+    unit: pct
+    seasonal_adjustment: not_sa
+    release_lag: ca. 1 måned
+    license: fred_public
+    status: A_PROD
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 1954-07-01
+      expected_frequency: monthly
+      max_missing_recent: 1
+    config_filters:
+      series_id: FEDFUNDS
+    notes: USAs styringsrente. Viktig eksogen variabel for norsk rentemodell.
+
+  - series_id: us_cpi
+    name: US konsumprisindeks (CPI-U, alle varer)
+    source: FRED
+    source_type: csv
+    endpoint: https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL
+    source_table: CPIAUCSL
+    frequency: monthly
+    unit: index
+    seasonal_adjustment: sa
+    release_lag: ca. 2 uker etter månedslutt
+    license: fred_public
+    status: A_PROD
+    required_for_mvp: true
+    transformations:
+      - type: yoy_pct
+        notes: 12-månedersvekst beregnes i prosesseringssteget.
+    validation:
+      min_date: 1947-01-01
+      expected_frequency: monthly
+      max_missing_recent: 1
+    config_filters:
+      series_id: CPIAUCSL
+    notes: Amerikansk inflasjon. Påvirker Fed-forventninger og dermed globale langrenter.
+
+  # ============================================================================
+  # NAV via SSB — Fase 3
+  # ============================================================================
+  # registrert_ledige legges inn når NAV-til-AKU-broen bygges i Fase 3.
+  # NAVDataSource finnes i src/data/nav.py.

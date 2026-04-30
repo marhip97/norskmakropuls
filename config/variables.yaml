@@ -170,3 +170,53 @@ variables:
         Lantaker2: ["Kred01"] # Publikum
         ContentsCode: ["AarsTrans2"]  # 12-månedersvekst, prosent
         Tid: ["*"]
+
+  - id: usd_nok
+    name: USD/NOK valutakurs (spot)
+    type: conditioning
+    unit: nok_per_usd
+    source: NorgesBankDataSource
+    frequency: daily
+    transform: level
+    source_params:
+      series: "USDNOK"
+
+  - id: us_10y_yield
+    name: US 10-årig statsobligasjonsrente
+    type: conditioning
+    unit: pct
+    source: FREDDataSource
+    frequency: daily
+    transform: level
+    source_params:
+      series_id: "DGS10"
+
+  - id: us_2y_yield
+    name: US 2-årig statsobligasjonsrente
+    type: conditioning
+    unit: pct
+    source: FREDDataSource
+    frequency: daily
+    transform: level
+    source_params:
+      series_id: "DGS2"
+
+  - id: fed_funds
+    name: Federal Funds Effective Rate
+    type: conditioning
+    unit: pct
+    source: FREDDataSource
+    frequency: monthly
+    transform: level
+    source_params:
+      series_id: "FEDFUNDS"
+
+  - id: us_cpi
+    name: US konsumprisindeks (CPI-U, alle varer)
+    type: conditioning
+    unit: index
+    source: FREDDataSource
+    frequency: monthly
+    transform: level
+    source_params:
+      series_id: "CPIAUCSL"
