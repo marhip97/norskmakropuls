@@ -29,7 +29,9 @@ DEFAULT_COEFFICIENTS: dict[str, float] = {
     "beta_kpi": 0.15,
     "beta_kpi_jae": 0.20,
     "beta_aku": -0.10,
-    "beta_eurnok": -0.05,
+    # dev_eurnok = current - anchor_assumption > 0 nar NOK svakner (EUR/NOK stiger).
+    # Svakere NOK gir importert inflasjon og behov for strammare rente -> positiv koeffisient.
+    "beta_eurnok": 0.05,
     "beta_oil": 0.002,
 }
 

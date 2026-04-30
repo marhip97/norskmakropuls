@@ -430,8 +430,8 @@ MVP bruker kalibrerte koeffisienter, ikke estimerte. Begrunnelse: korte tidsseri
 | beta_kpi | 0.15 | PPR-sensitivitet: +1pp KPI -> +0.15pp rente |
 | beta_kpi_jae | 0.20 | Høyere vekt fordi underliggende inflasjon veier tyngre |
 | beta_aku | -0.10 | +1pp ledighet -> -0.10pp rente (lavere press) |
-| beta_eurnok | -0.05 | +1 NOK svakere -> +0.05pp rente |
-| beta_oil | 0.02 | +10 USD/fat -> +0.02pp rente |
+| beta_eurnok | +0.05 | dev = current - anchor > 0 nar NOK svakner (EUR/NOK stiger); svakere NOK -> rente opp |
+| beta_oil | 0.002 | per USD/fat; +10 USD/fat -> +0.02pp rente |
 
 Koeffisientene skal alltid eksponeres i et konfigurasjonsdict (ikke hardkodes inne i metoder), slik at de enkelt kan justeres eller estimeres i Fase 6.
 
