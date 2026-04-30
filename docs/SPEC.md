@@ -158,3 +158,63 @@ Statusklassifisering:
 Minimumsfelter per oppføring — se `CLAUDE.md` seksjon 5 for komplett schema.
 
 Kjøreregel: ny variabel går aldri rett til `A_PROD`. Discovery-steget (hent metadata, valider dimensjoner, lagre eksempel-respons under `tests/fixtures/`) er obligatorisk.
+
+---
+
+## 5. Datamodell
+
+### 5.1 Rådata (data/raw/)
+
+Rådata lagres uendret slik de kom fra kilden. Én Parquet-fil per serie per innhentingsdato:
+
+```
+data/raw/<series_id>/<YYYY-MM-DD>.parquet
+```
+
+Eksempel: `data/raw/kpi/2026-04-30.parquet`
+
+Rådata skal aldri modifiseres etter lagring. Pipeline kan hente samme serie flere ganger — eksisterende filer overskrives aldri (se `DataSource.store()` i `src/data/base.py`).
+
+### 5.2 Prosesserte data (data/processed/)
+
+Kuraterte tidsserier etter transformasjon (f.eks. YoY-vekst fra nivåindeks) lagres som Parquet under `data/processed/`. Dette laget er ikke fullt implementert i MVP — pipeline arbeider primært mot rådata.
+
+### 5.3 Normalisert observasjonsskjema
+
+Alle tidsserier normaliseres til dette skjemaet. Dette er minimumsstandarden for alle DataSource-implementasjoner:
+
+| Kolonne | Type | Obligatorisk | Beskrivelse |
+|---|---|---|---|
+| `date` | `pd.Timestamp` | ja | Observasjonsdatoen (periodens startdato for månedlig/kvartal) |
+| `value` | `float` | ja | Observert verdi i seriens native enhet |
+| `vintage_date` | `str` (YYYY-MM-DD) | ja | Datoen denne innhentingen ble gjort (filnavnet) |
+| `ingestion_time` | `pd.Timestamp` | anbefalt | UTC-tidsstempel for når vi hentet fra kilden |
+| `source` | `str` | anbefalt | Kildenavn (`SSB`, `norges_bank`, `FRED`) |
+| `series_id` | `str` | anbefalt | Serie-ID fra `data_catalog.yaml` |
+| `status` | `str` | anbefalt | `ok`, `missing`, `revised` |
+
+Minimumskolonner som `DataSource.fetch()` alltid må returnere: `date` og `value`.
+
+`date`-kolonnen skal alltid være `pd.Timestamp`. For månedlige serier brukes periodens første dag (f.eks. `2025-12-01` for desember 2025). For kvartalsvise serier brukes kvartalets første dag (`2025-10-01` for Q4 2025).
+
+### 5.4 Ankerdataskjema
+
+Ankerprognoser (offisielle baner fra Norges Bank eller SSB) lagres med dette skjemaet:
+
+```
+data/anchors/<source>/<series_id>/<publication_date>.parquet
+```
+
+Kolonner per Parquet-fil:
+
+| Kolonne | Type | Beskrivelse |
+|---|---|---|
+| `forecast_date` | `pd.Timestamp` | Datoen prognosen gjelder for |
+| `value` | `float` | Prognostisert verdi |
+| `publication_date` | `pd.Timestamp` | Når ankeret ble publisert |
+| `vintage_id` | `str` | Entydig ID: `<source>_<publication_date>` |
+| `source` | `str` | `norges_bank_mpr`, `ssb_kt`, eller `fin_npb` |
+| `series_id` | `str` | Serie-ID som matcher `data_catalog.yaml` |
+| `ingestion_time` | `pd.Timestamp` | Når vi lastet inn ankeret |
+
+Gyldige kildekoder for ankere: `norges_bank_mpr`, `ssb_kt`, `fin_npb`.
