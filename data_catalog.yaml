@@ -19,6 +19,8 @@
 
 version: 1
 last_updated: 2026-04-30
+phase0_verified: 2026-04-30
+phase0_result: "12/12 variabler hentet uten feil via GitHub Actions"
 default_license_norway: NLOD-2.0
 default_license_us: public_domain
 
@@ -39,7 +41,7 @@ sources:
     seasonal_adjustment: sa
     release_lag: ca. 60 dager etter kvartalsslutt
     license: NLOD-2.0
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations:
       - type: yoy_pct
@@ -64,7 +66,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: ca. 10 dager etter månedslutt
     license: NLOD-2.0
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -87,7 +89,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: ca. 10 dager etter månedslutt
     license: NLOD-2.0
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -114,7 +116,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: ca. 30 dager etter månedslutt
     license: NLOD-2.0
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -126,7 +128,12 @@ sources:
       Kjonn: ["0"]
       Alder: ["15-74"]
       ContentsCode: ["Prosent"]
-    notes: AKU-ledighet er hovedindikator i ankerprognosene for arbeidsmarked.
+    notes: |
+      AKU-ledighet er hovedindikator i ankerprognosene for arbeidsmarked.
+      KALIBRERING: Nåværende konfigurasjon returnerer årsgjennomsnitt (54 rader 1972–2025),
+      ikke månedlig/kvartalsvis data. For kortere perioders oppfølging må riktig tabell
+      og filtre identifiseres via discovery (python -m src.data.discover_api --table 05111).
+      Verifisert hentet: 2026-04-30.
 
   - series_id: lonnsvekst
     name: Årslønnsvekst, alle næringer
@@ -139,7 +146,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: ca. 6 måneder etter årets slutt
     license: NLOD-2.0
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations:
       - type: yoy_pct
@@ -151,7 +158,11 @@ sources:
     config_filters:
       NACE2007: ["A-S"]
       ContentsCode: ["ArslonnEndring"]
-    notes: Suppleres senere med TBU-tall.
+    notes: |
+      Suppleres senere med TBU-tall.
+      KALIBRERING: ContentsCode "ArslonnEndring" returnerer kun 9 rader (2017–2025).
+      For historikk fra 1997 må alternativt filter eller tabell identifiseres via discovery.
+      Verifisert hentet: 2026-04-30.
 
   - series_id: boligprisvekst
     name: Boligprisindeks, hele landet
@@ -164,7 +175,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: ca. 1 måned etter kvartalsslutt
     license: NLOD-2.0
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations:
       - type: yoy_pct
@@ -190,7 +201,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: ca. 6 uker etter månedslutt
     license: NLOD-2.0
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -218,7 +229,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: daglig oppdatering, månedssnitt beregnes i pipeline
     license: norges_bank_terms
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations:
       - type: resample_monthly_mean
@@ -245,7 +256,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: samme dag (etter kursfastsettelse)
     license: norges_bank_terms
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -271,7 +282,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: ca. 1 uke
     license: fred_public
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -293,7 +304,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: samme dag
     license: fred_public
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -315,7 +326,7 @@ sources:
     seasonal_adjustment: sa
     release_lag: ca. 60 dager etter kvartalsslutt
     license: fred_public
-    status: B_VERIFY
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
