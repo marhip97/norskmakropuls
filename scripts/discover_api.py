@@ -44,6 +44,29 @@ NB_PROBE: dict[str, list[str]] = {
         f"{NBD_BASE}/CR/K2.H.12M.NOK?format=sdmx-json&startPeriod=2020-01-01",
         f"{NBD_BASE}/CR?format=sdmx-json&startPeriod=2020-01-01",
     ],
+    # ── Fase 1: ukjente series keys — discovery nødvendig ──────────────────────
+    "i44": [
+        f"{NBD_BASE}/EXR/M.I44.NOK.CR?format=sdmx-json&startPeriod=2024-01-01",
+        f"{NBD_BASE}/EXR/B.I44.NOK.CR?format=sdmx-json&startPeriod=2024-01-01",
+        f"{NBD_BASE}/KURSINDEKS?format=sdmx-json&startPeriod=2024-01-01",
+        f"{NBD_BASE}/EXR?format=sdmx-json&startPeriod=2024-01-01",
+    ],
+    "nowa": [
+        f"{NBD_BASE}/NOWA?format=sdmx-json&startPeriod=2024-01-01",
+        f"{NBD_BASE}/NOWA/D.NOWA.NOK.?format=sdmx-json&startPeriod=2024-01-01",
+        f"{NBD_BASE}/SHORT_RATES/D.NOWA.NOK.?format=sdmx-json&startPeriod=2024-01-01",
+    ],
+    "gov_yield_2y_no": [
+        f"{NBD_BASE}/YIELDS?format=sdmx-json&startPeriod=2024-01-01",
+        f"{NBD_BASE}/STATSOBLIGASJONER?format=sdmx-json&startPeriod=2024-01-01",
+        f"{NBD_BASE}/GOVT_YIELDS?format=sdmx-json&startPeriod=2024-01-01",
+        f"{NBD_BASE}/B_RATES/D.NOWA.2Y.?format=sdmx-json&startPeriod=2024-01-01",
+    ],
+    "gov_yield_10y_no": [
+        f"{NBD_BASE}/YIELDS?format=sdmx-json&startPeriod=2024-01-01",
+        f"{NBD_BASE}/STATSOBLIGASJONER?format=sdmx-json&startPeriod=2024-01-01",
+        f"{NBD_BASE}/B_RATES/D.NOWA.10Y.?format=sdmx-json&startPeriod=2024-01-01",
+    ],
 }
 
 
