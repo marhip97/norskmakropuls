@@ -1,4 +1,4 @@
-import { Box, Heading, BodyShort, Label, Tag } from '@navikt/ds-react'
+import { Heading, BodyShort, Label, Tag } from '@navikt/ds-react'
 import type { VariabelData } from '@/lib/types'
 import { newsSignal, formaterVerdi, formaterDato } from '@/lib/data'
 
@@ -7,35 +7,33 @@ interface Props {
   data: VariabelData
 }
 
+const kortStil: React.CSSProperties = {
+  background: 'var(--a-surface-default)',
+  borderRadius: 'var(--a-border-radius-xlarge)',
+  padding: 'var(--a-spacing-4)',
+  boxShadow: 'var(--a-shadow-small)',
+}
+
 function NewsTag({ standardisert }: { standardisert: number | null }) {
   const signal = newsSignal(standardisert)
   if (signal === 'ukjent') return null
 
   const label =
-    signal === 'noytralt'
-      ? 'Nær anker'
-      : signal === 'positiv'
-        ? 'Over anker'
-        : 'Under anker'
+    signal === 'noytralt' ? 'Near anker' :
+    signal === 'positiv'  ? 'Over anker' :
+                            'Under anker'
 
   const variant =
-    signal === 'noytralt' ? 'success' : signal === 'positiv' ? 'warning' : 'info'
+    signal === 'noytralt' ? 'success' :
+    signal === 'positiv'  ? 'warning'  :
+                            'info'
 
-  return (
-    <Tag variant={variant} size="small">
-      {label}
-    </Tag>
-  )
+  return <Tag variant={variant} size="small">{label}</Tag>
 }
 
 export default function VariabelKort({ serieId: _, data }: Props) {
   return (
-    <Box
-      background="surface-default"
-      borderRadius="medium"
-      padding="4"
-      shadow="small"
-    >
+    <div style={kortStil}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--a-spacing-2)' }}>
         <Label size="small" style={{ color: 'var(--a-text-subtle)' }}>
           {data.navn}
@@ -63,6 +61,6 @@ export default function VariabelKort({ serieId: _, data }: Props) {
       <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginTop: 'var(--a-spacing-1)' }}>
         {data.beskrivelse}
       </BodyShort>
-    </Box>
+    </div>
   )
 }

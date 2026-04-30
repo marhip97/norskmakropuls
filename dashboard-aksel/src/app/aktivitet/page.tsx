@@ -1,7 +1,7 @@
 import { Heading } from '@navikt/ds-react'
 import { loadSituasjonsbilde } from '@/lib/data'
 import VariabelKort from '@/components/VariabelKort'
-import TidsserieGraf from '@/components/TidsserieGraf'
+import TidsserieGrafKlient from '@/components/TidsserieGrafKlient'
 
 export default function AktivitetPage() {
   const data = loadSituasjonsbilde()
@@ -26,7 +26,7 @@ export default function AktivitetPage() {
           <Heading size="medium" level="2" className="seksjon-tittel">
             BNP Fastlands-Norge (% ar/ar)
           </Heading>
-          <TidsserieGraf
+          <TidsserieGrafKlient
             data={bnpHistorikk.slice(-20).map((p) => ({
               kvartal: p.dato.slice(0, 7),
               'BNP Fastlands-Norge': p.verdi,

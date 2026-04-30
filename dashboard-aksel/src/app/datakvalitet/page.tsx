@@ -1,4 +1,4 @@
-import { Heading, BodyShort, Alert, Table, Tag } from '@navikt/ds-react'
+import { Heading, BodyShort, Alert, Tag } from '@navikt/ds-react'
 import { loadSituasjonsbilde } from '@/lib/data'
 
 export default function DatakvalitetPage() {
@@ -24,59 +24,54 @@ export default function DatakvalitetPage() {
       </Heading>
 
       <div style={{ display: 'flex', gap: 'var(--a-spacing-6)', flexWrap: 'wrap', marginBottom: 'var(--a-spacing-6)' }}>
-        <div>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)' }}>Siste kjoring</BodyShort>
-          <BodyShort weight="semibold">{pipeline_status.siste_kjoring}</BodyShort>
-        </div>
-        <div>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)' }}>Variabler hentet</BodyShort>
-          <BodyShort weight="semibold">{pipeline_status.variabler_hentet}</BodyShort>
-        </div>
-        <div>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)' }}>Feil</BodyShort>
-          <BodyShort weight="semibold"
-            style={{ color: pipeline_status.variabler_feil > 0 ? 'var(--a-text-danger)' : undefined }}>
-            {pipeline_status.variabler_feil}
-          </BodyShort>
-        </div>
-        <div>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)' }}>Anker-vintage</BodyShort>
-          <BodyShort weight="semibold">{data.anker_vintage ?? '–'}</BodyShort>
-        </div>
+        {[
+          { label: 'Siste kjoring', verdi: pipeline_status.siste_kjoring },
+          { label: 'Variabler hentet', verdi: String(pipeline_status.variabler_hentet) },
+          { label: 'Feil', verdi: String(pipeline_status.variabler_feil) },
+          { label: 'Anker-vintage', verdi: data.anker_vintage ?? '–' },
+        ].map(({ label, verdi }) => (
+          <div key={label}>
+            <BodyShort size="small" style={{ color: 'var(--a-text-subtle)' }}>{label}</BodyShort>
+            <BodyShort weight="semibold">{verdi}</BodyShort>
+          </div>
+        ))}
       </div>
 
-      <Table size="small">
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell>Serie-ID</Table.HeaderCell>
-            <Table.HeaderCell>Navn</Table.HeaderCell>
-            <Table.HeaderCell>Siste verdi</Table.HeaderCell>
-            <Table.HeaderCell>Siste dato</Table.HeaderCell>
-            <Table.HeaderCell>News</Table.HeaderCell>
-            <Table.HeaderCell>Status</Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {Object.entries(variabler).map(([id, v]) => (
-            <Table.Row key={id}>
-              <Table.DataCell>
-                <code style={{ fontSize: 12 }}>{id}</code>
-              </Table.DataCell>
-              <Table.DataCell>{v.navn}</Table.DataCell>
-              <Table.DataCell>
-                {v.siste_verdi !== null ? `${v.siste_verdi} ${v.enhet}` : '–'}
-              </Table.DataCell>
-              <Table.DataCell>{v.siste_dato?.slice(0, 10) ?? '–'}</Table.DataCell>
-              <Table.DataCell>
-                {v.news !== null ? `${v.news >= 0 ? '+' : ''}${v.news?.toFixed(2)}` : '–'}
-              </Table.DataCell>
-              <Table.DataCell>
-                <Tag variant="success" size="xsmall">A_PROD</Tag>
-              </Table.DataCell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid var(--a-border-subtle)' }}>
+              {['Serie-ID', 'Navn', 'Siste verdi', 'Siste dato', 'News', 'Status'].map((h) => (
+                <th key={h} style={{ textAlign: 'left', padding: 'var(--a-spacing-2) var(--a-spacing-3)', color: 'var(--a-text-subtle)', fontWeight: 600 }}>
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(variabler).map(([id, v]) => (
+              <tr key={id} style={{ borderBottom: '1px solid var(--a-border-subtle)' }}>
+                <td style={{ padding: 'var(--a-spacing-2) var(--a-spacing-3)' }}>
+                  <code style={{ fontSize: 12, background: 'var(--a-surface-subtle)', padding: '2px 4px', borderRadius: 3 }}>{id}</code>
+                </td>
+                <td style={{ padding: 'var(--a-spacing-2) var(--a-spacing-3)' }}>{v.navn}</td>
+                <td style={{ padding: 'var(--a-spacing-2) var(--a-spacing-3)' }}>
+                  {v.siste_verdi !== null ? `${v.siste_verdi} ${v.enhet}` : '–'}
+                </td>
+                <td style={{ padding: 'var(--a-spacing-2) var(--a-spacing-3)' }}>
+                  {v.siste_dato?.slice(0, 10) ?? '–'}
+                </td>
+                <td style={{ padding: 'var(--a-spacing-2) var(--a-spacing-3)' }}>
+                  {v.news !== null ? `${v.news >= 0 ? '+' : ''}${v.news?.toFixed(2)}` : '–'}
+                </td>
+                <td style={{ padding: 'var(--a-spacing-2) var(--a-spacing-3)' }}>
+                  <Tag variant="success" size="small">A_PROD</Tag>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   )
 }

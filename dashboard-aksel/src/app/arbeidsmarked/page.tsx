@@ -1,7 +1,7 @@
 import { Heading } from '@navikt/ds-react'
 import { loadSituasjonsbilde } from '@/lib/data'
 import VariabelKort from '@/components/VariabelKort'
-import TidsserieGraf from '@/components/TidsserieGraf'
+import TidsserieGrafKlient from '@/components/TidsserieGrafKlient'
 
 export default function ArbeidsmarkedPage() {
   const data = loadSituasjonsbilde()
@@ -26,7 +26,7 @@ export default function ArbeidsmarkedPage() {
           <Heading size="medium" level="2" className="seksjon-tittel">
             AKU-ledighet (%)
           </Heading>
-          <TidsserieGraf
+          <TidsserieGrafKlient
             data={akuHistorikk.slice(-48).map((p) => ({
               dato: p.dato.slice(0, 7),
               'AKU-ledighet': p.verdi,

@@ -1,7 +1,7 @@
 import { Heading } from '@navikt/ds-react'
 import { loadSituasjonsbilde } from '@/lib/data'
 import VariabelKort from '@/components/VariabelKort'
-import TidsserieGraf from '@/components/TidsserieGraf'
+import TidsserieGrafKlient from '@/components/TidsserieGrafKlient'
 
 export default function InternasjonalPage() {
   const data = loadSituasjonsbilde()
@@ -28,7 +28,7 @@ export default function InternasjonalPage() {
           <Heading size="medium" level="2" className="seksjon-tittel">
             Oljepris Brent (USD/fat)
           </Heading>
-          <TidsserieGraf
+          <TidsserieGrafKlient
             data={oljeHistorikk.slice(-180).map((p) => ({
               dato: p.dato.slice(0, 10),
               Oljepris: p.verdi,

@@ -1,7 +1,7 @@
 import { Heading, BodyShort, Alert } from '@navikt/ds-react'
 import { loadSituasjonsbilde } from '@/lib/data'
 import VariabelKort from '@/components/VariabelKort'
-import TidsserieGraf from '@/components/TidsserieGraf'
+import TidsserieGrafKlient from '@/components/TidsserieGrafKlient'
 
 export default function InflasjonPage() {
   const data = loadSituasjonsbilde()
@@ -37,7 +37,7 @@ export default function InflasjonPage() {
           <Heading size="medium" level="2" className="seksjon-tittel">
             KPI og KPI-JAE (% ar/ar)
           </Heading>
-          <TidsserieGraf
+          <TidsserieGrafKlient
             data={grafData.slice(-36)}
             xKey="dato"
             linjer={[
