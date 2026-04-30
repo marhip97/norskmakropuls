@@ -377,3 +377,95 @@ Første situasjonsbilde mot PPR 1/2026 (publisert 2026-03-26):
 - KPI-JAE: nær anker
 - USD/NOK: -0.36 NOK fra ankerbanen (NOK styrket seg)
 - EUR/NOK: -0.26 NOK fra ankerbanen
+
+### 8.2 Skyggerentebane
+
+Implementeres i `src/models/shadow_rate.py` (Fase 3).
+
+#### Formål
+
+Skyggerentebanen er en revidert prognose for norsk styringsrente. Den tar Norges Banks offisielle rentebane (ankeret) og justerer den basert på ny informasjon siden siste PPR.
+
+```
+r_shadow_t = r_anchor_t + delta_r_t
+```
+
+der `delta_r_t` er det modellerte revisjonsbehovet for periode `t`.
+
+#### Inngangsvariable
+
+| Variabel | series_id | Rolle |
+|---|---|---|
+| Ankerrente | styringsrente (anker) | Utgangspunkt for banen |
+| KPI-nyheter | news(kpi) | Inflasjonstrykk mot mål |
+| KPI-JAE-nyheter | news(kpi_jae) | Underliggende inflasjon |
+| AKU-ledighet | ledighet_aku | Arbeidsmarkedspress |
+| EUR/NOK | eurnok | Importert inflasjon / valutapåvirkning |
+| USD/NOK | usd_nok | Oljepriskobling og global risikoapetitt |
+| Oljepris | oljepris | Eksogen term of trade |
+| US 10Y | us_10y_yield | Global langrente, terminsatspåvirkning |
+| ECB-rente | ecb_rente | Eurosonens pengepolitikk |
+
+#### Modellspesifikasjon
+
+Revisjonen er en lineær kombinasjon av news-verdiene:
+
+```
+delta_r_t = beta_kpi * news(kpi)_t
+          + beta_kpi_jae * news(kpi_jae)_t
+          + beta_aku * news(ledighet_aku)_t
+          + beta_eurnok * delta_eurnok_t
+          + beta_oil * delta_oljepris_t
+          + epsilon_t
+```
+
+`delta_eurnok_t` og `delta_oljepris_t` er avvik fra ankerets antatte nivå for disse variablene (ikke news i streng forstand, siden Norges Bank ikke publiserer kvartalsvise baner for disse i maskinlesbar form).
+
+#### Parametrisering i MVP
+
+MVP bruker kalibrerte koeffisienter, ikke estimerte. Begrunnelse: korte tidsserier for news-variablene gir ustabile OLS-estimater. Koeffisientene kalibreres mot Norges Banks egne sensitivitetsanalyser i PPR (Vedlegg 3) og faglitteratur:
+
+| Parameter | Verdi (MVP) | Kilde for kalibrering |
+|---|---|---|
+| beta_kpi | 0.15 | PPR-sensitivitet: +1pp KPI -> +0.15pp rente |
+| beta_kpi_jae | 0.20 | Høyere vekt fordi underliggende inflasjon veier tyngre |
+| beta_aku | -0.10 | +1pp ledighet -> -0.10pp rente (lavere press) |
+| beta_eurnok | -0.05 | +1 NOK svakere -> +0.05pp rente |
+| beta_oil | 0.02 | +10 USD/fat -> +0.02pp rente |
+
+Koeffisientene skal alltid eksponeres i et konfigurasjonsdict (ikke hardkodes inne i metoder), slik at de enkelt kan justeres eller estimeres i Fase 6.
+
+#### Revisjonsbegrensning (dampingsfaktor)
+
+For å hindre at modellen drar rentebanen for langt fra ankeret ved store datautslag:
+
+```
+delta_r_t_capped = clip(delta_r_t, -max_revision, +max_revision)
+```
+
+Standardverdi for MVP: `max_revision = 0.50` prosentpoeng per kvartal.
+
+#### Usikkerhetsbånd
+
+Skyggerentebanen ledsages av symmetriske usikkerhetsbånd basert på historisk news-volatilitet:
+
+```
+band_t = z * rolling_std(news(kpi), 12 kvartaler)
+```
+
+Standard: `z = 1.0` (ett standardavvik, tilsvarer ca. 68% konfidensintervall).
+
+#### Output-format
+
+```python
+@dataclass
+class ShadowRatePath:
+    anchor_publication: date      # hvilken PPR-vintage som er ankeret
+    computed_at: date             # når skyggebanen ble beregnet
+    periods: list[date]           # kvartalsvise datoer
+    anchor_values: list[float]    # ankerbanen (uendret)
+    revision: list[float]         # delta_r per periode
+    shadow_values: list[float]    # anchor + revision (capped)
+    band_upper: list[float]
+    band_lower: list[float]
+```
