@@ -27,6 +27,7 @@ NBD_BASE = "https://data.norges-bank.no/api/data"
 _SERIES_MAP: dict[str, tuple[str, str]] = {
     "SIREN":  ("SHORT_RATES", ""),          # Foliorente - all series, parser takes first
     "EURNOK": ("EXR",         "B.EUR.NOK.SP"),  # EUR/NOK spot, confirmed working
+    "USDNOK": ("EXR",         "B.USD.NOK.SP"),  # USD/NOK spot, same EXR flow as EUR/NOK
 }
 
 
