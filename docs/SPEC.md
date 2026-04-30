@@ -218,3 +218,98 @@ Kolonner per Parquet-fil:
 | `ingestion_time` | `pd.Timestamp` | Når vi lastet inn ankeret |
 
 Gyldige kildekoder for ankere: `norges_bank_mpr`, `ssb_kt`, `fin_npb`.
+
+---
+
+## 6. Vintage-håndtering
+
+Vintage-håndtering er obligatorisk for alle data i dette systemet — både observasjoner og ankerprognoser.
+
+### 6.1 Definisjon av vintage
+
+For observasjoner:
+- `observation_date`: datoen verdien gjelder for (når ble den målt / hvilken periode)
+- `publication_date`: når kilden publiserte den
+- `ingestion_time`: når vi hentet den (UTC)
+- `vintage_id`: entydig ID for innhentingsversjonen (`<series_id>_<YYYY-MM-DD>`)
+
+For ankerprognoser — de samme feltene, men semantikken er:
+- `forecast_date`: datoen prognosen gjelder for (fremtidig periode)
+- `publication_date`: når ankeret (MPR/KT) ble publisert — dette er vintagenøkkelen
+- `ingestion_time`: når vi lastet det inn i systemet
+- `vintage_id`: `<source>_<publication_date>`
+
+### 6.2 Invariant for ankervintager
+
+En MPR-bane fra mars og en fra juni er to forskjellige objekter — ikke en oppdatering av det samme. `AnchorStore.save()` skriver aldri over eksisterende filer. Eksisterende filer er immutable.
+
+News-motoren bruker alltid det ankeret som var siste offisielle ved observasjonstidspunktet. `AnchorStore.latest(series_id, on_date=obs_date)` realiserer dette.
+
+### 6.3 Filnavn som nøkkel
+
+Filnavnet er vintage-nøkkelen. Dette er enkelt og revisjonssikkert:
+```
+data/raw/kpi/2026-04-30.parquet          # observasjoner hentet 2026-04-30
+data/anchors/norges_bank_mpr/kpi/2026-03-26.parquet  # PPR 1/2026, publisert 26. mars
+```
+
+Filnavn skal alltid være ISO 8601-dato (`YYYY-MM-DD`). `AnchorStore` avviser filer som ikke kan parses som dato.
+
+---
+
+## 7. Ankerbane-infrastruktur
+
+Implementert i `src/anchors/__init__.py`.
+
+### 7.1 Dataklasse: Anchor
+
+```python
+@dataclass
+class Anchor:
+    source: str           # "norges_bank_mpr" | "ssb_kt" | "fin_npb"
+    publication_date: date
+    series_id: str
+    values: pd.Series     # indeks: pd.Timestamp (prognosedato), verdier: float
+    vintage_id: str       # auto: "<source>_<publication_date>"
+    ingestion_time: datetime
+```
+
+`Anchor.to_dataframe()` konverterer til flat DataFrame for Parquet-lagring. `Anchor.from_dataframe()` rekonstruerer fra lagret fil.
+
+### 7.2 Klasse: AnchorStore
+
+```python
+class AnchorStore:
+    def save(anchor: Anchor) -> Path          # lagrer; hopper over hvis filen finnes
+    def latest(series_id, on_date=None) -> Anchor | None  # siste bane per dato
+    def all_for_series(series_id) -> list[Anchor]         # alle vintager, sortert
+```
+
+`latest()` med `on_date` er det kritiske metodekallet for news-motoren: det gir det ankeret som faktisk var gjeldende da observasjonen ble publisert, ikke dagens siste.
+
+### 7.3 Ankerseed-format (manuell innlastning)
+
+Offisielle prognoser lastes manuelt inn via YAML-seed-filer under `data/anchors/seeds/`. Script: `scripts/load_anchor.py`.
+
+Seed-format:
+```yaml
+source: norges_bank_mpr
+publication_date: "2026-03-26"
+series:
+  styringsrente:
+    - {date: "2026-Q1", value: 4.50}
+    - {date: "2026-Q2", value: 4.25}
+    ...
+  kpi:
+    - {date: "2026-Q1", value: 3.1}
+    ...
+```
+
+Dato-format i seed: kvartalsnøkkel (`YYYY-QN`) konverteres til kvartalets første dag. Månedlig: `YYYY-MM`. Daglig: `YYYY-MM-DD`.
+
+### 7.4 Tilgjengelige ankervintager (per 2026-04-30)
+
+| Kilde | Publikasjonsdato | Serier | Periodedekning |
+|---|---|---|---|
+| norges_bank_mpr | 2025-12-19 | styringsrente, kpi, kpi_jae, produksjonsgap | til 2028-Q4 |
+| norges_bank_mpr | 2026-03-26 | styringsrente, kpi, kpi_jae, produksjonsgap | til 2029-Q4 |
