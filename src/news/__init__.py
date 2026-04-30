@@ -132,7 +132,7 @@ class NewsEngine:
             obs_ts = pd.Timestamp(obs_date)
 
             if obs_ts not in forecast_dates:
-                closest_idx = (forecast_dates - obs_ts).abs().argmin()
+                closest_idx = (forecast_dates - obs_ts).map(abs).argmin()
                 if abs((forecast_dates[closest_idx] - obs_ts).days) > 95:
                     logger.debug(
                         "Ingen nær ankerprognose for '%s' %s — hopper over.",

@@ -47,7 +47,7 @@ def _parse_date(raw: str) -> pd.Timestamp:
     raw = str(raw).strip()
     if "Q" in raw.upper():
         parts = raw.upper().split("Q")
-        year = int(parts[0])
+        year = int(parts[0].rstrip("-"))
         quarter = int(parts[1])
         month = (quarter - 1) * 3 + 1
         return pd.Timestamp(year=year, month=month, day=1)

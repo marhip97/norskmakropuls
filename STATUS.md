@@ -1,6 +1,6 @@
 # Status
 
-Sist oppdatert: 2026-04-30 (Fase 2 påbegynt)
+Sist oppdatert: 2026-04-30 (Fase 2 fullfort)
 
 Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne leses på under ett minutt før hver arbeidsøkt og oppdateres etter hver økt der noe vesentlig endres.
 
@@ -8,7 +8,7 @@ Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne le
 
 ## Nåværende fase
 
-**Fase 2 — Ankerbane-infrastruktur påbegynt.**
+**Fase 2 fullfort — Fase 3 klar til oppstart.**
 
 Fase 0 og 1 fullført 2026-04-30. Alle 21 variabler er A_PROD.
 
@@ -70,17 +70,14 @@ Fase 2 — ankerbane-infrastruktur. Kodebase er på plass. Venter på første MP
 - [x] `scripts/load_anchor.py`: manuell innlasting av ankerprognoser fra YAML-seed
 - [x] `data/anchors/seeds/example_format.yaml`: mal for MPR-data
 - [x] 16/16 tester grønne (test_anchors.py + test_news.py)
+- [x] PPR 4/2025 lastet inn (2025-12-19): styringsrente, kpi, kpi_jae, produksjonsgap (56 kvartalspunkter)
+- [x] PPR 1/2026 lastet inn (2026-03-27): samme serier (60 kvartalspunkter til 2029-Q4)
+- [x] NewsEngine.compute_news("kpi") mot ekte obs: 12 punkter 2025-Q1 til 2025-Q4, tall fornuftige
 
 ## Hva gjenstår — Fase 2
 
-1. **Last inn første MPR-seed**: fyll ut `data/anchors/seeds/mpr_<dato>.yaml` med
-   faktiske tall fra siste Norges Bank MPR, og kjør:
-   ```
-   python scripts/load_anchor.py data/anchors/seeds/mpr_<dato>.yaml
-   ```
-2. **Verifiser news-motoren mot ekte data**: kjør `NewsEngine.compute_news()`
-   for kpi, styringsrente, bnp_fastland og se at tall gir mening.
-3. Vurder om SSB Konjunkturtendensene skal legges inn som anker (ssb_kt) før Fase 3.
+1. Vurder om SSB Konjunkturtendensene skal legges inn som anker (ssb_kt) — åpent spørsmål.
+2. Fase 3 kan starte: skyggerentebane og komponentmodell for inflasjon.
 
 ## Datakildestatus
 
@@ -146,6 +143,7 @@ Følgende er ekskludert fra dagens repo og hentes senere:
 
 | Dato | Endring | Av |
 |---|---|---|
+| 2026-04-30 | Fase 2 fullfort: PPR 4/25 og PPR 1/26 lastet, news-motor verifisert mot KPI. | Claude Code |
 | 2026-04-30 | Fase 2 (delvis): src/anchors/ og src/news/ implementert. 16 nye tester grønne. | Claude Code |
 | 2026-04-30 | Fase 1 fullstendig: NOWA, I44, GOV10Y, GOV3Y verifisert grønn pipeline, satt A_PROD. 21 variabler totalt i A_PROD. | Claude Code |
 | 2026-04-30 | Fase 1 (NB-variabler): NOWA, I44, GOV10Y, GOV3Y implementert med verifiserte series keys. gov_yield_2y_no ekskludert. | Claude Code |
