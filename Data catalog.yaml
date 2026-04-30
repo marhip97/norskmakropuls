@@ -1,0 +1,354 @@
+# norskmakropuls - maskinlesbar kildekatalog
+#
+# Dette er den autoritative oversikten over alle datakilder.
+# CLAUDE.md seksjon 5 sier at all kode som henter en serie skal lese fra
+# denne katalogen. Tabell-IDer, series keys og endepunkter hardkodes ikke
+# spredt i koden.
+#
+# Status-koder:
+#   A_PROD       Stabilt, dokumentert, brukes i produksjon
+#   B_VERIFY     Kopiert fra SMART, må verifiseres mot kilde i nytt repo
+#                (sett til A_PROD etter første grønne pipeline-kjøring)
+#   B_TEST       Offentlig og maskinlesbart, må testes før produksjon
+#   C_FALLBACK   Kan automatiseres med høy bruddrisiko
+#   D_EXCLUDE    Ikke egnet uten manuell behandling
+#
+# Inntil pipeline har kjørt grønt i dette repoet, står alle SMART-arvede
+# variabler som B_VERIFY. Etter første verifiserte vintage oppdateres til
+# A_PROD eller passende klassifisering.
+
+version: 1
+last_updated: 2026-04-30
+default_license_norway: NLOD-2.0
+default_license_us: public_domain
+
+sources:
+
+  # ============================================================================
+  # SSB Statistikkbanken (7 variabler)
+  # ============================================================================
+
+  - series_id: bnp_fastland
+    name: BNP-vekst Fastlands-Norge (volum)
+    source: SSB
+    source_type: pxweb_api
+    endpoint: https://data.ssb.no/api/v0/no/table/09190
+    source_table: "09190"
+    frequency: quarterly
+    unit: pct_yoy
+    seasonal_adjustment: sa
+    release_lag: ca. 60 dager etter kvartalsslutt
+    license: NLOD-2.0
+    status: B_VERIFY
+    required_for_mvp: true
+    transformations:
+      - type: yoy_pct
+        notes: Beregner år-over-år vekst fra volumindeks.
+    validation:
+      min_date: 1978-Q1
+      expected_frequency: quarterly
+      max_missing_recent: 0
+    config_filters:
+      Makrost: ["bnpb.nr23_9fn"]
+      ContentsCode: ["Volum"]
+    notes: Sesongjustert volumvekst, kvartal mot kvartal.
+
+  - series_id: kpi
+    name: Konsumprisindeksen, total (12-mnd vekst)
+    source: SSB
+    source_type: pxweb_api
+    endpoint: https://data.ssb.no/api/v0/no/table/03013
+    source_table: "03013"
+    frequency: monthly
+    unit: pct_yoy
+    seasonal_adjustment: not_sa
+    release_lag: ca. 10 dager etter månedslutt
+    license: NLOD-2.0
+    status: B_VERIFY
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 1979-01
+      expected_frequency: monthly
+      max_missing_recent: 1
+    config_filters:
+      Konsumgrp: ["TOTAL"]
+      ContentsCode: ["Tolvmanedersendring"]
+    notes: 12-måneders prosentendring i total KPI.
+
+  - series_id: kpi_jae
+    name: KPI justert for avgifter og energi (12-mnd vekst)
+    source: SSB
+    source_type: pxweb_api
+    endpoint: https://data.ssb.no/api/v0/no/table/05327
+    source_table: "05327"
+    frequency: monthly
+    unit: pct_yoy
+    seasonal_adjustment: not_sa
+    release_lag: ca. 10 dager etter månedslutt
+    license: NLOD-2.0
+    status: B_VERIFY
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 2001-01
+      expected_frequency: monthly
+      max_missing_recent: 1
+    config_filters:
+      Konsumgrp: ["JAE_TOTAL"]
+      ContentsCode: ["Tolvmanedersendring"]
+    notes: |
+      Norges Banks foretrukne underliggende inflasjonsindikator.
+      MERK: konsumgrp-koden "JAE_TOTAL" må verifiseres mot SSB-metadata
+      ved første pipeline-kjøring. Hvis koden er endret, bruk
+      `python -m src.data.discover_api --table 05327` for å finne riktig kode.
+
+  - series_id: ledighet_aku
+    name: AKU-ledighet, 15-74 år
+    source: SSB
+    source_type: pxweb_api
+    endpoint: https://data.ssb.no/api/v0/no/table/05111
+    source_table: "05111"
+    frequency: monthly
+    unit: pct
+    seasonal_adjustment: not_sa
+    release_lag: ca. 30 dager etter månedslutt
+    license: NLOD-2.0
+    status: B_VERIFY
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 2006-01
+      expected_frequency: monthly
+      max_missing_recent: 2
+    config_filters:
+      ArbStyrkStatus: ["2"]
+      Kjonn: ["0"]
+      Alder: ["15-74"]
+      ContentsCode: ["Prosent"]
+    notes: AKU-ledighet er hovedindikator i ankerprognosene for arbeidsmarked.
+
+  - series_id: lonnsvekst
+    name: Årslønnsvekst, alle næringer
+    source: SSB
+    source_type: pxweb_api
+    endpoint: https://data.ssb.no/api/v0/no/table/11417
+    source_table: "11417"
+    frequency: annual
+    unit: pct_yoy
+    seasonal_adjustment: not_sa
+    release_lag: ca. 6 måneder etter årets slutt
+    license: NLOD-2.0
+    status: B_VERIFY
+    required_for_mvp: true
+    transformations:
+      - type: yoy_pct
+        notes: Konfigurert i variables.yaml; SSB-feltet ArslonnEndring leverer årsendring direkte.
+    validation:
+      min_date: "1997"
+      expected_frequency: annual
+      max_missing_recent: 0
+    config_filters:
+      NACE2007: ["A-S"]
+      ContentsCode: ["ArslonnEndring"]
+    notes: Suppleres senere med TBU-tall.
+
+  - series_id: boligprisvekst
+    name: Boligprisindeks, hele landet
+    source: SSB
+    source_type: pxweb_api
+    endpoint: https://data.ssb.no/api/v0/no/table/07230
+    source_table: "07230"
+    frequency: quarterly
+    unit: index
+    seasonal_adjustment: not_sa
+    release_lag: ca. 1 måned etter kvartalsslutt
+    license: NLOD-2.0
+    status: B_VERIFY
+    required_for_mvp: true
+    transformations:
+      - type: yoy_pct
+        notes: Beregner 12-måneders prosentendring fra nivåindeks i prosesseringssteget.
+    validation:
+      min_date: 1992-Q1
+      expected_frequency: quarterly
+      max_missing_recent: 0
+    config_filters:
+      Region: ["TOTAL"]
+      Boligtype: ["00"]
+      ContentsCode: ["BruktBlindex"]
+    notes: SSBs offisielle boligprisindeks.
+
+  - series_id: k2_kredittvekst
+    name: K2 husholdninger, 12-måneders kredittvekst
+    source: SSB
+    source_type: pxweb_api
+    endpoint: https://data.ssb.no/api/v0/no/table/11599
+    source_table: "11599"
+    frequency: monthly
+    unit: pct_yoy
+    seasonal_adjustment: not_sa
+    release_lag: ca. 6 uker etter månedslutt
+    license: NLOD-2.0
+    status: B_VERIFY
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 1996-01
+      expected_frequency: monthly
+      max_missing_recent: 1
+    config_filters:
+      Valuta: ["00"]
+      Lantaker2: ["Kred01"]
+      ContentsCode: ["AarsTrans2"]
+    notes: Innenlandsk kredittvekst, tolvmånedsvekst i prosent.
+
+  # ============================================================================
+  # Norges Bank Data (2 variabler)
+  # ============================================================================
+
+  - series_id: styringsrente
+    name: Foliorenten (styringsrenten), månedsgjennomsnitt
+    source: norges_bank
+    source_type: sdmx_json
+    endpoint: https://data.norges-bank.no/api/data/SHORT_RATES
+    source_table: SHORT_RATES
+    frequency: monthly
+    unit: pct
+    seasonal_adjustment: not_sa
+    release_lag: daglig oppdatering, månedssnitt beregnes i pipeline
+    license: norges_bank_terms
+    status: B_VERIFY
+    required_for_mvp: true
+    transformations:
+      - type: resample_monthly_mean
+        notes: Daglig serie resamples til månedsstart i fetcher.
+    validation:
+      min_date: 1991-01
+      expected_frequency: monthly
+      max_missing_recent: 0
+    config_filters:
+      series: SIREN
+    notes: |
+      Klient bruker series_key "" (tomt), så SHORT_RATES-flyten returnerer
+      alle serier og parser velger den med flest gyldige observasjoner.
+      Dette gjør oppføringen sårbar for endringer i Norges Banks rekkefølge.
+
+  - series_id: eurnok
+    name: Valutakurs EUR/NOK (spot)
+    source: norges_bank
+    source_type: sdmx_json
+    endpoint: https://data.norges-bank.no/api/data/EXR/B.EUR.NOK.SP
+    source_table: EXR
+    frequency: daily
+    unit: nok_per_eur
+    seasonal_adjustment: not_sa
+    release_lag: samme dag (etter kursfastsettelse)
+    license: norges_bank_terms
+    status: B_VERIFY
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 1999-01-04
+      expected_frequency: daily_business
+      max_missing_recent: 5
+    config_filters:
+      series: EURNOK
+    notes: Spotkurs offisielt fastsatt av Norges Bank.
+
+  # ============================================================================
+  # FRED (3 variabler)
+  # ============================================================================
+
+  - series_id: oljepris
+    name: Råoljepris, Brent (USD per fat)
+    source: FRED
+    source_type: csv
+    endpoint: https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU
+    source_table: DCOILBRENTEU
+    frequency: daily
+    unit: usd
+    seasonal_adjustment: not_sa
+    release_lag: ca. 1 uke
+    license: fred_public
+    status: B_VERIFY
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 1987-05-20
+      expected_frequency: daily_business
+      max_missing_recent: 10
+    config_filters:
+      series_id: DCOILBRENTEU
+    notes: Brent crude spot.
+
+  - series_id: ecb_rente
+    name: ECB Deposit Facility Rate
+    source: FRED
+    source_type: csv
+    endpoint: https://fred.stlouisfed.org/graph/fredgraph.csv?id=ECBDFR
+    source_table: ECBDFR
+    frequency: daily
+    unit: pct
+    seasonal_adjustment: not_sa
+    release_lag: samme dag
+    license: fred_public
+    status: B_VERIFY
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 1999-01-01
+      expected_frequency: daily
+      max_missing_recent: 5
+    config_filters:
+      series_id: ECBDFR
+    notes: ECBs sentrale styringsrente.
+
+  - series_id: handelspartnervekst
+    name: Eurosonens BNP (volum), kvartalsvis - proxy for handelspartnere
+    source: FRED
+    source_type: csv
+    endpoint: https://fred.stlouisfed.org/graph/fredgraph.csv?id=CLVMNACSCAB1GQEA19
+    source_table: CLVMNACSCAB1GQEA19
+    frequency: quarterly
+    unit: index
+    seasonal_adjustment: sa
+    release_lag: ca. 60 dager etter kvartalsslutt
+    license: fred_public
+    status: B_VERIFY
+    required_for_mvp: true
+    transformations: []
+    validation:
+      min_date: 1995-Q1
+      expected_frequency: quarterly
+      max_missing_recent: 1
+    config_filters:
+      series_id: CLVMNACSCAB1GQEA19
+    notes: Erstattes med vektet handelspartnerindeks i senere fase.
+
+  # ============================================================================
+  # Variabler som skal legges til i Fase 1 (ikke implementert ennå)
+  # ============================================================================
+  # Følgende variabler er identifisert som nødvendige for MVP men venter på
+  # discovery og implementering. Legges inn etter Fase 0 er ferdig:
+  #
+  # Norges Bank (krever discovery):
+  #   - usd_nok            (EXR, B.USD.NOK.SP - må verifiseres)
+  #   - i44                (importveid valutakurs)
+  #   - nowa               (NOWA-rente)
+  #   - gov_yield_2y_no    (statsobligasjonsrente 2 år)
+  #   - gov_yield_10y_no   (statsobligasjonsrente 10 år)
+  #
+  # FRED (kan implementeres direkte med eksisterende klient):
+  #   - us_10y_yield       (DGS10)
+  #   - us_2y_yield        (DGS2)
+  #   - fed_funds          (FEDFUNDS)
+  #   - us_cpi             (CPIAUCSL)
+  #
+  # NAV via SSB:
+  #   - registrert_ledige  (SSB tabell 05111, ContentsCode "Ledige2")
+  #     Note: NAVDataSource finnes i src/data/nav.py, men var ikke registrert
+  #     i config/variables.yaml ved repo-opprettelse. Legges inn når NAV-broen
+  #     bygges i Fase 3.
+  #
+  # Se PROJECT_PLAN.md seksjon 5 og STATUS.md "Hva står for tur".
