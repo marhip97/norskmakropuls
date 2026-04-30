@@ -1,4 +1,4 @@
-# Prosjektplan: Realtidsdashboard for norsk økonomi
+# Prosjektplan: norskmakropuls
 
 Sist revidert: 2026-04-29
 
@@ -6,15 +6,17 @@ Dette dokumentet er den strategiske oversikten over prosjektet. Den fullstendige
 
 ---
 
-## 0. Bakgrunn: pivot fra SMART
+## 0. Bakgrunn: etterfølger til SMART
 
-Dette repoet startet som SMART (System for Model Analysis in Real Time), et kryssjekkrammeverk der flere uavhengige modeller produserte parallelle prognoser. Den 29. april 2026 ble prosjektet pivotert til en ankerbasert tilnærming. Bakgrunnen er kort:
+norskmakropuls er etterfølgeren til prosjektet SMART (System for Model Analysis in Real Time). SMART var et kryssjekkrammeverk der flere uavhengige modeller (ARIMA, VAR, BVAR, DFM, AR-X, ML-baseline) produserte parallelle prognoser, og uenighet mellom modellene var det informative signalet.
 
-- Det opprinnelige produktprinsippet — "modellsprik som signal" — er metodisk interessant, men forklarer ikke til en bruker hva prognosen *er* akkurat nå.
+Etter en metodegjennomgang i april 2026 ble det besluttet å skifte produktprinsipp:
+
+- "Modellsprik som signal" var metodisk interessant, men forklarte ikke til en bruker hva prognosen *er* akkurat nå.
 - Offisielle prognoser fra Norges Bank og SSB er av høy kvalitet, men oppdateres sjelden. Det reelle behovet er å oppdatere disse mellom publiseringene basert på ny statistikk.
-- SMART-modellene (ARIMA, VAR, BVAR, DFM, AR-X, ML-baseline) hadde dokumenterte stabilitetsproblemer på korte serier (se historisk `TILTAK.md`). Som hovedprodukt blokkerer dette lansering. Som kryssjekk mot en ankerbane er det akseptabelt.
+- SMART-modellene hadde dokumenterte stabilitetsproblemer på korte serier. Som hovedprodukt blokkerte dette lansering. Som kryssjekk mot en ankerbane er det akseptabelt.
 
-Pivoten beholder datalaget, CI/CD, testene og modellene fra SMART, men endrer produktprinsippet og toppmotorhetten. Mer i seksjon 11.
+norskmakropuls er et nytt repo som gjenbruker datalaget, infrastrukturen og testene fra SMART, men har et nytt produktprinsipp og en ny frontend. SMART-repoet beholdes som referanse og arkiv. SMART-modellene hentes inn på nytt i fase 5 av denne planen som kryssjekk mot ankerbanen.
 
 ---
 
@@ -42,6 +44,8 @@ Oppdatert anslag = siste offisielle anslag + modellert revisjon fra nye data
 ```
 
 Revisjonen drives av: inflasjonsnyheter, arbeidsmarkedsnyheter, energipriser, valutakurs, internasjonale renter og inflasjon, aktivitetsindikatorer og markedsbaserte signaler.
+
+Modellenes rolle er å **justere** eksisterende prognoser, ikke å erstatte dem. Systemet skal være robust mot modellfeil ved å begrense hvor mye modellene kan flytte anslagene per oppdatering, og ved å bruke flere modeller som kryssjekk mot hverandre.
 
 Dashboardet skal alltid kunne svare på:
 
@@ -76,16 +80,16 @@ Lagring: Parquet for tidsserier (med vintage-håndtering), JSON for dashboard-ca
 
 ## 5. MVP-avgrensning
 
-MVP bygger videre på det eksisterende datalaget og legger til ankerbane- og news-logikken på toppen.
+MVP bygger på datalaget gjenbrukt fra SMART og legger til ankerbane- og news-logikken på toppen.
 
-**MVP-datakilder** (alle allerede implementert):
+**MVP-datakilder** (alle implementert fra SMART):
 
 - SSB Statbank (JSON-stat2)
 - Norges Bank Data API (SDMX-JSON)
 - FRED CSV (uten API-nøkkel)
-- NAV-data hentet via SSB der det er stabilt
+- NAV-data hentet via SSB
 
-**MVP-variabler som er hentet og verifisert:**
+**MVP-variabler som er hentet og verifisert i SMART, gjenbrukes:**
 
 `policy_rate_no` (Norges Bank), `eurnok` (Norges Bank), `bnp_fastland` (SSB 09190), `kpi` (SSB 03013), `kpi_jae` (SSB 05327), `ledighet_aku` (SSB 05111), `lonnsvekst` (SSB 11417), `boligprisvekst` (SSB 07230), `oljepris` (FRED DCOILBRENTEU), `ecb_rente` (FRED ECBDFR), `handelspartnervekst`, `k2_kredittvekst`.
 
@@ -107,14 +111,14 @@ Norges Bank MPR-XLSX-parser (fase 2), IEA/EIA, Eiendom Norge uten lisens, PMI ut
 
 ## 6. Designkrav
 
-Frontend bygges om fra dagens statiske Plotly-side til Next.js med Aksel.
+Frontend bygges som Next.js med Aksel.
 
 - Next.js (statisk eksport for GitHub Pages-deployment)
 - `@navikt/ds-react` for komponenter
 - `@navikt/ds-css` for grunnleggende styling
 - `@navikt/ds-tokens` for tokens
 - `@navikt/aksel-icons` for ikoner
-- Plotly eller Recharts for grafer (Plotly beholdes fra eksisterende dashboard)
+- Plotly eller Recharts for grafer
 
 Designprinsippene er nøkternhet, tilgjengelighet, responsivitet, tallorientering og forklarbarhet. Dashboardet skal forstås av en bruker uten økonometrisk spesialistkompetanse.
 
@@ -122,29 +126,27 @@ Hovedsider: Makropuls, Rente og finansielle forhold, Inflasjon, Arbeidsmarked, A
 
 ## 7. Faseplan
 
-Fasene reflekterer at vi starter fra et fungerende datalag, ikke fra null.
+### Fase 1: Datakatalog og kildeutvidelse
 
-### Fase 1: Datakatalog og kildeutvidelse (delvis ferdig)
-
-Mål: dokumentere eksisterende kilder i `data_catalog.yaml` og legge til de nye variablene.
+Mål: dokumentere SMART-arven i `data_catalog.yaml` og legge til de nye variablene.
 
 Leveranser:
 
-- `data_catalog.yaml` opprettes som maskinlesbar oversikt over alle implementerte kilder.
+- `data_catalog.yaml` opprettes som maskinlesbar oversikt over alle 12 SMART-variabler.
 - Discovery for nye Norges Bank-serier (`usd_nok`, `i44`, `nowa`, statsrenter).
-- Implementering av nye FRED-serier (rett frem).
-- `data_source_validation_report.md` oppdaterer dagens kildestatus.
+- Implementering av nye FRED-serier.
+- `docs/data_source_validation_report.md` dokumenterer kildestatus.
 
-### Fase 2: Ankerbane-infrastruktur (ny)
+### Fase 2: Ankerbane-infrastruktur
 
 Mål: lagre og bruke offisielle prognoser som ankre.
 
 Leveranser:
 
-- Datamodell for `anchor_forecast` med vintage-felter.
-- Manuell parser for SSB Konjunkturtendensene-tabeller (eller manuelle innlastninger som første versjon).
+- `src/anchors/`-modul med vintage-lagring av ankerprognoser.
+- Manuell innlastning av siste MPR og Konjunkturtendensene som første ankerdata.
 - Defensiv MPR-XLSX-parser (kan utsettes til fase 4 hvis manuelle innlastninger holder for MVP).
-- News-motor: `forecast_news_t = faktisk - forventet`.
+- News-motor i `src/news/`: `forecast_news_t = faktisk - forventet`.
 
 ### Fase 3: Skyggerentebane og komponentmodell
 
@@ -158,24 +160,26 @@ Leveranser:
 
 ### Fase 4: Aksel-dashboard
 
-Mål: erstatte dagens statiske Plotly-dashboard med Next.js + Aksel.
+Mål: bygge Next.js + Aksel frontend.
 
 Leveranser:
 
-- Next.js-prosjekt med statisk eksport.
+- Next.js-prosjekt i `dashboard-aksel/` med statisk eksport.
 - Makropuls-side med variabelkort.
 - Rente-, inflasjon-, arbeidsmarked-, aktivitet-sider.
 - Datakvalitetsside som viser pipelinestatus.
+- GitHub Pages-deploy via `.github/workflows/deploy_dashboard.yml` (legges til i denne fasen).
 
-### Fase 5: Modeller som kryssjekk (gjenbruk fra SMART)
+### Fase 5: Modeller som kryssjekk (henter fra SMART)
 
-Mål: ompositionere SMART-modellene (ARIMA, VAR, BVAR, DFM, AR-X, ML-baseline) som kryssjekk mot ankerbanen, ikke som hovedprognose.
+Mål: hente SMART-modellene over som kryssjekk mot ankerbanen, ikke som hovedprognose.
 
 Leveranser:
 
-- Ensemble-output vises på `Prognoser`-siden som "modell-kryssjekk".
-- Sprik mellom modeller og ankerbane vises eksplisitt.
-- Stabilitetsproblemene fra historisk `TILTAK.md` blir mindre kritiske i denne rollen, men dokumenteres.
+- ARIMA, VAR, BVAR, DFM, AR-X, ML-baseline kopieres fra SMART-repoet.
+- Tilkoblet ankerbanen via en ny `src/ensemble/`-modul.
+- Sprik mellom modeller og ankerbane vises eksplisitt på `Prognoser`-siden.
+- Stabilitetsproblemene fra SMARTs `TILTAK.md` blir mindre kritiske i denne rollen, men dokumenteres.
 
 ### Fase 6: Backtesting og kvalitet
 
@@ -190,7 +194,7 @@ Alle kilder vurderes etter denne klassifiseringen.
 - `C_FALLBACK`: kan automatiseres med høy bruddrisiko
 - `D_EXCLUDE`: ikke egnet uten manuell behandling
 
-Standardregel: ingen variabel går til produksjon uten å være klassifisert og uten oppføring i datakatalogen.
+Standardregel: ingen variabel går til produksjon uten å være klassifisert og uten oppføring i `data_catalog.yaml`.
 
 ## 9. Vintage-håndtering
 
@@ -199,12 +203,10 @@ Alle observasjoner og alle ankerprognoser lagres med:
 - `observation_date` (når ble verdien målt / hva gjelder den)
 - `publication_date` (når ble verdien publisert)
 - `ingestion_time` (når hentet vi den)
-- `vintage_id` (hvilken versjon av rådataen)
+- `vintage_id` (entydig id for innhentingsversjonen)
 - `source_revision_id` der mulig
 
 For ankerprognoser er dette ekstra viktig: en MPR-bane fra mars og en fra juni er to forskjellige objekter, ikke en oppdatering av det samme. News-motoren trenger å vite hvilket anker den sammenligner mot.
-
-Eksisterende vintage-lagring i `data/raw/<variable_id>/<vintage>.parquet` videreføres og utvides til ankerprognoser.
 
 ## 10. Risiko og avbøtende tiltak
 
@@ -216,49 +218,38 @@ Eksisterende vintage-lagring i `data/raw/<variable_id>/<vintage>.parquet` videre
 | Energi/kraftpriser med uklar lisens | Ekskludert fra MVP, vurderes i fase 6 |
 | Manglende vintage-håndtering for prognoser | Påkrevd fra fase 2 |
 | Modellambisjon før data er stabilt | Kjøreregel: smal og robust før kompleks |
-| Pivoten skaper forvirring i koden | Tydelig commit-historikk, oppdatert README, denne planen som referanse |
+| Modeller drar anslag for langt fra anker | Begrens revisjon per oppdatering; kryssjekk mot flere modeller |
 
-## 11. Hva gjenbrukes fra SMART, hva endres
+## 11. Hva er hentet fra SMART
 
-### Gjenbrukes direkte (ingen endring)
+### Hentet uendret
 
-- Datalaget i `src/data/`: `base.py`, `ssb.py`, `norges_bank.py`, `fred.py`, `nav.py`, `pipeline.py`
-- Discovery-verktøy: `scripts/discover_api.py`, `src/data/discover_api.py`
+- Datalaget i `src/data/`: `base.py`, `ssb.py`, `norges_bank.py`, `fred.py`, `nav.py`, `pipeline.py`, `discover_api.py`
+- Discovery-skript: `scripts/discover_api.py`
 - Tester for datalaget: `tests/test_ssb.py`, `tests/test_norges_bank.py`, `tests/test_fred.py`, `tests/test_pipeline.py`
-- CI/CD: `.github/workflows/data_pipeline.yml`, `tests.yml`, `discover_api.yml`
-- Vintage-lagring i `data/raw/`
-- Alle eksisterende variabeloppføringer i `config/variables.yaml`
-- `requirements.txt`, `requirements-dev.txt`, `LICENSE`, `.gitignore`
+- CI/CD-mønstre: `.github/workflows/data_pipeline.yml`, `tests.yml`, `discover_api.yml`
+- 12 verifiserte variabeloppføringer i `config/variables.yaml`
+- `requirements.txt`, `requirements-dev.txt`, `.gitignore`, `LICENSE`
 
-### Tilpasses
+### Nytt i norskmakropuls
 
-- `config/variables.yaml`: utvides med nye variabler (`usd_nok`, `i44`, `nowa`, statsrenter, FRED-utvidelser).
-- `src/models/`: modellene beholdes, men flyttes konseptuelt fra "hovedprognose" til "kryssjekk". Stabilitetsfix-ene fra historisk `TILTAK.md` (T1, T2, T3) er fortsatt verdifulle og beholdes.
-- `src/runner.py`: må utvides med ankerbane-input og news-beregning. Eksisterende ensemble-logikk beholdes, men presenteres som kryssjekk.
-- `dashboard/`: bygges om fra grunnen som Next.js + Aksel. Eksisterende Plotly-grafer kan gjenbrukes inne i de nye komponentene.
+- `data_catalog.yaml` som førsterangs maskinlesbar kildekatalog
+- `src/anchors/`: ankerprognose-håndtering
+- `src/news/`: news-motor
+- `src/models/shadow_rate.py`, `inflation_components.py`, `nav_to_aku.py`: nye revisjonsmodeller
+- `dashboard-aksel/`: Next.js + Aksel frontend
 
-### Bygges nytt
+### Hentes fra SMART senere (fase 5)
 
-- `src/anchors/`: ny modul for ankerprognose-håndtering (lagring, henting, vintage).
-- `src/news/`: ny modul for news-motor (faktisk vs forventet).
-- `src/models/shadow_rate.py`: skyggerentebane-modell.
-- `src/models/inflation_components.py`: komponentmodell for inflasjon.
-- `src/models/nav_to_aku.py`: nowcast-modell.
-- Aksel-basert frontend i nytt `dashboard-aksel/`-katalog.
-
-### Forkastes eller arkiveres
-
-- Historisk `TILTAK.md` arkiveres som referanse, men er ikke aktiv arbeidsliste lenger.
-- Eksisterende `data/processed/forecasts/`-filer er resultater fra gammelt produkt; beholdes inntil nytt dashboard er på plass, deretter slettes.
-- Gammel `prosjektplan.md` (SMART) erstattes av denne filen.
+- `src/models/arima.py`, `var.py`, `bvar.py`, `dfm.py`, `arx.py`, `ml_baseline.py`
+- `src/ensemble/disagreement.py`, `forecaster.py`
+- `src/runner.py` (vil måtte tilpasses ankerbanen)
 
 ## 12. Åpne avklaringer
 
 1. Hvordan skal SSB Konjunkturtendensene parses? Stabil HTML-tabell, eller manuell innlastning som fallback?
 2. Skal MPR-XLSX-parser inn i fase 2 eller fase 4? Vurderes etter at vi har testet stabiliteten på 2–3 historiske filer.
-3. Hvor lenge skal det gamle Plotly-dashboardet leve parallelt med Next.js-versjonen?
-4. Skal SMART-ensemble fortsatt deployes til samme GitHub Pages-URL, eller skal det nye dashboardet ta over?
-5. Skal repoet rebrandes (nytt navn, ny domene), eller beholde "SMART"-navnet med ny betydning?
+3. Skal SMART-repoet markeres som arkivert (read-only på GitHub) når norskmakropuls tar over?
 
 Status og beslutninger på disse spørsmålene følges opp i `STATUS.md`.
 
@@ -275,4 +266,5 @@ Denne regelen overstyrer all annen prioritering ved tvil.
 - `docs/SPEC.md`: full teknisk spesifikasjon med API-spørringer, datakatalog, modellbeskrivelser
 - `STATUS.md`: levende statusdokument for hvor prosjektet er nå
 - `CLAUDE.md`: arbeidsregler for Claude Code i dette repoet
-- `docs/decisions/`: ADR-stil beslutningslogg, inkludert pivot-beslutningen 2026-04-29
+- `docs/decisions/`: ADR-stil beslutningslogg
+- `docs/data-sources.md`: lisens og bruksvilkår for hver datakilde
