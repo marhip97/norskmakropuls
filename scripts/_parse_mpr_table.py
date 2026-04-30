@@ -146,7 +146,7 @@ def main() -> None:
     write_yaml(
         seeds / "mpr_1_2026.yaml",
         source="norges_bank_mpr",
-        pub_date="2026-03-27",
+        pub_date="2026-03-26",
         series={
             "styringsrente":   build_series(rows, "ppr1_rente"),
             "produksjonsgap":  build_series(rows, "ppr1_gap"),
