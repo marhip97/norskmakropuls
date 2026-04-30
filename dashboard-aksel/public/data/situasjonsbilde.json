@@ -1,5 +1,5 @@
 {
-  "generert": "2026-04-30T20:44:33.344828Z",
+  "generert": "2026-04-30T20:58:19.574639Z",
   "anker_vintage": "2026-03-26",
   "variabler": {
     "kpi": {
@@ -7929,344 +7929,344 @@
       {
         "periode": "2015-01-01",
         "anker": 1.25,
-        "skygge": 1.3717,
-        "over": 2.2826,
-        "under": 0.4608
+        "skygge": 1.2986,
+        "over": 2.2095,
+        "under": 0.3877
       },
       {
         "periode": "2015-04-01",
         "anker": 1.22,
-        "skygge": 1.3235,
-        "over": 2.2344,
-        "under": 0.4126
+        "skygge": 1.2613,
+        "over": 2.1722,
+        "under": 0.3504
       },
       {
         "periode": "2015-07-01",
         "anker": 0.98,
-        "skygge": 1.068,
-        "over": 1.9789,
-        "under": 0.1571
+        "skygge": 1.0151,
+        "over": 1.926,
+        "under": 0.1042
       },
       {
         "periode": "2015-10-01",
         "anker": 0.75,
-        "skygge": 0.8248,
-        "over": 1.7357,
-        "under": -0.0861
+        "skygge": 0.7799,
+        "over": 1.6908,
+        "under": -0.1311
       },
       {
         "periode": "2016-01-01",
         "anker": 0.71,
-        "skygge": 0.7735,
-        "over": 1.6845,
-        "under": -0.1374
+        "skygge": 0.7354,
+        "over": 1.6463,
+        "under": -0.1755
       },
       {
         "periode": "2016-04-01",
         "anker": 0.5,
-        "skygge": 0.554,
-        "over": 1.4649,
-        "under": -0.3569
+        "skygge": 0.5216,
+        "over": 1.4325,
+        "under": -0.3893
       },
       {
         "periode": "2016-07-01",
         "anker": 0.5,
-        "skygge": 0.5459,
-        "over": 1.4568,
-        "under": -0.365
+        "skygge": 0.5183,
+        "over": 1.4292,
+        "under": -0.3926
       },
       {
         "periode": "2016-10-01",
         "anker": 0.5,
-        "skygge": 0.539,
-        "over": 1.4499,
-        "under": -0.3719
+        "skygge": 0.5156,
+        "over": 1.4265,
+        "under": -0.3953
       },
       {
         "periode": "2017-01-01",
         "anker": 0.5,
-        "skygge": 0.5332,
-        "over": 1.4441,
-        "under": -0.3777
+        "skygge": 0.5132,
+        "over": 1.4242,
+        "under": -0.3977
       },
       {
         "periode": "2017-04-01",
         "anker": 0.5,
-        "skygge": 0.5282,
-        "over": 1.4391,
-        "under": -0.3827
+        "skygge": 0.5113,
+        "over": 1.4222,
+        "under": -0.3996
       },
       {
         "periode": "2017-07-01",
         "anker": 0.5,
-        "skygge": 0.524,
-        "over": 1.4349,
-        "under": -0.3869
+        "skygge": 0.5096,
+        "over": 1.4205,
+        "under": -0.4013
       },
       {
         "periode": "2017-10-01",
         "anker": 0.5,
-        "skygge": 0.5204,
-        "over": 1.4313,
-        "under": -0.3905
+        "skygge": 0.5081,
+        "over": 1.419,
+        "under": -0.4028
       },
       {
         "periode": "2018-01-01",
         "anker": 0.5,
-        "skygge": 0.5173,
-        "over": 1.4282,
-        "under": -0.3936
+        "skygge": 0.5069,
+        "over": 1.4178,
+        "under": -0.404
       },
       {
         "periode": "2018-04-01",
         "anker": 0.5,
-        "skygge": 0.5147,
-        "over": 1.4256,
-        "under": -0.3962
+        "skygge": 0.5059,
+        "over": 1.4168,
+        "under": -0.405
       },
       {
         "periode": "2018-07-01",
         "anker": 0.53,
-        "skygge": 0.5425,
-        "over": 1.4534,
-        "under": -0.3684
+        "skygge": 0.535,
+        "over": 1.4459,
+        "under": -0.3759
       },
       {
         "periode": "2018-10-01",
         "anker": 0.75,
-        "skygge": 0.7606,
-        "over": 1.6715,
-        "under": -0.1503
+        "skygge": 0.7542,
+        "over": 1.6652,
+        "under": -0.1567
       },
       {
         "periode": "2019-01-01",
         "anker": 0.78,
-        "skygge": 0.789,
-        "over": 1.6999,
-        "under": -0.1219
+        "skygge": 0.7836,
+        "over": 1.6945,
+        "under": -0.1273
       },
       {
         "periode": "2019-04-01",
         "anker": 1.03,
-        "skygge": 1.0377,
-        "over": 1.9486,
-        "under": 0.1268
+        "skygge": 1.0331,
+        "over": 1.944,
+        "under": 0.1222
       },
       {
         "periode": "2019-07-01",
         "anker": 1.28,
-        "skygge": 1.2865,
-        "over": 2.1974,
-        "under": 0.3756
+        "skygge": 1.2826,
+        "over": 2.1935,
+        "under": 0.3717
       },
       {
         "periode": "2019-10-01",
         "anker": 1.5,
-        "skygge": 1.5056,
-        "over": 2.4165,
-        "under": 0.5946
+        "skygge": 1.5022,
+        "over": 2.4131,
+        "under": 0.5913
       },
       {
         "periode": "2020-01-01",
         "anker": 1.34,
-        "skygge": 1.3447,
-        "over": 2.2556,
-        "under": 0.4338
+        "skygge": 1.3419,
+        "over": 2.2528,
+        "under": 0.431
       },
       {
         "periode": "2020-04-01",
         "anker": 0.1,
-        "skygge": 0.104,
-        "over": 1.0149,
-        "under": -0.8069
+        "skygge": 0.1016,
+        "over": 1.0125,
+        "under": -0.8093
       },
       {
         "periode": "2020-07-01",
         "anker": 0.0,
-        "skygge": 0.0034,
-        "over": 0.9143,
-        "under": -0.9075
+        "skygge": 0.0014,
+        "over": 0.9123,
+        "under": -0.9095
       },
       {
         "periode": "2020-10-01",
         "anker": 0.0,
-        "skygge": 0.0029,
-        "over": 0.9138,
-        "under": -0.908
+        "skygge": 0.0012,
+        "over": 0.9121,
+        "under": -0.9097
       },
       {
         "periode": "2021-01-01",
         "anker": 0.0,
-        "skygge": 0.0025,
-        "over": 0.9134,
-        "under": -0.9084
+        "skygge": 0.001,
+        "over": 0.9119,
+        "under": -0.9099
       },
       {
         "periode": "2021-04-01",
         "anker": 0.0,
-        "skygge": 0.0021,
-        "over": 0.913,
-        "under": -0.9088
+        "skygge": 0.0008,
+        "over": 0.9117,
+        "under": -0.9101
       },
       {
         "periode": "2021-07-01",
         "anker": 0.02,
-        "skygge": 0.0218,
-        "over": 0.9327,
-        "under": -0.8891
+        "skygge": 0.0207,
+        "over": 0.9316,
+        "under": -0.8902
       },
       {
         "periode": "2021-10-01",
         "anker": 0.29,
-        "skygge": 0.2915,
-        "over": 1.2024,
-        "under": -0.6194
+        "skygge": 0.2906,
+        "over": 1.2015,
+        "under": -0.6203
       },
       {
         "periode": "2022-01-01",
         "anker": 0.52,
-        "skygge": 0.5213,
-        "over": 1.4322,
-        "under": -0.3896
+        "skygge": 0.5205,
+        "over": 1.4314,
+        "under": -0.3904
       },
       {
         "periode": "2022-04-01",
         "anker": 0.79,
-        "skygge": 0.7911,
-        "over": 1.702,
-        "under": -0.1198
+        "skygge": 0.7904,
+        "over": 1.7013,
+        "under": -0.1205
       },
       {
         "periode": "2022-07-01",
         "anker": 1.53,
-        "skygge": 1.5309,
-        "over": 2.4418,
-        "under": 0.62
+        "skygge": 1.5304,
+        "over": 2.4413,
+        "under": 0.6195
       },
       {
         "periode": "2022-10-01",
         "anker": 2.45,
-        "skygge": 2.4508,
-        "over": 3.3617,
-        "under": 1.5399
+        "skygge": 2.4503,
+        "over": 3.3612,
+        "under": 1.5394
       },
       {
         "periode": "2023-01-01",
         "anker": 2.77,
-        "skygge": 2.7707,
-        "over": 3.6816,
-        "under": 1.8598
+        "skygge": 2.7703,
+        "over": 3.6812,
+        "under": 1.8594
       },
       {
         "periode": "2023-04-01",
         "anker": 3.2,
-        "skygge": 3.2006,
-        "over": 4.1115,
-        "under": 2.2897
+        "skygge": 3.2002,
+        "over": 4.1111,
+        "under": 2.2893
       },
       {
         "periode": "2023-07-01",
         "anker": 3.89,
-        "skygge": 3.8905,
-        "over": 4.8014,
-        "under": 2.9796
+        "skygge": 3.8902,
+        "over": 4.8011,
+        "under": 2.9793
       },
       {
         "periode": "2023-10-01",
         "anker": 4.3,
-        "skygge": 4.3004,
-        "over": 5.2113,
-        "under": 3.3895
+        "skygge": 4.3002,
+        "over": 5.2111,
+        "under": 3.3893
       },
       {
         "periode": "2024-01-01",
         "anker": 4.5,
-        "skygge": 4.5004,
-        "over": 5.4113,
-        "under": 3.5894
+        "skygge": 4.5001,
+        "over": 5.411,
+        "under": 3.5892
       },
       {
         "periode": "2024-04-01",
         "anker": 4.5,
-        "skygge": 4.5003,
-        "over": 5.4112,
-        "under": 3.5894
+        "skygge": 4.5001,
+        "over": 5.411,
+        "under": 3.5892
       },
       {
         "periode": "2024-07-01",
         "anker": 4.5,
-        "skygge": 4.5003,
-        "over": 5.4112,
-        "under": 3.5893
+        "skygge": 4.5001,
+        "over": 5.411,
+        "under": 3.5892
       },
       {
         "periode": "2024-10-01",
         "anker": 4.5,
-        "skygge": 4.5002,
-        "over": 5.4111,
-        "under": 3.5893
+        "skygge": 4.5001,
+        "over": 5.411,
+        "under": 3.5892
       },
       {
         "periode": "2025-01-01",
         "anker": 4.5,
-        "skygge": 4.5002,
-        "over": 5.4111,
-        "under": 3.5893
+        "skygge": 4.5001,
+        "over": 5.411,
+        "under": 3.5892
       },
       {
         "periode": "2025-04-01",
         "anker": 4.47,
-        "skygge": 4.4702,
-        "over": 5.3811,
-        "under": 3.5593
+        "skygge": 4.4701,
+        "over": 5.381,
+        "under": 3.5592
       },
       {
         "periode": "2025-07-01",
         "anker": 4.22,
         "skygge": 4.2201,
         "over": 5.131,
-        "under": 3.3092
+        "under": 3.3091
       },
       {
         "periode": "2025-10-01",
         "anker": 4.0,
-        "skygge": 4.0001,
-        "over": 4.911,
-        "under": 3.0892
+        "skygge": 4.0,
+        "over": 4.9109,
+        "under": 3.0891
       },
       {
         "periode": "2026-01-01",
         "anker": 4.0,
-        "skygge": 4.0001,
-        "over": 4.911,
-        "under": 3.0892
+        "skygge": 4.0,
+        "over": 4.9109,
+        "under": 3.0891
       },
       {
         "periode": "2026-04-01",
         "anker": 4.07,
-        "skygge": 4.0701,
-        "over": 4.981,
-        "under": 3.1592
+        "skygge": 4.07,
+        "over": 4.9809,
+        "under": 3.1591
       },
       {
         "periode": "2026-07-01",
         "anker": 4.26,
-        "skygge": 4.2601,
-        "over": 5.171,
-        "under": 3.3492
+        "skygge": 4.26,
+        "over": 5.1709,
+        "under": 3.3491
       },
       {
         "periode": "2026-10-01",
         "anker": 4.35,
-        "skygge": 4.3501,
-        "over": 5.261,
-        "under": 3.4392
+        "skygge": 4.35,
+        "over": 5.2609,
+        "under": 3.4391
       },
       {
         "periode": "2027-01-01",
         "anker": 4.3,
         "skygge": 4.3,
-        "over": 5.211,
+        "over": 5.2109,
         "under": 3.3891
       },
       {

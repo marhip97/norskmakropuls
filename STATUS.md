@@ -1,6 +1,6 @@
 # Status
 
-Sist oppdatert: 2026-04-30 (Fase 3 fullfort: revisjonsmodeller implementert)
+Sist oppdatert: 2026-04-30 (Fase 4 fullfort: Aksel-dashboard, statisk eksport, deploy til GitHub Pages)
 
 Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne leses på under ett minutt før hver arbeidsøkt og oppdateres etter hver økt der noe vesentlig endres.
 
@@ -8,7 +8,7 @@ Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne le
 
 ## Nåværende fase
 
-**Fase 3 fullfort — Fase 4 (Aksel-dashboard) klar til oppstart.**
+**Fase 4 fullfort — Fase 5 (SMART-modeller) er neste steg.**
 
 Fase 0 og 1 fullfort 2026-04-30. Alle 21 variabler A_PROD.
 
@@ -41,7 +41,7 @@ lastet, news-motor kjort mot ekte data. Forste situasjonsbilde produsert:
 **CI/CD:**
 - [x] `tests.yml`: kjører ved push til `main` og `claude/**`
 - [x] `data_pipeline.yml`: kjører ukentlig og ved push til `main` (kun `fetch-data`-jobben)
-- [x] `deploy_dashboard.yml`: manuell trigger (reaktiveres i Fase 4)
+- [x] `deploy_dashboard.yml`: bygger og deployer til GitHub Pages (trigger: manuell eller etter data-pipeline)
 
 **Første pipeline-kjøring:**
 - [x] 12/12 variabler hentet 2026-04-30 via GitHub Actions
@@ -55,17 +55,29 @@ lastet, news-motor kjort mot ekte data. Forste situasjonsbilde produsert:
 
 ## Hva er IKKE gjort ennå
 
-- `dashboard-aksel/` er tom mappe (Fase 4).
 - `registrert_ledige` (NAV) er ikke i pipeline — NAV-til-AKU-broen returnerer None inntil serien legges til data_catalog.yaml og pipeline.
+- KPI-JAE-delkomponenter (tjenester, importert, mat, husleie, energi) er ikke i pipeline — komponentmodellen degraderer grasiøst til total KPI-JAE.
 - `README.md` på topp-nivå er tom.
 - `docs/data-sources.md` er tom.
-- `docs/SPEC.md` finnes ikke i repoet.
-- 9 manglende MVP-variabler er ikke implementert (se Fase 1 nedenfor).
+- GitHub Pages ma aktiveres i repoinnstillingene (kilde: "GitHub Actions") for deploy-workflowen.
 - Modeller (ARIMA, VAR, BVAR, DFM, AR-X, ML-baseline) hentes i Fase 5.
 
 ## Hva er under arbeid
 
-Fase 4 — Aksel-dashboard (Next.js + Aksel).
+Ingen aktiv utvikling. Neste: Fase 5 (SMART-modeller som kryssjekk mot ankerbanen).
+
+## Hva er på plass — Fase 4 (fullfort)
+
+- [x] `dashboard-aksel/`: Next.js 15, statisk eksport (`output: 'export'`), basePath `/norskmakropuls`
+- [x] Aksel designsystem (`@navikt/ds-react` v8.10.3): InternalHeader, Alert, Heading, BodyShort, Tag
+- [x] Recharts for tidsseriediagrammer (klient-side, `ssr: false` pga. react-is-avhengighet)
+- [x] 7 sider: Makropuls (oversikt), Rente, Inflasjon, Arbeidsmarked, Aktivitet, Internasjonal, Datakvalitet
+- [x] `scripts/generate_cache.py`: produserer `situasjonsbilde.json` fra pipeline-data og modeller
+- [x] `.github/workflows/deploy_dashboard.yml`: Python → Next.js build → GitHub Pages deploy
+- [x] `dashboard-aksel/public/data/situasjonsbilde.json`: 20 variabler, skyggerentebane, inflasjondekomposisjon
+- [x] `next build` verifisert lokalt: alle 7 ruter bygget uten feil
+
+**Merk:** GitHub Pages ma aktiveres manuelt i repoinnstillingene (kilde: "GitHub Actions") for at deploy-workflow skal virke.
 
 ## Hva er på plass — Fase 3 (fullfort)
 
@@ -157,6 +169,7 @@ Følgende er ekskludert fra dagens repo og hentes senere:
 
 | Dato | Endring | Av |
 |---|---|---|
+| 2026-04-30 | Fase 4 fullfort: Aksel-dashboard (7 sider), GitHub Pages deploy-workflow, situasjonsbilde.json regenerert med riktig beta_eurnok. | Claude Code |
 | 2026-04-30 | Fase 3 fullfort: shadow_rate.py, inflation_components.py, nav_to_aku.py. 71 tester grønne. | Claude Code |
 | 2026-04-30 | Situasjonsbilde: KPI/KPI-JAE nær anker, NOK styrket seg -0.36/-0.26 siden PPR 1/26. | Claude Code |
 | 2026-04-30 | PPR-dato korrigert: PPR 1/2026 publisert 26. mars (ikke 27.). | Claude Code |
