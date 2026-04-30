@@ -2,7 +2,7 @@
 
 Dette dokumentet er instruks til Claude Code når den arbeider i dette repoet. Det er ikke en prosjektplan — den ligger i `PROJECT_PLAN.md`. Det er ikke en statusrapport — den ligger i `STATUS.md`. Det er en oppskrift på hvordan vi arbeider her.
 
-Repoet ble pivotert 2026-04-29 fra SMART (kryssjekk-rammeverk) til ankerbasert dashboard. Mye av kodebasen er gjenbrukt fra SMART; mye er nytt. Reglene under reflekterer denne hybride situasjonen.
+norskmakropuls er etterfølger til prosjektet SMART. Datalaget, testene og infrastrukturen er hentet fra SMART; produktprinsippet og frontenden er nytt. Ved spørsmål om bakgrunn, se `PROJECT_PLAN.md` seksjon 0 og 11.
 
 Ved konflikt: brukerens eksplisitte instruks i en samtale vinner alltid over dette dokumentet. Men i fravær av annen instruks gjelder reglene under.
 
@@ -12,10 +12,10 @@ Ved konflikt: brukerens eksplisitte instruks i en samtale vinner alltid over det
 
 Før du gjør noe annet:
 
-1. Les `STATUS.md`. Det forteller hvor prosjektet er nå, inkludert hvilken fase vi er i etter pivoten.
-2. Les `PROJECT_PLAN.md` seksjonen som er relevant for oppgaven, særlig seksjon 11 (hva som er gjenbrukt fra SMART).
+1. Les `STATUS.md`. Det forteller hvor prosjektet er nå.
+2. Les `PROJECT_PLAN.md` seksjonen som er relevant for oppgaven.
 3. Hvis oppgaven berører datakilder, parsere eller modeller: les relevant del av `docs/SPEC.md`.
-4. Hvis du er usikker på om en SMART-fil skal endres, gjenbrukes uendret eller forkastes: spør brukeren før du begynner.
+4. Hvis du er usikker på hva som er gjort: spør brukeren før du begynner. Ikke gjett.
 
 Avslutt aldri en arbeidsøkt uten å foreslå en oppdatering av `STATUS.md`.
 
@@ -32,55 +32,9 @@ Avslutt aldri en arbeidsøkt uten å foreslå en oppdatering av `STATUS.md`.
 
 Hvis en endring øker omfang eller modellkompleksitet før ankerbane-laget er stabilt — stopp og spør.
 
-## 4. Pivot-spesifikke regler
+## 4. Repostruktur
 
-Disse reglene gjelder så lenge vi er i overgangsperioden mellom SMART og ankerbasert dashboard.
-
-### Hvordan håndtere SMART-arven
-
-**Behold uendret med mindre eksplisitt nødvendig:**
-
-- Alle filer i `src/data/` (datalag, kildeklienter, pipeline)
-- Tester i `tests/test_ssb.py`, `tests/test_norges_bank.py`, `tests/test_fred.py`, `tests/test_pipeline.py`
-- CI/CD-workflows i `.github/workflows/`
-- `scripts/discover_api.py`, `src/data/discover_api.py`
-- `requirements.txt`, `requirements-dev.txt`, `LICENSE`, `.gitignore`
-
-**Tilpass forsiktig:**
-
-- `config/variables.yaml`: kan utvides med nye variabler. Eksisterende oppføringer endres ikke uten begrunnelse.
-- `src/models/`: modellene beholdes med dagens grensesnitt. Ikke refaktorer uten grunn — de skal flyttes til "kryssjekk"-rolle, ikke skrives om.
-- `src/runner.py`: må utvides med ankerbane og news-input. Ensemble-logikk beholdes.
-
-**Forkast eller arkiver med forsiktighet:**
-
-- `TILTAK.md`: arkiveres til `docs/archive/TILTAK_smart_phase.md` ved første anledning. Ikke slett — den dokumenterer kjente svakheter.
-- Gammelt `prosjektplan.md`: arkiveres til `docs/archive/prosjektplan_smart.md`.
-- `data/processed/forecasts/`: gamle resultatfiler. Beholdes inntil nytt dashboard er på plass; deretter slettes.
-- `dashboard/`: byttes ut med Next.js + Aksel i fase 4. Eksisterende Plotly-kode kan brukes som referanse for grafer.
-
-### Bygg nytt i nye kataloger
-
-For å unngå sammenblanding mellom gammel og ny kode skal nye moduler legges i nye kataloger:
-
-- Ankerprognoser: `src/anchors/`
-- News-motor: `src/news/`
-- Nye revisjonsmodeller: `src/models/shadow_rate.py`, `src/models/inflation_components.py`, `src/models/nav_to_aku.py`
-- Ny frontend: `dashboard-aksel/` (parallelt med dagens `dashboard/` inntil pivoten er fullført)
-
-Når pivoten er fullført flyttes `dashboard/` til `docs/archive/dashboard_plotly/` og `dashboard-aksel/` omdøpes til `dashboard/`.
-
-### Når en SMART-fil må endres
-
-Før du endrer en SMART-fil utenfor de spesifikke unntakene over:
-
-1. Forklar i dialog hva som må endres og hvorfor.
-2. Få bekreftelse før du gjør endringen.
-3. Bruk en egen feature-gren med navn `pivot/<beskrivelse>`.
-
-## 5. Repostruktur (etter pivoten)
-
-Forventet katalogstruktur når pivot-arbeidet er ferdig:
+Forventet katalogstruktur:
 
 ```
 .
@@ -88,39 +42,31 @@ Forventet katalogstruktur når pivot-arbeidet er ferdig:
 ├── STATUS.md
 ├── CLAUDE.md
 ├── README.md
+├── data_catalog.yaml             # maskinlesbar kildekatalog
 ├── docs/
 │   ├── SPEC.md
+│   ├── data-sources.md
 │   ├── data_source_validation_report.md
-│   ├── decisions/                   # ADR-stil beslutningslogg
-│   ├── models/                      # modellkort (gjenbrukt fra SMART)
-│   ├── variables/                   # variabelbeskrivelser (gjenbrukt fra SMART)
-│   └── archive/                     # arkivert SMART-materiale
-├── data_catalog.yaml                # NY: maskinlesbar kildekatalog
+│   ├── decisions/                # ADR-stil beslutningslogg
+│   └── archive/                  # arkivert materiale
 ├── config/
-│   ├── variables.yaml               # eksisterende, utvides
-│   └── models.yaml                  # eksisterende
+│   └── variables.yaml            # arvet fra SMART
 ├── src/
-│   ├── data/                        # GJENBRUKT fra SMART, uendret
-│   ├── anchors/                     # NY: ankerprognose-håndtering
-│   ├── news/                        # NY: news-motor
-│   ├── models/                      # GJENBRUKT fra SMART, ny rolle (kryssjekk)
-│   │   ├── shadow_rate.py           # NY
-│   │   ├── inflation_components.py  # NY
-│   │   └── nav_to_aku.py            # NY
-│   ├── ensemble/                    # GJENBRUKT fra SMART
-│   └── runner.py                    # GJENBRUKT, utvides
-├── tests/                           # eksisterende + nye tester
+│   ├── data/                     # arvet fra SMART, uendret
+│   ├── anchors/                  # ankerprognose-håndtering
+│   ├── news/                     # news-motor
+│   └── models/                   # nye revisjonsmodeller (skygge, komponent, NAV-til-AKU)
+├── tests/                        # arvet fra SMART + nye tester
 ├── data/
-│   ├── raw/                         # eksisterende vintage-lagring
-│   ├── anchors/                     # NY: ankerprognoser med vintage
-│   └── processed/                   # eksisterende
-├── dashboard/                       # eksisterende Plotly-versjon, utgår
-├── dashboard-aksel/                 # NY: Next.js + Aksel
+│   ├── raw/                      # rådata med vintage
+│   ├── anchors/                  # ankerprognoser med vintage
+│   └── processed/                # kuraterte datasett
+├── dashboard-aksel/              # Next.js + Aksel
 ├── scripts/
 └── .github/workflows/
 ```
 
-## 6. Datakatalog først
+## 5. Datakatalog først
 
 Ingen ny datakilde implementeres uten oppføring i `data_catalog.yaml`. Minimum felter per oppføring:
 
@@ -148,15 +94,13 @@ notes: <...>
 
 Regel: kode som henter en serie skal lese fra denne katalogen. Tabell-ID-er, series keys og endepunkter hardkodes ikke spredt i koden.
 
-For eksisterende SMART-variabler skal informasjonen migreres fra `config/variables.yaml` og `docs/variables/<variabel>.md` til `data_catalog.yaml`. Migreringen er én tidlig oppgave i fase 1 etter pivoten.
-
-## 7. Standard datamodell
+## 6. Standard datamodell
 
 Alle tidsserier normaliseres til skjemaet i `docs/SPEC.md` seksjon 5.3. Minimumsfelter per observasjon: `date`, `vintage_date`, `ingestion_time`, `source`, `series_id`, `value`, `status`.
 
-Rådata lagres uendret i `data/raw/<source>/<series_id>/<vintage>.{json|csv|xlsx}`. Kuraterte data lagres som Parquet i `data/curated/`.
+Rådata lagres uendret i `data/raw/<source>/<series_id>/<vintage>.{json|csv|xlsx}`. Kuraterte data lagres som Parquet i `data/processed/`.
 
-## 8. Vintage-håndtering er obligatorisk
+## 7. Vintage-håndtering er obligatorisk
 
 Hver innhenting lagrer:
 
@@ -166,9 +110,9 @@ Hver innhenting lagrer:
 - `vintage_id` (entydig id for innhentingsversjonen)
 - `source_revision_id` der mulig
 
-Dette gjelder **også for ankerprognoser**. En MPR-bane fra mars og en fra juni er to forskjellige objekter, ikke en oppdatering av samme objekt. News-motoren må vite hvilket anker den sammenligner mot.
+Dette gjelder **også for ankerprognoser** lagret i `data/anchors/`. En MPR-bane fra mars og en fra juni er to forskjellige objekter, ikke en oppdatering av samme objekt. News-motoren må vite hvilket anker den sammenligner mot.
 
-## 9. Kildeklassifisering før produksjon
+## 8. Kildeklassifisering før produksjon
 
 Ny variabel går aldri rett til produksjon. Veien er:
 
@@ -180,11 +124,11 @@ Ny variabel går aldri rett til produksjon. Veien er:
 
 Hopp aldri over discovery-steget med begrunnelsen "jeg tror tabellen heter X". Vi gjetter ikke SSB-tabeller, Norges Bank series keys eller FRED series IDs.
 
-## 10. MVP-grenser
+## 9. MVP-grenser
 
 Disse er **utenfor MVP** og skal ikke implementeres uten eksplisitt brukerbeslutning:
 
-- Norges Bank MPR-XLSX-parser (vurderes i fase 4, ikke fase 2)
+- Norges Bank MPR-XLSX-parser (vurderes i fase 4)
 - IEA, EIA, ENTSO-E, Nord Pool
 - Eiendom Norge uten lisensavklaring
 - PMI uten åpent API
@@ -194,24 +138,29 @@ Disse er **utenfor MVP** og skal ikke implementeres uten eksplisitt brukerbeslut
 
 Hvis du blir bedt om noe i denne listen: påpek at det er utenfor MVP-grensene og bekreft før du fortsetter.
 
-## 11. Test før commit
+## 10. Test før commit
 
 - Hver extractor skal ha en test som kjører mot en fixture (ikke nettverket).
 - Hver pipeline-transformasjon skal ha en test på normalisert format.
 - Skjemavalidering skal feile kontrollert ved strukturendring i kilden, ikke stille.
 - Kjør `pytest` og `ruff check src/ tests/` før du foreslår commit.
-- Eksisterende SMART-tester (130 stykker per 2026-04-28) må fortsatt være grønne. Hvis en SMART-test må endres pga. pivoten, dokumenter hvorfor.
+
+## 11. Forholdet til SMART-arven
+
+Datalaget i `src/data/` er hentet uendret fra SMART. Ikke refaktorer det uten grunn — det er modent og dekket av tester.
+
+SMART-modellene (ARIMA, VAR, BVAR, DFM, AR-X, ML-baseline) er **ikke** kopiert inn ennå. De hentes i Fase 5 som kryssjekk mot ankerbanen. Hvis du blir bedt om å implementere dem tidligere: påpek at det er utenfor gjeldende fase.
 
 ## 12. Hva du IKKE skal gjøre uten å spørre
 
 - Endre `PROJECT_PLAN.md` (det er en strategisk beslutning).
-- Slette eller flytte SMART-filer som ikke er eksplisitt forkastet i seksjon 4.
-- Refaktorere SMART-modellene utover P1-tiltakene fra historisk `TILTAK.md`.
+- Refaktorere SMART-arven i `src/data/` uten konkret grunn.
 - Legge til nye datakilder utenfor MVP.
-- Bytte ut grunnleggende avhengigheter (Python-versjon, Next.js, Aksel, statsmodels).
+- Bytte ut grunnleggende avhengigheter (Python-versjon, Next.js, Aksel).
 - Slette historikk eller gjøre force-push på `main`.
 - Skrive til `data/raw/` med modifisert innhold — rådata er uendret per definisjon.
 - Begynne på modellbygging før ankerbane-laget er stabilt.
+- Hente SMART-modellene før Fase 5 starter.
 
 ## 13. Forklar pedagogisk
 
@@ -263,8 +212,7 @@ Når en annen jobber på GitHub og du vil hente endringene:
 Vi bruker en enkel modell:
 
 - `main`: alltid kjørbar. Aldri push direkte hit etter at prosjektet har første kjørbare versjon.
-- `feature/<kort-beskrivelse>`: en gren per oppgave eller funksjon. Eksempel: `feature/anchor-storage`, `feature/news-motor`, `feature/aksel-makropuls`.
-- `pivot/<kort-beskrivelse>`: spesialgren for pivot-relaterte endringer som rører eksisterende SMART-kode. Eksempel: `pivot/arkiver-tiltak`, `pivot/dashboard-coexistence`. Bruk denne i stedet for `feature/` når du endrer SMART-arven.
+- `feature/<kort-beskrivelse>`: en gren per oppgave eller funksjon. Eksempel: `feature/data-katalog`, `feature/anchor-storage`, `feature/aksel-makropuls`.
 - `fix/<kort-beskrivelse>`: småfiks.
 - `experiment/<kort-beskrivelse>`: utforskning som kanskje aldri merges. Lov å forkaste.
 
@@ -278,59 +226,26 @@ git checkout main
 git pull
 
 # 2. Lag en ny gren for oppgaven
-git checkout -b feature/news-motor
+git checkout -b feature/data-katalog
 
 # 3. Gjør jobben. Commit ofte og smått.
-git add src/news/ tests/test_news.py
-git commit -m "Legg til news-motor med forecast_news_t = faktisk - forventet"
+git add data_catalog.yaml
+git commit -m "Legg til datakatalog for 12 SMART-arvede variabler"
 
 # 4. Push grenen til GitHub
-git push -u origin feature/news-motor
+git push -u origin feature/data-katalog
 
 # 5. Åpne pull request på GitHub. Be om review (eller selv-review).
 
 # 6. Når PR er godkjent og merget, oppdater lokalt:
 git checkout main
 git pull
-git branch -d feature/news-motor
+git branch -d feature/data-katalog
 ```
 
-`-u origin feature/news-motor` første gang gjør at senere `git push` og `git pull` på den grenen vet hvor de skal.
+`-u origin feature/data-katalog` første gang gjør at senere `git push` og `git pull` på den grenen vet hvor de skal.
 
-## D. Spesielt om pivot-arbeid
-
-Pivot-grener (`pivot/...`) skal være **ekstra forsiktige** fordi de rører eksisterende SMART-kode. Tilleggsregler:
-
-1. Hver pivot-PR må eksplisitt vise hva som *ikke* er endret. Skriv i PR-beskrivelsen: "Endrer ikke `src/data/`, `tests/test_ssb.py`, ..."
-2. Pivot-PR-er bør ikke kombineres med ny funksjonalitet. Først arkiver, deretter bygg nytt.
-3. Hvis tester slutter å passere, stopp og forklar hvorfor før du fortsetter.
-
-Eksempel på en god pivot-PR:
-
-```
-Tittel: Arkiver TILTAK.md og gammel prosjektplan til docs/archive/
-
-Hva:
-- Flyttet TILTAK.md til docs/archive/TILTAK_smart_phase.md
-- Flyttet prosjektplan.md til docs/archive/prosjektplan_smart.md
-- Lagt til README i docs/archive/ som forklarer at dette er SMART-historikk
-
-Hvorfor:
-Ifølge PROJECT_PLAN.md seksjon 11 (etter pivoten 2026-04-29) er disse
-filene ikke lenger aktive arbeidsdokumenter. De arkiveres for sporbarhet.
-
-Endrer ikke:
-- src/, tests/, .github/workflows/, config/
-
-Test:
-- pytest passerer (130/130)
-- Lenker fra README og STATUS.md oppdatert
-
-Risiko:
-Lav. Kun filflytting, ingen kodendring.
-```
-
-## E. Commit-meldinger
+## D. Commit-meldinger
 
 En god commit-melding har:
 
@@ -359,7 +274,7 @@ Dårlige eksempler å unngå: "fix", "wip", "endringer", "diverse oppdateringer"
 
 Regel: en commit skal være liten nok til å beskrives i én setning. Hvis du må skrive "og" i tittellinjen, er commiten for stor.
 
-## F. Hva commiter vi, hva commiter vi ikke
+## E. Hva commiter vi, hva commiter vi ikke
 
 **Commit:**
 - All kildekode
@@ -368,7 +283,6 @@ Regel: en commit skal være liten nok til å beskrives i én setning. Hvis du m�
 - `data_catalog.yaml`
 - Test-fixtures (små eksempler på rårespons)
 - Datavintager i `data/raw/` (følger eksisterende SMART-praksis — pipeline committer)
-- Prognoseresultater i `data/processed/` inntil pivot er fullført
 
 **Commit ikke:**
 - Hemmeligheter (API-nøkler, passord, tokens)
@@ -376,9 +290,9 @@ Regel: en commit skal være liten nok til å beskrives i én setning. Hvis du m�
 - Genererte artefakter (`__pycache__/`, `node_modules/`, `dist/`, `.next/`)
 - IDE-spesifikke filer (`.vscode/`, `.idea/`) med mindre teamet er enig
 
-Repoet har en `.gitignore` fra SMART-perioden som dekker dette. Hvis en hemmelighet noensinne blir committet ved uhell: stopp og varsle brukeren umiddelbart. Det krever historikk-rensing og rotering av nøkkelen.
+Repoet har en `.gitignore` som dekker dette. Hvis en hemmelighet noensinne blir committet ved uhell: stopp og varsle brukeren umiddelbart. Det krever historikk-rensing og rotering av nøkkelen.
 
-## G. Pull requests
+## F. Pull requests
 
 Når du åpner en PR:
 
@@ -390,9 +304,8 @@ Når du åpner en PR:
    - **Risiko**: hva kan gå galt?
 3. Hvis PR endrer datakatalog eller introduserer ny kilde, koble eksplisitt til klassifiseringen (`A_PROD`, `B_TEST`, ...).
 4. Hold PR-en så liten som mulig. Helst under 400 endrede linjer. Store PR-er får ikke skikkelig review.
-5. For pivot-PR-er: følg spesialreglene i seksjon D.
 
-## H. Holde grenen oppdatert
+## G. Holde grenen oppdatert
 
 Hvis arbeidet på `main` har gått videre mens du jobbet på en gren, oppdater grenen før merge:
 
@@ -411,7 +324,7 @@ Alternativ til rebase er merge (`git merge origin/main`). Forskjellen:
 
 Tommelfingerregel for solo-utvikling: rebase egne grener før merge til main.
 
-## I. Når noe går galt
+## H. Når noe går galt
 
 | Situasjon | Kommando |
 |---|---|
@@ -425,16 +338,40 @@ Tommelfingerregel for solo-utvikling: rebase egne grener før merge til main.
 
 Regel: aldri kjør `git push --force` på `main`. På egne feature-grener kan `--force-with-lease` brukes etter rebase, men varsle eventuelle medarbeidere først.
 
+## I. Initiell push av norskmakropuls
+
+For å pushe denne pakken til det nye GitHub-repoet:
+
+```
+# 1. Pakk ut zipen i en lokal mappe
+cd /sti/til/utpakket-norskmakropuls
+
+# 2. Initialiser Git
+git init
+git branch -M main
+
+# 3. Legg til alle filer og lag initial commit
+git add .
+git commit -m "Initial commit: norskmakropuls, etterfølger til SMART
+
+Datalaget, testene og CI/CD er hentet fra SMART-repoet.
+SMART-modellene hentes inn senere i Fase 5 som kryssjekk
+mot ankerbanen. Se PROJECT_PLAN.md for full plan."
+
+# 4. Koble til GitHub-repoet
+git remote add origin https://github.com/<ditt-brukernavn>/norskmakropuls.git
+
+# 5. Push
+git push -u origin main
+
+# 6. Sett første tag
+git tag -a v0.1.0 -m "Initial release: datalag arvet fra SMART"
+git push origin v0.1.0
+```
+
 ## J. Tagger og versjoner
 
-SMART-perioden har ingen formelle tagger. Vi setter første tagg ved fullført pivot:
-
-```
-git tag -a v0.1.0-pivot -m "Pivot fra SMART til ankerbasert dashboard"
-git push origin v0.1.0-pivot
-```
-
-Etter dette tagges hver milepæl etter ankerbane-fasene:
+Etter initiell push tagges hver milepæl etter ankerbane-fasene:
 
 ```
 git tag -a v0.2.0 -m "Fase 2 ferdig: ankerbane-infrastruktur"
@@ -446,8 +383,8 @@ Tagger er udelelige peker til en commit. De brukes til å markere stabile versjo
 ## K. GitHub-spesifikke ting
 
 - **Issues**: én per konkret oppgave. Lenkes fra PR-er med `Closes #12`.
-- **Branch protection** på `main`: krev minst én review og at tester passerer. Anbefales aktivert nå hvis det ikke allerede er det.
-- **Actions**: kjører tester og deployer dashboard automatisk. Allerede etablert fra SMART-perioden.
+- **Branch protection** på `main`: krev minst én review og at tester passerer. Anbefales aktivert tidlig.
+- **Actions**: kjører tester og data-pipeline automatisk. Aktiveres ved første push.
 - **Secrets**: API-nøkler hører hjemme i GitHub Actions secrets eller en miljøvariabelfil som ikke committes. Aldri i kode.
 
 ## L. Rytmen vi anbefaler
@@ -455,7 +392,7 @@ Tagger er udelelige peker til en commit. De brukes til å markere stabile versjo
 Daglig:
 
 1. Start med `git pull` på `main`.
-2. Lag eller bytt til feature/pivot-gren.
+2. Lag eller bytt til feature-gren.
 3. Commit smått og ofte underveis. Si hva og hvorfor.
 4. Push til GitHub minst én gang om dagen, slik at arbeid ikke ligger sårbart bare lokalt.
 
@@ -472,52 +409,8 @@ Per oppgave:
 
 Dette skaper en jevn rytme der historikken er ryddig, hver endring er sporbar, og det er lett å rulle tilbake hvis noe går galt.
 
-## M. Spesielt om denne pivoten
-
-For å gjøre selve pivoten ryddig anbefaler jeg denne sekvensen i Git:
-
-```
-# 1. Et tydelig pivot-commit på main
-git checkout main
-git pull
-
-# Legg til de tre nye dokumentene (PROJECT_PLAN.md, STATUS.md, CLAUDE.md)
-# og oppdater README med ny prosjektbeskrivelse
-git add PROJECT_PLAN.md STATUS.md CLAUDE.md README.md
-git commit -m "Pivot: SMART -> ankerbasert dashboard for norsk økonomi
-
-Endrer prosjektets produktprinsipp fra modell-kryssjekk
-(SMART) til ankerbasert oppdatering av offisielle prognoser.
-Datalag, modeller og CI/CD beholdes; toppmotorhetten endres.
-Se PROJECT_PLAN.md seksjon 0 og 11 for begrunnelse."
-
-git tag -a v0.1.0-pivot -m "Pivot fra SMART"
-git push origin main --tags
-
-# 2. Arkivering av SMART-spesifikt materiale (egen pivot-gren)
-git checkout -b pivot/arkiver-smart-dokumenter
-mkdir -p docs/archive
-git mv TILTAK.md docs/archive/TILTAK_smart_phase.md
-git mv prosjektplan.md docs/archive/prosjektplan_smart.md
-# Legg til docs/archive/README.md som forklarer arkivet
-git add docs/archive/README.md
-git commit -m "Arkiver SMART-fase-dokumenter til docs/archive/"
-git push -u origin pivot/arkiver-smart-dokumenter
-# Åpne PR, merge
-
-# 3. Deretter: vanlig feature-grener for nytt arbeid
-git checkout main
-git pull
-git checkout -b feature/data-katalog
-# osv.
-```
-
-Dette etterlater en klar og lesbar historikk: én pivot-commit som markerer punktet, deretter ryddige feature-grener for det nye arbeidet.
-
 ---
 
 ## Til slutt
 
 Når du er i tvil: spør. Det er bedre å bruke ett minutt på å avklare enn å bygge i feil retning i en time.
-
-Pivoten gjør prosjektet midlertidig mer komplisert å resonnere om, fordi gammel og ny kode lever side om side. Reglene i seksjon 4 og branchstrategien i seksjon B/D er der for å redusere den friksjonen. Hvis noe i disse reglene viser seg å ikke fungere, si fra — `CLAUDE.md` skal oppdateres når arbeidsformen endrer seg, ikke holdes hellig.
