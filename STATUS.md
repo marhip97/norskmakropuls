@@ -1,6 +1,6 @@
 # Status
 
-Sist oppdatert: 2026-04-30 (Fase 1 fullført)
+Sist oppdatert: 2026-04-30 (Fase 2 påbegynt)
 
 Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne leses på under ett minutt før hver arbeidsøkt og oppdateres etter hver økt der noe vesentlig endres.
 
@@ -8,11 +8,12 @@ Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne le
 
 ## Nåværende fase
 
-**Fase 1 fullført — Fase 2 klar til oppstart.**
+**Fase 2 — Ankerbane-infrastruktur påbegynt.**
 
-Fase 0 fullført 2026-04-30: pipeline kjørte 12/12 variabler uten feil på GitHub Actions.
+Fase 0 og 1 fullført 2026-04-30. Alle 21 variabler er A_PROD.
 
-Fase 1 fullført 2026-04-30: alle 21 variabler i katalogen er A_PROD etter pipeline-kjøring. `gov_yield_2y_no` er ekskludert (2Y-tenor ikke tilgjengelig fra NB); `gov_yield_3y_no` brukes i stedet.
+Fase 2 påbegynt 2026-04-30: `src/anchors/` og `src/news/` er implementert og testet.
+Gjenstår: manuell innlasting av første MPR-seed og kjøring av news-motor mot ekte data.
 
 ## Hva er på plass i repoet (verifisert)
 
@@ -60,12 +61,26 @@ Fase 1 fullført 2026-04-30: alle 21 variabler i katalogen er A_PROD etter pipel
 
 ## Hva er under arbeid
 
-Ingenting pågår. Fase 1 er fullført.
+Fase 2 — ankerbane-infrastruktur. Kodebase er på plass. Venter på første MPR-seed.
 
-## Hva står for tur — Fase 2
+## Hva er på plass — Fase 2 (delvis)
 
-Fase 2 handler om ankerbane-infrastruktur. Avventer brukerens beslutning om oppstart.
-Se `PROJECT_PLAN.md` for detaljer om Fase 2-omfang.
+- [x] `src/anchors/__init__.py`: `Anchor` + `AnchorStore` med vintage-lagring
+- [x] `src/news/__init__.py`: `NewsEngine` med `compute_news()`, `latest_news()`, `news_dataframe()`
+- [x] `scripts/load_anchor.py`: manuell innlasting av ankerprognoser fra YAML-seed
+- [x] `data/anchors/seeds/example_format.yaml`: mal for MPR-data
+- [x] 16/16 tester grønne (test_anchors.py + test_news.py)
+
+## Hva gjenstår — Fase 2
+
+1. **Last inn første MPR-seed**: fyll ut `data/anchors/seeds/mpr_<dato>.yaml` med
+   faktiske tall fra siste Norges Bank MPR, og kjør:
+   ```
+   python scripts/load_anchor.py data/anchors/seeds/mpr_<dato>.yaml
+   ```
+2. **Verifiser news-motoren mot ekte data**: kjør `NewsEngine.compute_news()`
+   for kpi, styringsrente, bnp_fastland og se at tall gir mening.
+3. Vurder om SSB Konjunkturtendensene skal legges inn som anker (ssb_kt) før Fase 3.
 
 ## Datakildestatus
 
@@ -131,7 +146,8 @@ Følgende er ekskludert fra dagens repo og hentes senere:
 
 | Dato | Endring | Av |
 |---|---|---|
-| 2026-04-30 | Fase 1 fullført: NOWA, I44, GOV10Y, GOV3Y verifisert grønn pipeline, satt A_PROD. 21 variabler totalt i A_PROD. | Claude Code |
+| 2026-04-30 | Fase 2 (delvis): src/anchors/ og src/news/ implementert. 16 nye tester grønne. | Claude Code |
+| 2026-04-30 | Fase 1 fullstendig: NOWA, I44, GOV10Y, GOV3Y verifisert grønn pipeline, satt A_PROD. 21 variabler totalt i A_PROD. | Claude Code |
 | 2026-04-30 | Fase 1 (NB-variabler): NOWA, I44, GOV10Y, GOV3Y implementert med verifiserte series keys. gov_yield_2y_no ekskludert. | Claude Code |
 | 2026-04-30 | Fase 1 (delvis): 5 nye variabler verifisert og A_PROD. 4 NB-variabler venter på discovery. | Claude Code |
 | 2026-04-30 | Fase 0 ferdig: 12/12 variabler verifisert, CI grønn, alle A_PROD i data_catalog.yaml. | Claude Code |

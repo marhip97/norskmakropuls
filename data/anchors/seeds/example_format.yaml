@@ -1,0 +1,46 @@
+# Mal for ankerprognoser fra Norges Bank MPR.
+#
+# Fyll ut med faktiske tall fra siste MPR-rapport.
+# Datoformat: "YYYY-QN" for kvartal (konverteres til kvartalets startdato)
+#             eller "YYYY-MM-DD" for eksakt dato.
+#
+# Gyldige source-verdier:
+#   norges_bank_mpr  - Norges Banks pengepolitiske rapport
+#   ssb_kt           - SSB Konjunkturtendensene
+#   fin_npb          - Finansdepartementet, nasjonalbudsjettet
+#
+# Bruk: python scripts/load_anchor.py data/anchors/seeds/<filnavn>.yaml
+
+source: norges_bank_mpr
+publication_date: "YYYY-MM-DD"   # sett til MPR-publiseringsdato
+
+series:
+  styringsrente:
+    - date: "YYYY-QN"
+      value: 0.00
+    - date: "YYYY-QN"
+      value: 0.00
+
+  kpi:
+    - date: "YYYY-QN"
+      value: 0.0
+    - date: "YYYY-QN"
+      value: 0.0
+
+  kpi_jae:
+    - date: "YYYY-QN"
+      value: 0.0
+    - date: "YYYY-QN"
+      value: 0.0
+
+  bnp_fastland:
+    - date: "YYYY-QN"
+      value: 0.0
+    - date: "YYYY-QN"
+      value: 0.0
+
+  ledighet_aku:
+    - date: "YYYY-QN"
+      value: 0.0
+    - date: "YYYY-QN"
+      value: 0.0
