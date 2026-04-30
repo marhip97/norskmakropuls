@@ -469,3 +469,91 @@ class ShadowRatePath:
     band_upper: list[float]
     band_lower: list[float]
 ```
+
+### 8.3 Komponentmodell for inflasjon
+
+Implementeres i `src/models/inflation_components.py` (Fase 3).
+
+#### Formål
+
+KPI-JAE dekomponeres i underkomponenter for å identifisere hva som driver inflasjonsavviket fra ankeret. Dette gjør situasjonsbildet forklarbart: "avviket skyldes primært tjenesteprisvekst, ikke importerte varer."
+
+#### Komponenter
+
+| Komponent | Vekt (SSB 2024-kurv) | series_id / kilde |
+|---|---|---|
+| Innenlandsk tjenester | ca. 37% | SSB 05327 (delgruppe) |
+| Importerte konsumvarer | ca. 21% | SSB 05327 (delgruppe) |
+| Mat og alkoholfrie drikkevarer | ca. 14% | SSB 05327 (delgruppe) |
+| Husleie | ca. 14% | SSB 05327 (delgruppe) |
+| Energi (elektrisitet, drivstoff) | ca. 14% | SSB 03013 (energikomponent) |
+
+Vektene er tilnærmede og oppdateres ved SSBs årlige revisjoner. De lagres ikke som magic numbers i koden, men leses fra `config/variables.yaml` eller `data_catalog.yaml`.
+
+#### Modelllogikk
+
+For hver komponent `k`:
+```
+news_k_t = faktisk_k_t - forventet_k_t
+```
+
+der `forventet_k_t` er ankerets KPI-JAE-bane skalert med komponentens relative vekt.
+
+Aggregert bidrag:
+```
+news(kpi_jae)_t ≈ sum_k(w_k * news_k_t)
+```
+
+I MVP er ikke alle delkomponenter tilgjengelig som separate ankerprognoser fra Norges Bank. Fallback: bare nyheter på total KPI-JAE rapporteres, komponentdekomposisjon vises som "under arbeid" på Datakvalitets-siden.
+
+#### Output-format
+
+```python
+@dataclass
+class InflationDecomposition:
+    reference_date: date
+    total_surprise: float
+    components: dict[str, float]   # {"tjenester": 0.3, "importert": -0.1, ...}
+    dominant_driver: str           # komponenten med størst absolutt bidrag
+```
+
+### 8.4 NAV-til-AKU bro
+
+Implementeres i `src/models/nav_to_aku.py` (Fase 3).
+
+#### Formål
+
+NAV publiserer registrert ledighet månedlig med kort forsinkelse (~2 dager). AKU-ledigheten (SSBs arbeidskraftundersøkelse) publiseres med ~30 dagers forsinkelse. Broen bruker NAVs raske tall til å nowcaste AKU-nivået, slik at nyheten mot ankerets AKU-bane kan beregnes uten å vente på SSB.
+
+#### Kilde
+
+NAV-data hentes via SSB tabell 05111 (`src/data/nav.py`). Se `data_catalog.yaml` — `registrert_ledige` legges til katalogen i Fase 3.
+
+#### Modellspesifikasjon
+
+Enkel lineær bro estimert over historiske data:
+
+```
+AKU_t_nowcast = alpha + beta * NAV_t + gamma * AKU_{t-1}
+```
+
+Alternativt, der sesongjustering er vanskelig: bruk av differansemetode:
+
+```
+delta_AKU_t_nowcast = beta * delta_NAV_t
+```
+
+MVP bruker differansemetoden — enklere og mer robust på korte serier.
+
+Parametrene estimeres på historiske data (`ledighet_aku` og `registrert_ledige`) med minst 24 måneder. Resultatet valideres mot faktisk AKU i test-settet.
+
+#### Output-format
+
+```python
+@dataclass
+class AKUNowcast:
+    reference_date: date
+    nav_value: float          # siste NAV-tall brukt
+    aku_nowcast: float        # estimert AKU-nivå
+    model_uncertainty: float  # RMSE fra historisk kalibrering
+```
