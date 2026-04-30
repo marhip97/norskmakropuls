@@ -1,0 +1,35 @@
+@import "@navikt/ds-css";
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--a-bg-subtle);
+  min-height: 100vh;
+}
+
+.innhold {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--a-spacing-8) var(--a-spacing-6);
+}
+
+.kortgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--a-spacing-4);
+  margin-top: var(--a-spacing-4);
+}
+
+.seksjon {
+  margin-top: var(--a-spacing-8);
+}
+
+.seksjon-tittel {
+  margin-bottom: var(--a-spacing-3);
+  padding-bottom: var(--a-spacing-2);
+  border-bottom: 2px solid var(--a-border-subtle);
+}
