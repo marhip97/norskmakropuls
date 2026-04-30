@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 from datetime import datetime
-from pathlib import Path
 
 import pandas as pd
 import pytest
 
 from src.data.base import DataSource
-from src.data.pipeline import build_source, load_config, run_pipeline
+from src.data.pipeline import build_source, load_config
 
 
 # --- Test fixture: en dummy datakilde -------------------------------------------
