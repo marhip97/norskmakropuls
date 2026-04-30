@@ -18,16 +18,20 @@ logger = logging.getLogger(__name__)
 
 # Norges Bank Data REST API (SDMX-JSON)
 # Base: https://data.norges-bank.no/api/data/{flow}/{key}?format=sdmx-json
-# Confirmed working dataflows: SHORT_RATES, EXR
+# Confirmed working dataflows: SHORT_RATES, EXR, GOVT_GENERIC_RATES
 NBD_BASE = "https://data.norges-bank.no/api/data"
 
 # (dataflow, series_key)
 # series_key = "" -> fetch entire dataflow and pick first series in response.
 # This is used for SHORT_RATES where the sight-deposit series is returned first.
 _SERIES_MAP: dict[str, tuple[str, str]] = {
-    "SIREN":  ("SHORT_RATES", ""),          # Foliorente - all series, parser takes first
-    "EURNOK": ("EXR",         "B.EUR.NOK.SP"),  # EUR/NOK spot, confirmed working
-    "USDNOK": ("EXR",         "B.USD.NOK.SP"),  # USD/NOK spot, same EXR flow as EUR/NOK
+    "SIREN":   ("SHORT_RATES",        ""),               # Foliorente - all series, parser picks most obs
+    "EURNOK":  ("EXR",                "B.EUR.NOK.SP"),   # EUR/NOK spot
+    "USDNOK":  ("EXR",                "B.USD.NOK.SP"),   # USD/NOK spot
+    "NOWA":    ("SHORT_RATES",        "B.NOWA.ON."),     # NOWA overnight weighted average
+    "I44":     ("EXR",                "B.I44.NOK.SP"),   # Importveid valutakursindeks (44 land)
+    "GOV10Y":  ("GOVT_GENERIC_RATES", "B.10Y.GBON."),   # Norsk statsobl. 10 ar
+    "GOV3Y":   ("GOVT_GENERIC_RATES", "B.3Y.GBON."),    # Norsk statsobl. 3 ar (naermeste til 2Y)
 }
 
 

@@ -220,3 +220,43 @@ variables:
     transform: level
     source_params:
       series_id: "CPIAUCSL"
+
+  - id: nowa
+    name: NOWA (Norwegian Overnight Weighted Average)
+    type: conditioning
+    unit: pct
+    source: NorgesBankDataSource
+    frequency: daily
+    transform: level
+    source_params:
+      series: "NOWA"
+
+  - id: i44
+    name: Importveid valutakursindeks I-44
+    type: conditioning
+    unit: index
+    source: NorgesBankDataSource
+    frequency: daily
+    transform: level
+    source_params:
+      series: "I44"
+
+  - id: gov_yield_10y_no
+    name: Norsk statsobligasjonsrente 10 ar
+    type: conditioning
+    unit: pct
+    source: NorgesBankDataSource
+    frequency: daily
+    transform: level
+    source_params:
+      series: "GOV10Y"
+
+  - id: gov_yield_3y_no
+    name: Norsk statsobligasjonsrente 3 ar
+    type: conditioning
+    unit: pct
+    source: NorgesBankDataSource
+    frequency: daily
+    transform: level
+    source_params:
+      series: "GOV3Y"

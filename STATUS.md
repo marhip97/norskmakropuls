@@ -1,6 +1,6 @@
 # Status
 
-Sist oppdatert: 2026-04-30 (Fase 0 ferdig)
+Sist oppdatert: 2026-04-30 (Fase 1 NB-variabler implementert)
 
 Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne leses på under ett minutt før hver arbeidsøkt og oppdateres etter hver økt der noe vesentlig endres.
 
@@ -12,7 +12,7 @@ Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne le
 
 Fase 0 er fullført 2026-04-30. Pipeline kjørte 12/12 variabler uten feil på GitHub Actions. Tester kjører grønt på CI (33/33). To kalibreringsnoteringer er dokumentert nedenfor, men blokkerer ikke Fase 1.
 
-Fase 1 pågår: 5 nye variabler implementert og verifisert (2026-04-30). 4 Norges Bank-variabler gjenstår og krever discovery (`i44`, `nowa`, `gov_yield_2y_no`, `gov_yield_10y_no`).
+Fase 1 pågår: alle planlagte variabler implementert (2026-04-30). 4 Norges Bank-variabler (`i44`, `nowa`, `gov_yield_3y_no`, `gov_yield_10y_no`) er lagt inn med verifiserte series keys og venter på pipeline-kjøring for A_PROD. Merk: `gov_yield_2y_no` er satt til D_EXCLUDE — 2Y-tenor finnes ikke i GOVT_GENERIC_RATES; `gov_yield_3y_no` (3-årig) brukes i stedet.
 
 ## Hva er på plass i repoet (verifisert)
 
@@ -60,26 +60,19 @@ Fase 1 pågår: 5 nye variabler implementert og verifisert (2026-04-30). 4 Norge
 
 ## Hva er under arbeid
 
-Fase 1 — discovery for de 4 gjenstående Norges Bank-variablene.
+Pipeline-kjøring for å verifisere de 4 nye NB-variablene og sette A_PROD.
 
 ## Hva står for tur — Fase 1 (gjenstående)
 
-1. **Discovery for 4 Norges Bank-variabler** — series keys ukjent, kan ikke gjettes:
-   - `i44` (importveid valutakursindeks, 44 land)
-   - `nowa` (Norwegian Overnight Weighted Average)
-   - `gov_yield_2y_no` (statsobligasjonsrente 2 år)
-   - `gov_yield_10y_no` (statsobligasjonsrente 10 år)
+1. **Kjør pipeline** for å verifisere de 4 nye NB-variablene:
+   - `nowa` (SHORT_RATES/B.NOWA.ON.)
+   - `i44` (EXR/B.I44.NOK.SP)
+   - `gov_yield_10y_no` (GOVT_GENERIC_RATES/B.10Y.GBON.)
+   - `gov_yield_3y_no` (GOVT_GENERIC_RATES/B.3Y.GBON.)
 
-   Trigger `discover_api.yml`-workflowen på GitHub Actions, eller kjør lokalt:
-   ```
-   python -m src.data.discover_api --source norges_bank
-   ```
+2. **Sett A_PROD** i `data_catalog.yaml` etter første grønne pipeline-kjøring.
 
-2. **Implementer de 4 variablene** i `norges_bank.py` (`_SERIES_MAP`) og legg til i `config/variables.yaml`.
-
-3. **Verifiser** via pipeline og sett `A_PROD` i `data_catalog.yaml`.
-
-4. Vurder om Fase 2 (ankerbane-infrastruktur) kan starte parallelt.
+3. Vurder om Fase 2 (ankerbane-infrastruktur) kan starte.
 
 ## Datakildestatus
 
@@ -104,10 +97,11 @@ Pipeline kjørt to ganger: 2026-04-30 (Fase 0) og 2026-04-30 (Fase 1).
 | **us_2y_yield** | FRED DGS2 | **A_PROD** | 2026-04-30 | 13021 rader, 1976–2026, 548 nulls (normalt) |
 | **fed_funds** | FRED FEDFUNDS | **A_PROD** | 2026-04-30 | 861 rader, 1954–2026 |
 | **us_cpi** | FRED CPIAUCSL | **A_PROD** | 2026-04-30 | 951 rader, 1947–2026 |
-| i44 | Norges Bank | B_TEST | — | Trenger discovery |
-| nowa | Norges Bank | B_TEST | — | Trenger discovery |
-| gov_yield_2y_no | Norges Bank | B_TEST | — | Trenger discovery |
-| gov_yield_10y_no | Norges Bank | B_TEST | — | Trenger discovery |
+| i44 | Norges Bank EXR B.I44.NOK.SP | B_TEST | — | Implementert, venter pipeline |
+| nowa | Norges Bank SHORT_RATES B.NOWA.ON. | B_TEST | — | Implementert, venter pipeline |
+| gov_yield_2y_no | — | D_EXCLUDE | — | 2Y finnes ikke i GOVT_GENERIC_RATES |
+| gov_yield_3y_no | Norges Bank GOVT_GENERIC_RATES B.3Y.GBON. | B_TEST | — | Implementert (3Y proxy), venter pipeline |
+| gov_yield_10y_no | Norges Bank GOVT_GENERIC_RATES B.10Y.GBON. | B_TEST | — | Implementert, venter pipeline |
 
 ## Blokkeringer og åpne spørsmål
 
@@ -144,6 +138,7 @@ Følgende er ekskludert fra dagens repo og hentes senere:
 
 | Dato | Endring | Av |
 |---|---|---|
+| 2026-04-30 | Fase 1 (NB-variabler): NOWA, I44, GOV10Y, GOV3Y implementert med verifiserte series keys. gov_yield_2y_no ekskludert (2Y ikke tilgjengelig fra NB). | Claude Code |
 | 2026-04-30 | Fase 1 (delvis): 5 nye variabler verifisert og A_PROD. 4 NB-variabler venter på discovery. | Claude Code |
 | 2026-04-30 | Fase 0 ferdig: 12/12 variabler verifisert, CI grønn, alle A_PROD i data_catalog.yaml. | Claude Code |
 | 2026-04-30 | STATUS.md korrigert: fjernet falske SMART-status-rester, lagt inn ærlig Fase 0-plan. | Plan-fase |

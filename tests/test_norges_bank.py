@@ -73,3 +73,71 @@ def test_norges_bank_eurnok_fetch():
     assert len(df) == 3
     df = src.validate(df)
     assert df["value"].iloc[0] == 4.5
+
+
+@responses.activate
+def test_norges_bank_nowa_fetch():
+    responses.add(
+        responses.GET,
+        "https://data.norges-bank.no/api/data/SHORT_RATES/B.NOWA.ON.",
+        json=_example_sdmx_json(),
+    )
+    src = NorgesBankDataSource(
+        variable_id="nowa",
+        source_params={"series": "NOWA"},
+    )
+    df = src.fetch()
+    assert len(df) == 3
+    df = src.validate(df)
+    assert df["value"].iloc[-1] == 4.75
+
+
+@responses.activate
+def test_norges_bank_i44_fetch():
+    responses.add(
+        responses.GET,
+        "https://data.norges-bank.no/api/data/EXR/B.I44.NOK.SP",
+        json=_example_sdmx_json(),
+    )
+    src = NorgesBankDataSource(
+        variable_id="i44",
+        source_params={"series": "I44"},
+    )
+    df = src.fetch()
+    assert len(df) == 3
+    df = src.validate(df)
+    assert df["value"].iloc[0] == 4.5
+
+
+@responses.activate
+def test_norges_bank_gov10y_fetch():
+    responses.add(
+        responses.GET,
+        "https://data.norges-bank.no/api/data/GOVT_GENERIC_RATES/B.10Y.GBON.",
+        json=_example_sdmx_json(),
+    )
+    src = NorgesBankDataSource(
+        variable_id="gov_yield_10y_no",
+        source_params={"series": "GOV10Y"},
+    )
+    df = src.fetch()
+    assert len(df) == 3
+    df = src.validate(df)
+    assert df["value"].iloc[0] == 4.5
+
+
+@responses.activate
+def test_norges_bank_gov3y_fetch():
+    responses.add(
+        responses.GET,
+        "https://data.norges-bank.no/api/data/GOVT_GENERIC_RATES/B.3Y.GBON.",
+        json=_example_sdmx_json(),
+    )
+    src = NorgesBankDataSource(
+        variable_id="gov_yield_3y_no",
+        source_params={"series": "GOV3Y"},
+    )
+    df = src.fetch()
+    assert len(df) == 3
+    df = src.validate(df)
+    assert df["value"].iloc[0] == 4.5
