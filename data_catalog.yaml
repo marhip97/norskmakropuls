@@ -386,7 +386,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: samme dag
     license: norges_bank_terms
-    status: B_TEST
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -398,7 +398,7 @@ sources:
     notes: |
       Norges Banks importveide valutakursindeks (44 handelspartnere).
       Series key B.I44.NOK.SP verifisert fra Norges Bank Data API.
-      Settes til A_PROD etter første grønne pipeline-kjøring.
+      Verifisert hentet: 2026-04-30.
 
   - series_id: nowa
     name: Norwegian Overnight Weighted Average (NOWA)
@@ -411,7 +411,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: neste dag
     license: norges_bank_terms
-    status: B_TEST
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -422,8 +422,8 @@ sources:
       series: NOWA
     notes: |
       NOWA overnight weighted average rate. Series key B.NOWA.ON. (ON = overnight)
-      fra Norges Banks SHORT_RATES-dataflow. Verifisert fra API-URL.
-      Settes til A_PROD etter første grønne pipeline-kjøring.
+      fra Norges Banks SHORT_RATES-dataflow.
+      Verifisert hentet: 2026-04-30.
 
   - series_id: gov_yield_2y_no
     name: Norsk statsobligasjonsrente, 2 år
@@ -461,7 +461,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: samme dag
     license: norges_bank_terms
-    status: B_TEST
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -474,7 +474,7 @@ sources:
       Norsk statsobligasjonsrente 3-årig løpetid (GBON = government bonds).
       Erstatter planlagt gov_yield_2y_no — 2Y-tenor finnes ikke i GOVT_GENERIC_RATES.
       Series key B.3Y.GBON. verifisert fra Norges Bank Data API.
-      Settes til A_PROD etter første grønne pipeline-kjøring.
+      Verifisert hentet: 2026-04-30.
 
   - series_id: gov_yield_10y_no
     name: Norsk statsobligasjonsrente, 10 år
@@ -487,7 +487,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: samme dag
     license: norges_bank_terms
-    status: B_TEST
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -499,7 +499,7 @@ sources:
     notes: |
       Norsk statsobligasjonsrente 10-årig løpetid (GBON = government bonds).
       Series key B.10Y.GBON. verifisert fra Norges Bank Data API.
-      Settes til A_PROD etter første grønne pipeline-kjøring.
+      Verifisert hentet: 2026-04-30.
 
   # ============================================================================
   # FRED — Fase 1 (implementert)
