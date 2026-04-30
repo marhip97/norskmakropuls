@@ -1,6 +1,6 @@
 # Status
 
-Sist oppdatert: 2026-04-30 (Fase 2 fullfort)
+Sist oppdatert: 2026-04-30 (Fase 2 fullfort, news-analyse kjort)
 
 Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne leses på under ett minutt før hver arbeidsøkt og oppdateres etter hver økt der noe vesentlig endres.
 
@@ -10,10 +10,13 @@ Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne le
 
 **Fase 2 fullfort — Fase 3 klar til oppstart.**
 
-Fase 0 og 1 fullført 2026-04-30. Alle 21 variabler er A_PROD.
+Fase 0 og 1 fullfort 2026-04-30. Alle 21 variabler A_PROD.
 
-Fase 2 påbegynt 2026-04-30: `src/anchors/` og `src/news/` er implementert og testet.
-Gjenstår: manuell innlasting av første MPR-seed og kjøring av news-motor mot ekte data.
+Fase 2 fullfort 2026-04-30: ankerbane-infrastruktur på plass, to MPR-vintager
+lastet, news-motor kjort mot ekte data. Forste situasjonsbilde produsert:
+- KPI og KPI-JAE nær anker ved siste obs (des. 2025)
+- NOK styrket seg merkbart siden PPR 1/26 (USD/NOK -0.36, EUR/NOK -0.26)
+- Ingen overraskelser i finansielle variabler utover kronestyrkingen
 
 ## Hva er på plass i repoet (verifisert)
 
@@ -70,14 +73,15 @@ Fase 2 — ankerbane-infrastruktur. Kodebase er på plass. Venter på første MP
 - [x] `scripts/load_anchor.py`: manuell innlasting av ankerprognoser fra YAML-seed
 - [x] `data/anchors/seeds/example_format.yaml`: mal for MPR-data
 - [x] 16/16 tester grønne (test_anchors.py + test_news.py)
-- [x] PPR 4/2025 lastet inn (2025-12-19): styringsrente, kpi, kpi_jae, produksjonsgap (56 kvartalspunkter)
-- [x] PPR 1/2026 lastet inn (2026-03-27): samme serier (60 kvartalspunkter til 2029-Q4)
-- [x] NewsEngine.compute_news("kpi") mot ekte obs: 12 punkter 2025-Q1 til 2025-Q4, tall fornuftige
+- [x] PPR 4/2025 lastet (2025-12-19): styringsrente, kpi, kpi_jae, produksjonsgap — 56 kvartalspunkter
+- [x] PPR 1/2026 lastet (2026-03-26): samme serier — 60 kvartalspunkter til 2029-Q4
+- [x] NewsEngine verifisert mot ekte KPI-data: 12 punkter for 2025, tall fornuftige
+- [x] Forste situasjonsbilde kjort 2026-04-30 (se endringslogg for funn)
 
-## Hva gjenstår — Fase 2
+## Hva gjenstår / apne sporsmal
 
-1. Vurder om SSB Konjunkturtendensene skal legges inn som anker (ssb_kt) — åpent spørsmål.
-2. Fase 3 kan starte: skyggerentebane og komponentmodell for inflasjon.
+- SSB Konjunkturtendensene som anker (ssb_kt): apent sporsmal, anbefalt etter Fase 3
+- Fase 3 kan starte: skyggerentebane og komponentmodell for inflasjon
 
 ## Datakildestatus
 
@@ -143,6 +147,8 @@ Følgende er ekskludert fra dagens repo og hentes senere:
 
 | Dato | Endring | Av |
 |---|---|---|
+| 2026-04-30 | Situasjonsbilde: KPI/KPI-JAE nær anker, NOK styrket seg -0.36/-0.26 siden PPR 1/26. | Claude Code |
+| 2026-04-30 | PPR-dato korrigert: PPR 1/2026 publisert 26. mars (ikke 27.). | Claude Code |
 | 2026-04-30 | Fase 2 fullfort: PPR 4/25 og PPR 1/26 lastet, news-motor verifisert mot KPI. | Claude Code |
 | 2026-04-30 | Fase 2 (delvis): src/anchors/ og src/news/ implementert. 16 nye tester grønne. | Claude Code |
 | 2026-04-30 | Fase 1 fullstendig: NOWA, I44, GOV10Y, GOV3Y verifisert grønn pipeline, satt A_PROD. 21 variabler totalt i A_PROD. | Claude Code |
