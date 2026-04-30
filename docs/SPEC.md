@@ -557,3 +557,100 @@ class AKUNowcast:
     aku_nowcast: float        # estimert AKU-nivå
     model_uncertainty: float  # RMSE fra historisk kalibrering
 ```
+
+---
+
+## 9. Dashboard-arkitektur
+
+Implementeres i `dashboard-aksel/` (Fase 4).
+
+### 9.1 Teknisk stack
+
+- Next.js med statisk eksport (`output: 'export'` i `next.config.js`)
+- `@navikt/ds-react` og `@navikt/ds-css` (Aksel)
+- `@navikt/aksel-icons`
+- Recharts eller Plotly React for grafer
+- Deploy via GitHub Pages (`.github/workflows/deploy_dashboard.yml`)
+
+### 9.2 Dashboard-cache
+
+Modellresultatene lagres i en JSON-cache slik at dashboardet kan bygges statisk uten å kjøre Python i nettleseren:
+
+```
+data/cache/<YYYY-MM-DD>.json
+```
+
+Cache-format (toppnivå):
+
+```json
+{
+  "generated_at": "2026-04-30T12:00:00Z",
+  "anchor_vintage": "2026-03-26",
+  "series": {
+    "kpi": {
+      "latest_actual": 3.1,
+      "latest_date": "2025-12",
+      "news": 0.0,
+      "standardised_news": 0.1,
+      "anchor_forecast": [{"date": "2026-Q1", "value": 3.0}, ...]
+    },
+    "styringsrente": {
+      "shadow_path": [{"date": "2026-Q1", "anchor": 4.50, "shadow": 4.35, "upper": 4.85, "lower": 3.85}],
+      ...
+    }
+  }
+}
+```
+
+### 9.3 Sider og variabelkort
+
+| Side | URL | Innhold |
+|---|---|---|
+| Makropuls | `/` | Oversiktskort for alle nøkkelvariabler med news-indikator |
+| Rente | `/rente` | Skyggerentebane vs. anker, NOWA, statsobligasjoner |
+| Inflasjon | `/inflasjon` | KPI, KPI-JAE, komponentdekomposisjon |
+| Arbeidsmarked | `/arbeidsmarked` | AKU-ledighet, NAV, lonnsvekst |
+| Aktivitet | `/aktivitet` | BNP Fastlands-Norge, boligprisvekst, kredittvekst |
+| Internasjonal | `/internasjonal` | Oljepris, valutakurser, ECB, Fed, handelspartner-BNP |
+| Datakvalitet | `/datakvalitet` | Pipelinestatus, siste kjøring, manglende data |
+
+Variabelkort-komponent viser: siste faktiske verdi, news (avvik fra anker), standardisert news som fargekode (grønn/nøytral/rød), og en minimalistisk tidsserie.
+
+---
+
+## 10. Datakvalitet og overvåking
+
+### 10.1 Skjemavalidering
+
+Alle extractorer kaster `ValueError` ved:
+- Manglende obligatoriske kolonner (`date`, `value`)
+- Null-verdier i `date`-kolonnen
+- Antall rader under forventet minimum
+- Ukjente dimensjonskoder fra SSB (varsler om strukturendring)
+
+Feil skal aldri ties stille. Skjemavalidering feiler kontrollert, ikke stille.
+
+### 10.2 Kalibreringsnoteringer
+
+Kjente avvik fra spesifikasjonen som ikke er blokkere:
+
+| Serie | Problem | Status |
+|---|---|---|
+| ledighet_aku | Returnerer årsgjennomsnitt, ikke månedlig | Krever discovery av riktig filter |
+| lonnsvekst | Kun 2017–2025, ikke fra 1997 | Krever alternativt filter eller tabell |
+
+### 10.3 CI/CD-pipeline
+
+| Workflow | Trigger | Jobb |
+|---|---|---|
+| `tests.yml` | Push til `main`, `claude/**` | pytest, ruff |
+| `data_pipeline.yml` | Ukentlig (mandag 06:00 UTC), push til `main` | `fetch-data` |
+| `deploy_dashboard.yml` | Manuell (aktiveres i Fase 4) | Bygg og deploy Next.js |
+
+### 10.4 Teststrategi
+
+- Alle extractorer testes mot fixtures i `tests/fixtures/` — ikke mot nettverket.
+- Pipeline-transformasjoner testes på normalisert format.
+- Ankerbane-modulen testes i `tests/test_anchors.py`.
+- News-motoren testes i `tests/test_news.py`.
+- Kjør alltid `pytest` og `ruff check src/ tests/` før commit.
