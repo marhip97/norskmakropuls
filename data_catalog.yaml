@@ -379,8 +379,8 @@ sources:
     name: Importveid valutakursindeks (I-44)
     source: norges_bank
     source_type: sdmx_json
-    endpoint: https://data.norges-bank.no/api/data/
-    source_table: ukjent — krever discovery
+    endpoint: https://data.norges-bank.no/api/data/EXR/B.I44.NOK.SP
+    source_table: EXR
     frequency: daily
     unit: index
     seasonal_adjustment: not_sa
@@ -393,17 +393,19 @@ sources:
       min_date: 1999-01-01
       expected_frequency: daily_business
       max_missing_recent: 5
-    config_filters: {}
+    config_filters:
+      series: I44
     notes: |
-      DISCOVERY NØDVENDIG. Norges Banks importveide valutakursindeks (44 land).
-      Mulig dataflow: EXR eller TWI. Series key ukjent — kjør discovery før implementering.
+      Norges Banks importveide valutakursindeks (44 handelspartnere).
+      Series key B.I44.NOK.SP verifisert fra Norges Bank Data API.
+      Settes til A_PROD etter første grønne pipeline-kjøring.
 
   - series_id: nowa
     name: Norwegian Overnight Weighted Average (NOWA)
     source: norges_bank
     source_type: sdmx_json
-    endpoint: https://data.norges-bank.no/api/data/
-    source_table: ukjent — krever discovery
+    endpoint: https://data.norges-bank.no/api/data/SHORT_RATES/B.NOWA.ON.
+    source_table: SHORT_RATES
     frequency: daily
     unit: pct
     seasonal_adjustment: not_sa
@@ -416,17 +418,44 @@ sources:
       min_date: 2011-01-01
       expected_frequency: daily_business
       max_missing_recent: 5
-    config_filters: {}
+    config_filters:
+      series: NOWA
     notes: |
-      DISCOVERY NØDVENDIG. NOWA er Norges Banks pengemarkedsrente for
-      overnight-lån. Mulig dataflow: NOWA eller SHORT_RATES.
+      NOWA overnight weighted average rate. Series key B.NOWA.ON. (ON = overnight)
+      fra Norges Banks SHORT_RATES-dataflow. Verifisert fra API-URL.
+      Settes til A_PROD etter første grønne pipeline-kjøring.
 
   - series_id: gov_yield_2y_no
     name: Norsk statsobligasjonsrente, 2 år
     source: norges_bank
     source_type: sdmx_json
-    endpoint: https://data.norges-bank.no/api/data/
-    source_table: ukjent — krever discovery
+    endpoint: https://data.norges-bank.no/api/data/GOVT_GENERIC_RATES
+    source_table: GOVT_GENERIC_RATES
+    frequency: daily
+    unit: pct
+    seasonal_adjustment: not_sa
+    release_lag: samme dag
+    license: norges_bank_terms
+    status: D_EXCLUDE
+    required_for_mvp: false
+    transformations: []
+    validation:
+      min_date: 1990-01-01
+      expected_frequency: daily_business
+      max_missing_recent: 5
+    config_filters: {}
+    notes: |
+      2-årig tenor er IKKE tilgjengelig i Norges Banks GOVT_GENERIC_RATES.
+      Tilgjengelige tenorer: 3M, 12M, 3Y, 5Y, 10Y.
+      Erstattet av gov_yield_3y_no (3-årig) som nærmeste tilgjengelige tenor.
+      Vurder å bruke FRED DGS2 som alternativ for norsk 2Y om nødvendig.
+
+  - series_id: gov_yield_3y_no
+    name: Norsk statsobligasjonsrente, 3 år
+    source: norges_bank
+    source_type: sdmx_json
+    endpoint: https://data.norges-bank.no/api/data/GOVT_GENERIC_RATES/B.3Y.GBON.
+    source_table: GOVT_GENERIC_RATES
     frequency: daily
     unit: pct
     seasonal_adjustment: not_sa
@@ -439,17 +468,20 @@ sources:
       min_date: 1990-01-01
       expected_frequency: daily_business
       max_missing_recent: 5
-    config_filters: {}
+    config_filters:
+      series: GOV3Y
     notes: |
-      DISCOVERY NØDVENDIG. Norsk statsobligasjonsrente 2-årig løpetid.
-      Mulig dataflow: YIELDS eller GOVT_BONDS.
+      Norsk statsobligasjonsrente 3-årig løpetid (GBON = government bonds).
+      Erstatter planlagt gov_yield_2y_no — 2Y-tenor finnes ikke i GOVT_GENERIC_RATES.
+      Series key B.3Y.GBON. verifisert fra Norges Bank Data API.
+      Settes til A_PROD etter første grønne pipeline-kjøring.
 
   - series_id: gov_yield_10y_no
     name: Norsk statsobligasjonsrente, 10 år
     source: norges_bank
     source_type: sdmx_json
-    endpoint: https://data.norges-bank.no/api/data/
-    source_table: ukjent — krever discovery
+    endpoint: https://data.norges-bank.no/api/data/GOVT_GENERIC_RATES/B.10Y.GBON.
+    source_table: GOVT_GENERIC_RATES
     frequency: daily
     unit: pct
     seasonal_adjustment: not_sa
@@ -462,10 +494,12 @@ sources:
       min_date: 1990-01-01
       expected_frequency: daily_business
       max_missing_recent: 5
-    config_filters: {}
+    config_filters:
+      series: GOV10Y
     notes: |
-      DISCOVERY NØDVENDIG. Norsk statsobligasjonsrente 10-årig løpetid.
-      Mulig dataflow: YIELDS eller GOVT_BONDS.
+      Norsk statsobligasjonsrente 10-årig løpetid (GBON = government bonds).
+      Series key B.10Y.GBON. verifisert fra Norges Bank Data API.
+      Settes til A_PROD etter første grønne pipeline-kjøring.
 
   # ============================================================================
   # FRED — Fase 1 (implementert)
