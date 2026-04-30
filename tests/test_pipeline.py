@@ -54,7 +54,7 @@ def test_load_config_returnerer_alle_variabler():
     assert "kpi" in ids
     assert "styringsrente" in ids
     assert "oljepris" in ids
-    assert "registrert_ledige" in ids
+    assert "ledighet_aku" in ids
 
 
 def test_build_source_avviser_ukjent_klasse():
