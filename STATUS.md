@@ -12,7 +12,7 @@ Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne le
 
 Fase 0 er fullført 2026-04-30. Pipeline kjørte 12/12 variabler uten feil på GitHub Actions. Tester kjører grønt på CI (33/33). To kalibreringsnoteringer er dokumentert nedenfor, men blokkerer ikke Fase 1.
 
-Fase 1 mål: legge til de 9 manglende MVP-variablene (`usd_nok`, `i44`, `nowa`, statsrenter, US-renter, `us_cpi`) via discovery og implementering.
+Fase 1 pågår: 5 nye variabler implementert og verifisert (2026-04-30). 4 Norges Bank-variabler gjenstår og krever discovery (`i44`, `nowa`, `gov_yield_2y_no`, `gov_yield_10y_no`).
 
 ## Hva er på plass i repoet (verifisert)
 
@@ -60,31 +60,30 @@ Fase 1 mål: legge til de 9 manglende MVP-variablene (`usd_nok`, `i44`, `nowa`, 
 
 ## Hva er under arbeid
 
-Ingenting aktivt. Klar for Fase 1.
+Fase 1 — discovery for de 4 gjenstående Norges Bank-variablene.
 
-## Hva står for tur — Fase 1
+## Hva står for tur — Fase 1 (gjenstående)
 
-1. **Discovery for Norges Bank-variabler** (`usd_nok`, `i44`, `nowa`, `gov_yield_2y_no`, `gov_yield_10y_no`):
+1. **Discovery for 4 Norges Bank-variabler** — series keys ukjent, kan ikke gjettes:
+   - `i44` (importveid valutakursindeks, 44 land)
+   - `nowa` (Norwegian Overnight Weighted Average)
+   - `gov_yield_2y_no` (statsobligasjonsrente 2 år)
+   - `gov_yield_10y_no` (statsobligasjonsrente 10 år)
+
+   Trigger `discover_api.yml`-workflowen på GitHub Actions, eller kjør lokalt:
    ```
    python -m src.data.discover_api --source norges_bank
    ```
-   Finn riktige series keys via Norges Bank Data API-dokumentasjon.
 
-2. **Legg til FRED-variabler** — kan implementeres direkte med eksisterende klient:
-   - `us_10y_yield` (DGS10)
-   - `us_2y_yield` (DGS2)
-   - `fed_funds` (FEDFUNDS)
-   - `us_cpi` (CPIAUCSL)
+2. **Implementer de 4 variablene** i `norges_bank.py` (`_SERIES_MAP`) og legg til i `config/variables.yaml`.
 
-3. **Oppdater `data_catalog.yaml`** og `config/variables.yaml` med nye variabler.
+3. **Verifiser** via pipeline og sett `A_PROD` i `data_catalog.yaml`.
 
-4. **Verifiser alle nye variabler** via pipeline-kjøring og sett `A_PROD`.
-
-5. **Oppdater `docs/data_source_validation_report.md`** med kildestatus for alle variabler.
+4. Vurder om Fase 2 (ankerbane-infrastruktur) kan starte parallelt.
 
 ## Datakildestatus
 
-Første pipeline-kjøring gjennomført 2026-04-30 via GitHub Actions. Alle 12 variabler hentet uten feil.
+Pipeline kjørt to ganger: 2026-04-30 (Fase 0) og 2026-04-30 (Fase 1).
 
 | Variabel | Kilde | Status | Sist verifisert | Notat |
 |---|---|---|---|---|
@@ -95,11 +94,20 @@ Første pipeline-kjøring gjennomført 2026-04-30 via GitHub Actions. Alle 12 va
 | lonnsvekst | SSB 11417 | A_PROD | 2026-04-30 | 9 rader 2017–2025. Historikk fra 1997 krever nytt filter |
 | boligprisvekst | SSB 07230 | A_PROD | 2026-04-30 | 34 rader, 1992–2025 |
 | k2_kredittvekst | SSB 11599 | A_PROD | 2026-04-30 | 472 rader, 1986–2026 |
-| styringsrente | Norges Bank SIREN | A_PROD | 2026-04-30 | 176 rader, 2011–2026 |
+| styringsrente | Norges Bank SHORT_RATES | A_PROD | 2026-04-30 | 176 rader, 2011–2026 |
 | eurnok | Norges Bank EXR | A_PROD | 2026-04-30 | 6881 rader, 1999–2026 |
 | oljepris | FRED DCOILBRENTEU | A_PROD | 2026-04-30 | 10159 rader, 1987–2026, 280 nulls (normalt) |
 | ecb_rente | FRED ECBDFR | A_PROD | 2026-04-30 | 9982 rader, 1999–2026 |
 | handelspartnervekst | FRED CLVMNACSCAB1GQEA19 | A_PROD | 2026-04-30 | 125 rader, 1995–2026 |
+| **usd_nok** | Norges Bank EXR | **A_PROD** | 2026-04-30 | 9151 rader, 1990–2026 |
+| **us_10y_yield** | FRED DGS10 | **A_PROD** | 2026-04-30 | 16781 rader, 1962–2026, 716 nulls (normalt) |
+| **us_2y_yield** | FRED DGS2 | **A_PROD** | 2026-04-30 | 13021 rader, 1976–2026, 548 nulls (normalt) |
+| **fed_funds** | FRED FEDFUNDS | **A_PROD** | 2026-04-30 | 861 rader, 1954–2026 |
+| **us_cpi** | FRED CPIAUCSL | **A_PROD** | 2026-04-30 | 951 rader, 1947–2026 |
+| i44 | Norges Bank | B_TEST | — | Trenger discovery |
+| nowa | Norges Bank | B_TEST | — | Trenger discovery |
+| gov_yield_2y_no | Norges Bank | B_TEST | — | Trenger discovery |
+| gov_yield_10y_no | Norges Bank | B_TEST | — | Trenger discovery |
 
 ## Blokkeringer og åpne spørsmål
 
@@ -136,6 +144,7 @@ Følgende er ekskludert fra dagens repo og hentes senere:
 
 | Dato | Endring | Av |
 |---|---|---|
+| 2026-04-30 | Fase 1 (delvis): 5 nye variabler verifisert og A_PROD. 4 NB-variabler venter på discovery. | Claude Code |
 | 2026-04-30 | Fase 0 ferdig: 12/12 variabler verifisert, CI grønn, alle A_PROD i data_catalog.yaml. | Claude Code |
 | 2026-04-30 | STATUS.md korrigert: fjernet falske SMART-status-rester, lagt inn ærlig Fase 0-plan. | Plan-fase |
 | 2026-04-29 | Initial opprettelse av norskmakropuls-repo. Datalag og dokumenter fra zip lagt inn. | Plan-fase |

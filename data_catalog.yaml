@@ -352,7 +352,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: samme dag (etter kursfastsettelse)
     license: norges_bank_terms
-    status: B_TEST
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -365,6 +365,7 @@ sources:
       Spotkurs USD/NOK. Series key B.USD.NOK.SP følger samme mønster som
       EUR/NOK (B.EUR.NOK.SP) som er verifisert. Sett til A_PROD etter
       første grønne pipeline-kjøring.
+      Verifisert hentet: 2026-04-30. 9151 rader, 1990–2026, nulls=0.
 
   # ============================================================================
   # Norges Bank — Fase 1 (trenger discovery)
@@ -481,7 +482,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: 1 virkedag
     license: fred_public
-    status: B_TEST
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -503,7 +504,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: 1 virkedag
     license: fred_public
-    status: B_TEST
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -525,7 +526,7 @@ sources:
     seasonal_adjustment: not_sa
     release_lag: ca. 1 måned
     license: fred_public
-    status: B_TEST
+    status: A_PROD
     required_for_mvp: true
     transformations: []
     validation:
@@ -547,7 +548,7 @@ sources:
     seasonal_adjustment: sa
     release_lag: ca. 2 uker etter månedslutt
     license: fred_public
-    status: B_TEST
+    status: A_PROD
     required_for_mvp: true
     transformations:
       - type: yoy_pct
