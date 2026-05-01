@@ -11,7 +11,6 @@ const LENKER = [
   { href: '/arbeidsmarked', label: 'Arbeidsmarked' },
   { href: '/aktivitet', label: 'Aktivitet' },
   { href: '/internasjonal', label: 'Internasjonal' },
-  { href: '/datakvalitet', label: 'Datakvalitet' },
 ]
 
 const navLenkestil = (aktiv: boolean): React.CSSProperties => ({

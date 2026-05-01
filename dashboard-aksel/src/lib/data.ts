@@ -34,3 +34,9 @@ export function formaterDato(datoStr: string | null): string {
   const d = new Date(datoStr)
   return d.toLocaleDateString('nb-NO', { year: 'numeric', month: 'short' })
 }
+
+export function trendPil(news: number | null, standardisert: number | null): string {
+  if (news === null || standardisert === null || isNaN(news) || isNaN(standardisert)) return ''
+  if (Math.abs(standardisert) <= 0.5) return '→'
+  return news > 0 ? '↑' : '↓'
+}
