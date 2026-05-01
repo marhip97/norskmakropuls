@@ -1,24 +1,16 @@
-import { Heading, BodyShort, Alert } from '@navikt/ds-react'
-import { loadSituasjonsbilde } from '@/lib/data'
+import { Heading, BodyShort, Alert, ReadMore } from '@navikt/ds-react'
+import { loadSituasjonsbilde, formaterDelta, formaterDato } from '@/lib/data'
 import VariabelKort from '@/components/VariabelKort'
-import TidsserieGrafKlient from '@/components/TidsserieGrafKlient'
+import AnkerVsFaktiskMedVelger, { VINDU_PRESETS } from '@/components/AnkerVsFaktiskMedVelger'
+import InflasjonDekomposisjonGrafKlient from '@/components/InflasjonDekomposisjonGrafKlient'
 
 export default function InflasjonPage() {
   const data = loadSituasjonsbilde()
   const variabler = data?.variabler ?? {}
   const dekomp = data?.inflasjon_dekomposisjon ?? null
 
-  const kpiHistorikk = variabler['kpi']?.historikk ?? []
-  const kpiJaeHistorikk = variabler['kpi_jae']?.historikk ?? []
-
-  const grafData = kpiHistorikk.map((p) => {
-    const jaeMatch = kpiJaeHistorikk.find((j) => j.dato === p.dato)
-    return {
-      dato: p.dato.slice(0, 7),
-      KPI: p.verdi,
-      'KPI-JAE': jaeMatch?.verdi ?? null,
-    }
-  })
+  const kpi = variabler['kpi']
+  const kpiJae = variabler['kpi_jae']
 
   return (
     <>
@@ -32,20 +24,44 @@ export default function InflasjonPage() {
         ))}
       </div>
 
-      {grafData.length > 0 && (
+      {kpiJae && (
         <div className="seksjon">
           <Heading size="medium" level="2" className="seksjon-tittel">
-            KPI og KPI-JAE (% ar/ar)
+            KPI-JAE: faktisk vs ankerbane
           </Heading>
-          <TidsserieGrafKlient
-            data={grafData.slice(-36)}
-            xKey="dato"
-            linjer={[
-              { dataKey: 'KPI', farge: '#0067c5', navn: 'KPI' },
-              { dataKey: 'KPI-JAE', farge: '#e35c00', navn: 'KPI-JAE' },
-            ]}
-            yEtikett="% ar/ar"
-            hoyde={300}
+          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-3)' }}>
+            {kpiJae.anker_bane
+              ? `Anker: PPR ${formaterDato(kpiJae.anker_bane.publikasjon)}`
+              : 'Ankerbane mangler — viser kun faktisk observerte verdier.'}
+          </BodyShort>
+          <AnkerVsFaktiskMedVelger
+            historikk={kpiJae.historikk}
+            ankerBane={kpiJae.anker_bane}
+            enhet="% år/år"
+            navn="KPI-JAE"
+            vinduer={VINDU_PRESETS.monthly}
+            initielt="3 år"
+          />
+        </div>
+      )}
+
+      {kpi && (
+        <div className="seksjon">
+          <Heading size="medium" level="2" className="seksjon-tittel">
+            KPI: faktisk vs ankerbane
+          </Heading>
+          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-3)' }}>
+            {kpi.anker_bane
+              ? `Anker: PPR ${formaterDato(kpi.anker_bane.publikasjon)}`
+              : 'Ankerbane mangler — viser kun faktisk observerte verdier.'}
+          </BodyShort>
+          <AnkerVsFaktiskMedVelger
+            historikk={kpi.historikk}
+            ankerBane={kpi.anker_bane}
+            enhet="% år/år"
+            navn="KPI"
+            vinduer={VINDU_PRESETS.monthly}
+            initielt="3 år"
           />
         </div>
       )}
@@ -57,20 +73,34 @@ export default function InflasjonPage() {
         {dekomp ? (
           <>
             <BodyShort style={{ marginBottom: 'var(--a-spacing-3)' }}>
-              Total overraskelse: <strong>
+              Total overraskelse:{' '}
+              <strong>
                 {dekomp.total_surprise !== null
-                  ? `${dekomp.total_surprise >= 0 ? '+' : ''}${dekomp.total_surprise?.toFixed(2)} pp`
+                  ? `${formaterDelta(dekomp.total_surprise)} pp`
                   : '–'}
               </strong>
               {dekomp.dominant_driver !== 'kpi_jae' && (
-                <> · Hoveddrivar: <strong>{dekomp.dominant_driver}</strong></>
+                <> · Hoveddriver: <strong>{dekomp.dominant_driver}</strong></>
               )}
             </BodyShort>
+            <InflasjonDekomposisjonGrafKlient
+              bidrag={dekomp.bidrag_liste}
+              manglende={dekomp.manglende_komponenter}
+              totalSurprise={dekomp.total_surprise}
+            />
             {dekomp.manglende_komponenter.length > 0 && (
-              <Alert variant="info" size="small">
-                Komponenter ikke i pipeline ennå: {dekomp.manglende_komponenter.join(', ')}
+              <Alert variant="info" size="small" style={{ marginTop: 'var(--a-spacing-3)' }}>
+                Komponenter ikke i pipeline ennå: {dekomp.manglende_komponenter.join(', ')}.
+                Plassholdere er vist stiplet i diagrammet.
               </Alert>
             )}
+            <ReadMore header="Hva betyr dekomposisjonen?" size="small" defaultOpen={false}>
+              Hver komponent (tjenester, importerte varer, mat, husleie, energi) bidrar til total
+              KPI-JAE-overraskelse vektet med kurvandelen. Bidraget = (faktisk – anker) × kurvvekt.
+              Når en komponent mangler i pipelinen, vises den som plassholder slik at det er tydelig
+              hvilke deler av nedbrytingen som er utestaaende. Total overraskelse oppgis i
+              prosentpoeng (pp).
+            </ReadMore>
           </>
         ) : (
           <Alert variant="info">Dekomposisjon ikke tilgjengelig.</Alert>

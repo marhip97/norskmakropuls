@@ -1,13 +1,13 @@
-import { Heading } from '@navikt/ds-react'
-import { loadSituasjonsbilde } from '@/lib/data'
+import { Heading, BodyShort } from '@navikt/ds-react'
+import { loadSituasjonsbilde, formaterDato } from '@/lib/data'
 import VariabelKort from '@/components/VariabelKort'
-import TidsserieGrafKlient from '@/components/TidsserieGrafKlient'
+import AnkerVsFaktiskMedVelger, { VINDU_PRESETS } from '@/components/AnkerVsFaktiskMedVelger'
 
 export default function InternasjonalPage() {
   const data = loadSituasjonsbilde()
   const variabler = data?.variabler ?? {}
 
-  const oljeHistorikk = variabler['oljepris']?.historikk ?? []
+  const olje = variabler['oljepris']
 
   return (
     <>
@@ -23,21 +23,28 @@ export default function InternasjonalPage() {
           ))}
       </div>
 
-      {oljeHistorikk.length > 0 && (
+      {olje && (
         <div className="seksjon">
           <Heading size="medium" level="2" className="seksjon-tittel">
             Oljepris Brent (USD/fat)
           </Heading>
-          <TidsserieGrafKlient
-            data={oljeHistorikk.slice(-180).map((p) => ({
-              dato: p.dato.slice(0, 10),
-              Oljepris: p.verdi,
-            }))}
-            xKey="dato"
-            linjer={[{ dataKey: 'Oljepris', farge: '#e35c00', navn: 'Brent (USD/fat)' }]}
-            yEtikett="USD"
-            hoyde={280}
+          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-3)' }}>
+            Eksogen variabel — ankerbanen for oljepris er en teknisk forutsetning i Norges Banks PPR
+            og inngår ikke som egen ankerserie i dette dashbordet.
+          </BodyShort>
+          <AnkerVsFaktiskMedVelger
+            historikk={olje.historikk}
+            ankerBane={null}
+            enhet="USD/fat"
+            navn="Oljepris Brent"
+            vinduer={VINDU_PRESETS.daily}
+            initielt="1 år"
           />
+          {olje.anker_publikasjon && (
+            <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginTop: 'var(--a-spacing-2)' }}>
+              Sist sammenlignet mot anker fra {formaterDato(olje.anker_publikasjon)}.
+            </BodyShort>
+          )}
         </div>
       )}
     </>
