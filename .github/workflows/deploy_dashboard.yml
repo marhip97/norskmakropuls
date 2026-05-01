@@ -1,26 +1,23 @@
-name: Deploy dashboard to GitHub Pages
+name: Deploy dashboard til GitHub Pages
 
 on:
-  # Kun manuell trigger inntil Aksel-frontend er bygget i Fase 4.
-  # workflow_run og push-triggerene reaktiveres da.
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Data pipeline"]
+    types: [completed]
 
-# Grant GITHUB_TOKEN the permissions needed to deploy to Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Only one concurrent deployment; skip in-progress runs and let latest win
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
-    # Run on successful pipeline completion, or on direct push triggers
+  bygg-og-deploy:
     if: >
-      github.event_name == 'push' ||
       github.event_name == 'workflow_dispatch' ||
       github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
@@ -29,34 +26,41 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Prepare site directory
-        run: |
-          mkdir -p _site/data/forecasts
+      - name: Sett opp Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
 
-          # Copy dashboard front-end files
-          cp dashboard/index.html _site/index.html
-          cp dashboard/app.js     _site/app.js
-          cp dashboard/style.css  _site/style.css
+      - name: Installer Python-avhengigheter
+        run: pip install -r requirements.txt
 
-          # Copy forecast JSON files if they exist
-          if [ -d data/processed/forecasts ]; then
-            cp -r data/processed/forecasts/. _site/data/forecasts/
-            echo "Copied forecast data."
-          else
-            # Create a placeholder manifest so the dashboard shows a clear message
-            echo '{"run_date":"(ingen data ennå)","variables":[]}' \
-              > _site/data/forecasts/manifest.json
-            echo "No forecast data yet – placeholder manifest written."
-          fi
+      - name: Generer situasjonsbilde-JSON
+        run: python scripts/generate_cache.py
 
-      - name: Upload Pages artifact
+      - name: Sett opp Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: dashboard-aksel/package-lock.json
+
+      - name: Installer npm-avhengigheter
+        working-directory: dashboard-aksel
+        run: npm ci --legacy-peer-deps
+
+      - name: Bygg Next.js
+        working-directory: dashboard-aksel
+        run: npm run build
+
+      - name: Last opp Pages-artefakt
         uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: dashboard-aksel/out
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy til GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

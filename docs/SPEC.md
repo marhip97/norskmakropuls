@@ -1,0 +1,656 @@
+# Teknisk spesifikasjon: norskmakropuls
+
+Sist revidert: 2026-04-30
+
+Dette dokumentet er den fullstendige tekniske spesifikasjonen for norskmakropuls. Det utfyller `PROJECT_PLAN.md` med konkrete skjemadefinisjoner, API-parametre, modellspesifikasjoner og implementeringsregler. Alle seksjonsreferanser i `CLAUDE.md` peker hit.
+
+---
+
+## 1. Formål og avgrensning
+
+norskmakropuls produserer et automatisert, forklarbart situasjonsbilde av norsk økonomi. Kjernespørsmålet systemet besvarer:
+
+> Hvordan ser det norske makrobildet trolig ut i dag, gitt all ny informasjon publisert siden siste offisielle prognoserunde?
+
+Systemet bruker offisielle prognoser fra Norges Bank (Pengepolitisk rapport, PPR) og SSB (Konjunkturtendensene, KT) som ankere, og oppdaterer disse kontinuerlig med ny statistikk via en news-motor og revisjonsmodeller.
+
+**Utenfor scope for denne spesifikasjonen:**
+- Betalte datakilder (Consensus Economics, PMI, Nord Pool)
+- PDF-scraping som primærpipeline
+- Finansdepartementets prognoser som kritisk feed
+- SMART-modellene (ARIMA, VAR, BVAR, DFM, AR-X, ML-baseline) — hentes i Fase 5
+
+---
+
+## 2. Systemarkitektur
+
+```
+[Datakilder]
+    |
+    v
+[Pipeline: fetch -> validate -> store_raw -> (transform -> store_processed)]
+    |
+    v
+[data/raw/<series_id>/<YYYY-MM-DD>.parquet]     [data/anchors/<source>/<series_id>/<pub_date>.parquet]
+    |                                                           |
+    v                                                           v
+[News-motor: faktisk - forventet (src/news/)]
+    |
+    v
+[Revisjonsmodeller (src/models/)]
+  - Skyggerentebane  (shadow_rate.py)
+  - Komponentmodell  (inflation_components.py)
+  - NAV-til-AKU bro  (nav_to_aku.py)
+    |
+    v
+[Dashboard-cache: data/cache/<YYYY-MM-DD>.json]
+    |
+    v
+[Aksel/Next.js frontend: dashboard-aksel/]
+```
+
+Lagring:
+- Parquet for alle tidsserier (observasjoner og ankerprognoser)
+- JSON for dashboard-cache
+- YAML for datakatalog og ankerseed-filer
+
+---
+
+## 3. Datakilder — API-spørringer og endepunkter
+
+### 3.1 SSB Statistikkbanken (JSON-stat2)
+
+Basisklient: `src/data/ssb.py` (`SSBDataSource`)
+
+Endepunkt-mønster:
+```
+POST https://data.ssb.no/api/v0/no/table/{table_id}
+Content-Type: application/json
+
+{
+  "query": [
+    {"code": "<dimensjon>", "selection": {"filter": "item", "values": ["<kode>"]}},
+    ...
+    {"code": "Tid", "selection": {"filter": "all", "values": ["*"]}}
+  ],
+  "response": {"format": "json-stat2"}
+}
+```
+
+Aktive tabeller:
+
+| series_id | Tabell | Dimensjonsfiltre |
+|---|---|---|
+| bnp_fastland | 09190 | Makrost=bnpb.nr23_9fn, ContentsCode=Volum |
+| kpi | 03013 | Konsumgrp=TOTAL, ContentsCode=Tolvmanedersendring |
+| kpi_jae | 05327 | Konsumgrp=JAE_TOTAL, ContentsCode=Tolvmanedersendring |
+| ledighet_aku | 05111 | ArbStyrkStatus=2, Kjonn=0, Alder=15-74, ContentsCode=Prosent |
+| lonnsvekst | 11417 | NACE2007=A-S, ContentsCode=ArslonnEndring |
+| boligprisvekst | 07230 | Region=TOTAL, Boligtype=00, ContentsCode=BruktBlindex |
+| k2_kredittvekst | 11599 | Valuta=00, Lantaker2=Kred01, ContentsCode=AarsTrans2 |
+
+Feilhåndtering: valider dimensjonskoder ved hver kjøring via `src/data/discover_api.py`. Kast `ValueError` ved uventet skjema — aldri still.
+
+### 3.2 Norges Bank Data API (SDMX-JSON)
+
+Basisklient: `src/data/norges_bank.py` (`NorgesBankDataSource`)
+
+Endepunkt-mønster:
+```
+GET https://data.norges-bank.no/api/data/{dataflow}/{series_key}
+    ?format=sdmx-json&locale=no&startPeriod={YYYY-MM-DD}
+```
+
+Aktive serier:
+
+| series_id | Dataflow | Series key | Enhet |
+|---|---|---|---|
+| styringsrente | SHORT_RATES | (tom, alle serier) | pct |
+| eurnok | EXR | B.EUR.NOK.SP | nok_per_eur |
+| usd_nok | EXR | B.USD.NOK.SP | nok_per_usd |
+| i44 | EXR | B.I44.NOK.SP | index |
+| nowa | SHORT_RATES | B.NOWA.ON. | pct |
+| gov_yield_3y_no | GOVT_GENERIC_RATES | B.3Y.GBON. | pct |
+| gov_yield_10y_no | GOVT_GENERIC_RATES | B.10Y.GBON. | pct |
+
+Merknad `styringsrente`: klienten henter alle SHORT_RATES-serier og velger serien med flest gyldige observasjoner. Dette er sårbart ved strukturendring i Norges Banks API.
+
+Merknad `gov_yield_2y_no`: 2-årig tenor finnes ikke i GOVT_GENERIC_RATES. Variabelen er satt til `D_EXCLUDE`. Nærmeste proxy er `gov_yield_3y_no`.
+
+### 3.3 FRED (St. Louis Fed, CSV)
+
+Basisklient: `src/data/fred.py` (`FREDDataSource`)
+
+Endepunkt-mønster:
+```
+GET https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}
+```
+
+Ingen API-nøkkel kreves. Manglende observasjoner er markert med `.` i rådata — parseren konverterer til `NaN`.
+
+Aktive serier:
+
+| series_id | FRED-ID | Frekvens | Enhet |
+|---|---|---|---|
+| oljepris | DCOILBRENTEU | daily | usd |
+| ecb_rente | ECBDFR | daily | pct |
+| handelspartnervekst | CLVMNACSCAB1GQEA19 | quarterly | index |
+| us_10y_yield | DGS10 | daily | pct |
+| us_2y_yield | DGS2 | daily | pct |
+| fed_funds | FEDFUNDS | monthly | pct |
+| us_cpi | CPIAUCSL | monthly | index |
+
+---
+
+## 4. Datakatalog og klassifisering
+
+Den autoritative kildeoversikten er `data_catalog.yaml`. All kode som henter en serie skal lese tabell-ID-er, series keys og endepunkter fra denne katalogen — ikke hardkode dem i koden.
+
+Statusklassifisering:
+
+| Kode | Betydning |
+|---|---|
+| A_PROD | Stabilt, dokumentert API, brukes i produksjon |
+| B_TEST | Offentlig og maskinlesbart, krever ytterligere testing |
+| C_FALLBACK | Kan automatiseres, men med høy bruddrisiko |
+| D_EXCLUDE | Ikke egnet uten manuell behandling |
+
+Minimumsfelter per oppføring — se `CLAUDE.md` seksjon 5 for komplett schema.
+
+Kjøreregel: ny variabel går aldri rett til `A_PROD`. Discovery-steget (hent metadata, valider dimensjoner, lagre eksempel-respons under `tests/fixtures/`) er obligatorisk.
+
+---
+
+## 5. Datamodell
+
+### 5.1 Rådata (data/raw/)
+
+Rådata lagres uendret slik de kom fra kilden. Én Parquet-fil per serie per innhentingsdato:
+
+```
+data/raw/<series_id>/<YYYY-MM-DD>.parquet
+```
+
+Eksempel: `data/raw/kpi/2026-04-30.parquet`
+
+Rådata skal aldri modifiseres etter lagring. Pipeline kan hente samme serie flere ganger — eksisterende filer overskrives aldri (se `DataSource.store()` i `src/data/base.py`).
+
+### 5.2 Prosesserte data (data/processed/)
+
+Kuraterte tidsserier etter transformasjon (f.eks. YoY-vekst fra nivåindeks) lagres som Parquet under `data/processed/`. Dette laget er ikke fullt implementert i MVP — pipeline arbeider primært mot rådata.
+
+### 5.3 Normalisert observasjonsskjema
+
+Alle tidsserier normaliseres til dette skjemaet. Dette er minimumsstandarden for alle DataSource-implementasjoner:
+
+| Kolonne | Type | Obligatorisk | Beskrivelse |
+|---|---|---|---|
+| `date` | `pd.Timestamp` | ja | Observasjonsdatoen (periodens startdato for månedlig/kvartal) |
+| `value` | `float` | ja | Observert verdi i seriens native enhet |
+| `vintage_date` | `str` (YYYY-MM-DD) | ja | Datoen denne innhentingen ble gjort (filnavnet) |
+| `ingestion_time` | `pd.Timestamp` | anbefalt | UTC-tidsstempel for når vi hentet fra kilden |
+| `source` | `str` | anbefalt | Kildenavn (`SSB`, `norges_bank`, `FRED`) |
+| `series_id` | `str` | anbefalt | Serie-ID fra `data_catalog.yaml` |
+| `status` | `str` | anbefalt | `ok`, `missing`, `revised` |
+
+Minimumskolonner som `DataSource.fetch()` alltid må returnere: `date` og `value`.
+
+`date`-kolonnen skal alltid være `pd.Timestamp`. For månedlige serier brukes periodens første dag (f.eks. `2025-12-01` for desember 2025). For kvartalsvise serier brukes kvartalets første dag (`2025-10-01` for Q4 2025).
+
+### 5.4 Ankerdataskjema
+
+Ankerprognoser (offisielle baner fra Norges Bank eller SSB) lagres med dette skjemaet:
+
+```
+data/anchors/<source>/<series_id>/<publication_date>.parquet
+```
+
+Kolonner per Parquet-fil:
+
+| Kolonne | Type | Beskrivelse |
+|---|---|---|
+| `forecast_date` | `pd.Timestamp` | Datoen prognosen gjelder for |
+| `value` | `float` | Prognostisert verdi |
+| `publication_date` | `pd.Timestamp` | Når ankeret ble publisert |
+| `vintage_id` | `str` | Entydig ID: `<source>_<publication_date>` |
+| `source` | `str` | `norges_bank_mpr`, `ssb_kt`, eller `fin_npb` |
+| `series_id` | `str` | Serie-ID som matcher `data_catalog.yaml` |
+| `ingestion_time` | `pd.Timestamp` | Når vi lastet inn ankeret |
+
+Gyldige kildekoder for ankere: `norges_bank_mpr`, `ssb_kt`, `fin_npb`.
+
+---
+
+## 6. Vintage-håndtering
+
+Vintage-håndtering er obligatorisk for alle data i dette systemet — både observasjoner og ankerprognoser.
+
+### 6.1 Definisjon av vintage
+
+For observasjoner:
+- `observation_date`: datoen verdien gjelder for (når ble den målt / hvilken periode)
+- `publication_date`: når kilden publiserte den
+- `ingestion_time`: når vi hentet den (UTC)
+- `vintage_id`: entydig ID for innhentingsversjonen (`<series_id>_<YYYY-MM-DD>`)
+
+For ankerprognoser — de samme feltene, men semantikken er:
+- `forecast_date`: datoen prognosen gjelder for (fremtidig periode)
+- `publication_date`: når ankeret (MPR/KT) ble publisert — dette er vintagenøkkelen
+- `ingestion_time`: når vi lastet det inn i systemet
+- `vintage_id`: `<source>_<publication_date>`
+
+### 6.2 Invariant for ankervintager
+
+En MPR-bane fra mars og en fra juni er to forskjellige objekter — ikke en oppdatering av det samme. `AnchorStore.save()` skriver aldri over eksisterende filer. Eksisterende filer er immutable.
+
+News-motoren bruker alltid det ankeret som var siste offisielle ved observasjonstidspunktet. `AnchorStore.latest(series_id, on_date=obs_date)` realiserer dette.
+
+### 6.3 Filnavn som nøkkel
+
+Filnavnet er vintage-nøkkelen. Dette er enkelt og revisjonssikkert:
+```
+data/raw/kpi/2026-04-30.parquet          # observasjoner hentet 2026-04-30
+data/anchors/norges_bank_mpr/kpi/2026-03-26.parquet  # PPR 1/2026, publisert 26. mars
+```
+
+Filnavn skal alltid være ISO 8601-dato (`YYYY-MM-DD`). `AnchorStore` avviser filer som ikke kan parses som dato.
+
+---
+
+## 7. Ankerbane-infrastruktur
+
+Implementert i `src/anchors/__init__.py`.
+
+### 7.1 Dataklasse: Anchor
+
+```python
+@dataclass
+class Anchor:
+    source: str           # "norges_bank_mpr" | "ssb_kt" | "fin_npb"
+    publication_date: date
+    series_id: str
+    values: pd.Series     # indeks: pd.Timestamp (prognosedato), verdier: float
+    vintage_id: str       # auto: "<source>_<publication_date>"
+    ingestion_time: datetime
+```
+
+`Anchor.to_dataframe()` konverterer til flat DataFrame for Parquet-lagring. `Anchor.from_dataframe()` rekonstruerer fra lagret fil.
+
+### 7.2 Klasse: AnchorStore
+
+```python
+class AnchorStore:
+    def save(anchor: Anchor) -> Path          # lagrer; hopper over hvis filen finnes
+    def latest(series_id, on_date=None) -> Anchor | None  # siste bane per dato
+    def all_for_series(series_id) -> list[Anchor]         # alle vintager, sortert
+```
+
+`latest()` med `on_date` er det kritiske metodekallet for news-motoren: det gir det ankeret som faktisk var gjeldende da observasjonen ble publisert, ikke dagens siste.
+
+### 7.3 Ankerseed-format (manuell innlastning)
+
+Offisielle prognoser lastes manuelt inn via YAML-seed-filer under `data/anchors/seeds/`. Script: `scripts/load_anchor.py`.
+
+Seed-format:
+```yaml
+source: norges_bank_mpr
+publication_date: "2026-03-26"
+series:
+  styringsrente:
+    - {date: "2026-Q1", value: 4.50}
+    - {date: "2026-Q2", value: 4.25}
+    ...
+  kpi:
+    - {date: "2026-Q1", value: 3.1}
+    ...
+```
+
+Dato-format i seed: kvartalsnøkkel (`YYYY-QN`) konverteres til kvartalets første dag. Månedlig: `YYYY-MM`. Daglig: `YYYY-MM-DD`.
+
+### 7.4 Tilgjengelige ankervintager (per 2026-04-30)
+
+| Kilde | Publikasjonsdato | Serier | Periodedekning |
+|---|---|---|---|
+| norges_bank_mpr | 2025-12-19 | styringsrente, kpi, kpi_jae, produksjonsgap | til 2028-Q4 |
+| norges_bank_mpr | 2026-03-26 | styringsrente, kpi, kpi_jae, produksjonsgap | til 2029-Q4 |
+
+---
+
+## 8. Revisjonsmodeller
+
+### 8.1 News-motor
+
+Implementert i `src/news/__init__.py`.
+
+#### Definisjon
+
+```
+news_t = faktisk_t - forventet_t
+```
+
+`forventet_t` er ankerprognosens verdi for periode `t`, der ankeret er det siste offisielle publisert senest ved `t` (punkt-i-tid-korrekt).
+
+#### Dataklasse: News
+
+```python
+@dataclass
+class News:
+    series_id: str
+    observation_date: date
+    actual: float
+    expected: float
+    surprise: float                # actual - expected
+    standardised_surprise: float   # surprise / rolling_std(surprise, 36 perioder)
+    anchor_publication: date       # hvilken ankervintagedato ble brukt
+```
+
+#### Klasse: NewsEngine
+
+```python
+class NewsEngine:
+    def compute_news(series_id, since, as_of=None) -> list[News]
+    def latest_news(series_id) -> News | None
+    def news_dataframe(series_id, since) -> pd.DataFrame
+```
+
+`as_of`-parameteren er nøkkelen til punkt-i-tid-korrekthet. For historisk analyse: sett `as_of` til datoen du vil analysere fra. Standard er `date.today()`.
+
+#### Standardisering
+
+`standardised_surprise = surprise / rolling_std(diff(value), window=36, min_periods=6)`
+
+Standardiseringen bruker rullende standardavvik på 36 perioder av første-differansen til serien (ikke av selve serien). Dette gir dimensjonsløs størrelse der ±1 tilsvarer ett historisk standardavvik i månedlig variasjon.
+
+Produserer `NaN` der det er færre enn 6 perioder tilgjengelig for estimatet.
+
+#### Datomatching mellom observasjon og anker
+
+Ankerprognoser er kvartalsvise. Observasjoner er oftest månedlige. Matching-regel:
+1. Eksakt match på dato (etter normalisering til midnatt UTC).
+2. Nærmeste ankerpunkt innenfor 95 dager aksepteres.
+3. Observasjoner uten ankertreff hoppes over med advarsel i logg.
+
+#### Observert funn (2026-04-30)
+
+Første situasjonsbilde mot PPR 1/2026 (publisert 2026-03-26):
+- KPI: nær anker for siste tilgjengelige observasjon (des. 2025)
+- KPI-JAE: nær anker
+- USD/NOK: -0.36 NOK fra ankerbanen (NOK styrket seg)
+- EUR/NOK: -0.26 NOK fra ankerbanen
+
+### 8.2 Skyggerentebane
+
+Implementeres i `src/models/shadow_rate.py` (Fase 3).
+
+#### Formål
+
+Skyggerentebanen er en revidert prognose for norsk styringsrente. Den tar Norges Banks offisielle rentebane (ankeret) og justerer den basert på ny informasjon siden siste PPR.
+
+```
+r_shadow_t = r_anchor_t + delta_r_t
+```
+
+der `delta_r_t` er det modellerte revisjonsbehovet for periode `t`.
+
+#### Inngangsvariable
+
+| Variabel | series_id | Rolle |
+|---|---|---|
+| Ankerrente | styringsrente (anker) | Utgangspunkt for banen |
+| KPI-nyheter | news(kpi) | Inflasjonstrykk mot mål |
+| KPI-JAE-nyheter | news(kpi_jae) | Underliggende inflasjon |
+| AKU-ledighet | ledighet_aku | Arbeidsmarkedspress |
+| EUR/NOK | eurnok | Importert inflasjon / valutapåvirkning |
+| USD/NOK | usd_nok | Oljepriskobling og global risikoapetitt |
+| Oljepris | oljepris | Eksogen term of trade |
+| US 10Y | us_10y_yield | Global langrente, terminsatspåvirkning |
+| ECB-rente | ecb_rente | Eurosonens pengepolitikk |
+
+#### Modellspesifikasjon
+
+Revisjonen er en lineær kombinasjon av news-verdiene:
+
+```
+delta_r_t = beta_kpi * news(kpi)_t
+          + beta_kpi_jae * news(kpi_jae)_t
+          + beta_aku * news(ledighet_aku)_t
+          + beta_eurnok * delta_eurnok_t
+          + beta_oil * delta_oljepris_t
+          + epsilon_t
+```
+
+`delta_eurnok_t` og `delta_oljepris_t` er avvik fra ankerets antatte nivå for disse variablene (ikke news i streng forstand, siden Norges Bank ikke publiserer kvartalsvise baner for disse i maskinlesbar form).
+
+#### Parametrisering i MVP
+
+MVP bruker kalibrerte koeffisienter, ikke estimerte. Begrunnelse: korte tidsserier for news-variablene gir ustabile OLS-estimater. Koeffisientene kalibreres mot Norges Banks egne sensitivitetsanalyser i PPR (Vedlegg 3) og faglitteratur:
+
+| Parameter | Verdi (MVP) | Kilde for kalibrering |
+|---|---|---|
+| beta_kpi | 0.15 | PPR-sensitivitet: +1pp KPI -> +0.15pp rente |
+| beta_kpi_jae | 0.20 | Høyere vekt fordi underliggende inflasjon veier tyngre |
+| beta_aku | -0.10 | +1pp ledighet -> -0.10pp rente (lavere press) |
+| beta_eurnok | +0.05 | dev = current - anchor > 0 nar NOK svakner (EUR/NOK stiger); svakere NOK -> rente opp |
+| beta_oil | 0.002 | per USD/fat; +10 USD/fat -> +0.02pp rente |
+
+Koeffisientene skal alltid eksponeres i et konfigurasjonsdict (ikke hardkodes inne i metoder), slik at de enkelt kan justeres eller estimeres i Fase 6.
+
+#### Revisjonsbegrensning (dampingsfaktor)
+
+For å hindre at modellen drar rentebanen for langt fra ankeret ved store datautslag:
+
+```
+delta_r_t_capped = clip(delta_r_t, -max_revision, +max_revision)
+```
+
+Standardverdi for MVP: `max_revision = 0.50` prosentpoeng per kvartal.
+
+#### Usikkerhetsbånd
+
+Skyggerentebanen ledsages av symmetriske usikkerhetsbånd basert på historisk news-volatilitet:
+
+```
+band_t = z * rolling_std(news(kpi), 12 kvartaler)
+```
+
+Standard: `z = 1.0` (ett standardavvik, tilsvarer ca. 68% konfidensintervall).
+
+#### Output-format
+
+```python
+@dataclass
+class ShadowRatePath:
+    anchor_publication: date      # hvilken PPR-vintage som er ankeret
+    computed_at: date             # når skyggebanen ble beregnet
+    periods: list[date]           # kvartalsvise datoer
+    anchor_values: list[float]    # ankerbanen (uendret)
+    revision: list[float]         # delta_r per periode
+    shadow_values: list[float]    # anchor + revision (capped)
+    band_upper: list[float]
+    band_lower: list[float]
+```
+
+### 8.3 Komponentmodell for inflasjon
+
+Implementeres i `src/models/inflation_components.py` (Fase 3).
+
+#### Formål
+
+KPI-JAE dekomponeres i underkomponenter for å identifisere hva som driver inflasjonsavviket fra ankeret. Dette gjør situasjonsbildet forklarbart: "avviket skyldes primært tjenesteprisvekst, ikke importerte varer."
+
+#### Komponenter
+
+| Komponent | Vekt (SSB 2024-kurv) | series_id / kilde |
+|---|---|---|
+| Innenlandsk tjenester | ca. 37% | SSB 05327 (delgruppe) |
+| Importerte konsumvarer | ca. 21% | SSB 05327 (delgruppe) |
+| Mat og alkoholfrie drikkevarer | ca. 14% | SSB 05327 (delgruppe) |
+| Husleie | ca. 14% | SSB 05327 (delgruppe) |
+| Energi (elektrisitet, drivstoff) | ca. 14% | SSB 03013 (energikomponent) |
+
+Vektene er tilnærmede og oppdateres ved SSBs årlige revisjoner. De lagres ikke som magic numbers i koden, men leses fra `config/variables.yaml` eller `data_catalog.yaml`.
+
+#### Modelllogikk
+
+For hver komponent `k`:
+```
+news_k_t = faktisk_k_t - forventet_k_t
+```
+
+der `forventet_k_t` er ankerets KPI-JAE-bane skalert med komponentens relative vekt.
+
+Aggregert bidrag:
+```
+news(kpi_jae)_t ≈ sum_k(w_k * news_k_t)
+```
+
+I MVP er ikke alle delkomponenter tilgjengelig som separate ankerprognoser fra Norges Bank. Fallback: bare nyheter på total KPI-JAE rapporteres, komponentdekomposisjon vises som "under arbeid" på Datakvalitets-siden.
+
+#### Output-format
+
+```python
+@dataclass
+class InflationDecomposition:
+    reference_date: date
+    total_surprise: float
+    components: dict[str, float]   # {"tjenester": 0.3, "importert": -0.1, ...}
+    dominant_driver: str           # komponenten med størst absolutt bidrag
+```
+
+### 8.4 NAV-til-AKU bro
+
+Implementeres i `src/models/nav_to_aku.py` (Fase 3).
+
+#### Formål
+
+NAV publiserer registrert ledighet månedlig med kort forsinkelse (~2 dager). AKU-ledigheten (SSBs arbeidskraftundersøkelse) publiseres med ~30 dagers forsinkelse. Broen bruker NAVs raske tall til å nowcaste AKU-nivået, slik at nyheten mot ankerets AKU-bane kan beregnes uten å vente på SSB.
+
+#### Kilde
+
+NAV-data hentes via SSB tabell 05111 (`src/data/nav.py`). Se `data_catalog.yaml` — `registrert_ledige` legges til katalogen i Fase 3.
+
+#### Modellspesifikasjon
+
+Enkel lineær bro estimert over historiske data:
+
+```
+AKU_t_nowcast = alpha + beta * NAV_t + gamma * AKU_{t-1}
+```
+
+Alternativt, der sesongjustering er vanskelig: bruk av differansemetode:
+
+```
+delta_AKU_t_nowcast = beta * delta_NAV_t
+```
+
+MVP bruker differansemetoden — enklere og mer robust på korte serier.
+
+Parametrene estimeres på historiske data (`ledighet_aku` og `registrert_ledige`) med minst 24 måneder. Resultatet valideres mot faktisk AKU i test-settet.
+
+#### Output-format
+
+```python
+@dataclass
+class AKUNowcast:
+    reference_date: date
+    nav_value: float          # siste NAV-tall brukt
+    aku_nowcast: float        # estimert AKU-nivå
+    model_uncertainty: float  # RMSE fra historisk kalibrering
+```
+
+---
+
+## 9. Dashboard-arkitektur
+
+Implementeres i `dashboard-aksel/` (Fase 4).
+
+### 9.1 Teknisk stack
+
+- Next.js med statisk eksport (`output: 'export'` i `next.config.js`)
+- `@navikt/ds-react` og `@navikt/ds-css` (Aksel)
+- `@navikt/aksel-icons`
+- Recharts eller Plotly React for grafer
+- Deploy via GitHub Pages (`.github/workflows/deploy_dashboard.yml`)
+
+### 9.2 Dashboard-cache
+
+Modellresultatene lagres i en JSON-cache slik at dashboardet kan bygges statisk uten å kjøre Python i nettleseren:
+
+```
+data/cache/<YYYY-MM-DD>.json
+```
+
+Cache-format (toppnivå):
+
+```json
+{
+  "generated_at": "2026-04-30T12:00:00Z",
+  "anchor_vintage": "2026-03-26",
+  "series": {
+    "kpi": {
+      "latest_actual": 3.1,
+      "latest_date": "2025-12",
+      "news": 0.0,
+      "standardised_news": 0.1,
+      "anchor_forecast": [{"date": "2026-Q1", "value": 3.0}, ...]
+    },
+    "styringsrente": {
+      "shadow_path": [{"date": "2026-Q1", "anchor": 4.50, "shadow": 4.35, "upper": 4.85, "lower": 3.85}],
+      ...
+    }
+  }
+}
+```
+
+### 9.3 Sider og variabelkort
+
+| Side | URL | Innhold |
+|---|---|---|
+| Makropuls | `/` | Oversiktskort for alle nøkkelvariabler med news-indikator |
+| Rente | `/rente` | Skyggerentebane vs. anker, NOWA, statsobligasjoner |
+| Inflasjon | `/inflasjon` | KPI, KPI-JAE, komponentdekomposisjon |
+| Arbeidsmarked | `/arbeidsmarked` | AKU-ledighet, NAV, lonnsvekst |
+| Aktivitet | `/aktivitet` | BNP Fastlands-Norge, boligprisvekst, kredittvekst |
+| Internasjonal | `/internasjonal` | Oljepris, valutakurser, ECB, Fed, handelspartner-BNP |
+| Datakvalitet | `/datakvalitet` | Pipelinestatus, siste kjøring, manglende data |
+
+Variabelkort-komponent viser: siste faktiske verdi, news (avvik fra anker), standardisert news som fargekode (grønn/nøytral/rød), og en minimalistisk tidsserie.
+
+---
+
+## 10. Datakvalitet og overvåking
+
+### 10.1 Skjemavalidering
+
+Alle extractorer kaster `ValueError` ved:
+- Manglende obligatoriske kolonner (`date`, `value`)
+- Null-verdier i `date`-kolonnen
+- Antall rader under forventet minimum
+- Ukjente dimensjonskoder fra SSB (varsler om strukturendring)
+
+Feil skal aldri ties stille. Skjemavalidering feiler kontrollert, ikke stille.
+
+### 10.2 Kalibreringsnoteringer
+
+Kjente avvik fra spesifikasjonen som ikke er blokkere:
+
+| Serie | Problem | Status |
+|---|---|---|
+| ledighet_aku | Returnerer årsgjennomsnitt, ikke månedlig | Krever discovery av riktig filter |
+| lonnsvekst | Kun 2017–2025, ikke fra 1997 | Krever alternativt filter eller tabell |
+
+### 10.3 CI/CD-pipeline
+
+| Workflow | Trigger | Jobb |
+|---|---|---|
+| `tests.yml` | Push til `main`, `claude/**` | pytest, ruff |
+| `data_pipeline.yml` | Ukentlig (mandag 06:00 UTC), push til `main` | `fetch-data` |
+| `deploy_dashboard.yml` | Manuell (aktiveres i Fase 4) | Bygg og deploy Next.js |
+
+### 10.4 Teststrategi
+
+- Alle extractorer testes mot fixtures i `tests/fixtures/` — ikke mot nettverket.
+- Pipeline-transformasjoner testes på normalisert format.
+- Ankerbane-modulen testes i `tests/test_anchors.py`.
+- News-motoren testes i `tests/test_news.py`.
+- Kjør alltid `pytest` og `ruff check src/ tests/` før commit.

@@ -1,6 +1,6 @@
 # Status
 
-Sist oppdatert: 2026-04-30 (Fase 2 fullfort, news-analyse kjort)
+Sist oppdatert: 2026-04-30 (Fase 4 fullfort: Aksel-dashboard, statisk eksport, deploy til GitHub Pages)
 
 Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne leses på under ett minutt før hver arbeidsøkt og oppdateres etter hver økt der noe vesentlig endres.
 
@@ -8,7 +8,7 @@ Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne le
 
 ## Nåværende fase
 
-**Fase 2 fullfort — Fase 3 klar til oppstart.**
+**Fase 4 fullfort — Fase 5 (SMART-modeller) er neste steg.**
 
 Fase 0 og 1 fullfort 2026-04-30. Alle 21 variabler A_PROD.
 
@@ -41,7 +41,7 @@ lastet, news-motor kjort mot ekte data. Forste situasjonsbilde produsert:
 **CI/CD:**
 - [x] `tests.yml`: kjører ved push til `main` og `claude/**`
 - [x] `data_pipeline.yml`: kjører ukentlig og ved push til `main` (kun `fetch-data`-jobben)
-- [x] `deploy_dashboard.yml`: manuell trigger (reaktiveres i Fase 4)
+- [x] `deploy_dashboard.yml`: bygger og deployer til GitHub Pages (trigger: manuell eller etter data-pipeline)
 
 **Første pipeline-kjøring:**
 - [x] 12/12 variabler hentet 2026-04-30 via GitHub Actions
@@ -55,18 +55,39 @@ lastet, news-motor kjort mot ekte data. Forste situasjonsbilde produsert:
 
 ## Hva er IKKE gjort ennå
 
-- `src/anchors/`, `src/news/`, `src/models/`, `src/dashboard/`, `dashboard-aksel/` er tomme mapper med kun README som beskriver plan.
+- `registrert_ledige` (NAV) er ikke i pipeline — NAV-til-AKU-broen returnerer None inntil serien legges til data_catalog.yaml og pipeline.
+- KPI-JAE-delkomponenter (tjenester, importert, mat, husleie, energi) er ikke i pipeline — komponentmodellen degraderer grasiøst til total KPI-JAE.
 - `README.md` på topp-nivå er tom.
 - `docs/data-sources.md` er tom.
-- `docs/SPEC.md` finnes ikke i repoet.
-- 9 manglende MVP-variabler er ikke implementert (se Fase 1 nedenfor).
+- GitHub Pages ma aktiveres i repoinnstillingene (kilde: "GitHub Actions") for deploy-workflowen.
 - Modeller (ARIMA, VAR, BVAR, DFM, AR-X, ML-baseline) hentes i Fase 5.
 
 ## Hva er under arbeid
 
-Fase 2 — ankerbane-infrastruktur. Kodebase er på plass. Venter på første MPR-seed.
+Ingen aktiv utvikling. Neste: Fase 5 (SMART-modeller som kryssjekk mot ankerbanen).
 
-## Hva er på plass — Fase 2 (delvis)
+## Hva er på plass — Fase 4 (fullfort)
+
+- [x] `dashboard-aksel/`: Next.js 15, statisk eksport (`output: 'export'`), basePath `/norskmakropuls`
+- [x] Aksel designsystem (`@navikt/ds-react` v8.10.3): InternalHeader, Alert, Heading, BodyShort, Tag
+- [x] Recharts for tidsseriediagrammer (klient-side, `ssr: false` pga. react-is-avhengighet)
+- [x] 7 sider: Makropuls (oversikt), Rente, Inflasjon, Arbeidsmarked, Aktivitet, Internasjonal, Datakvalitet
+- [x] `scripts/generate_cache.py`: produserer `situasjonsbilde.json` fra pipeline-data og modeller
+- [x] `.github/workflows/deploy_dashboard.yml`: Python → Next.js build → GitHub Pages deploy
+- [x] `dashboard-aksel/public/data/situasjonsbilde.json`: 20 variabler, skyggerentebane, inflasjondekomposisjon
+- [x] `next build` verifisert lokalt: alle 7 ruter bygget uten feil
+
+**Merk:** GitHub Pages ma aktiveres manuelt i repoinnstillingene (kilde: "GitHub Actions") for at deploy-workflow skal virke.
+
+## Hva er på plass — Fase 3 (fullfort)
+
+- [x] `docs/SPEC.md`: full teknisk spesifikasjon (seksjon 1–10), inkl. seksjon 5.3 og 8.2
+- [x] `src/models/shadow_rate.py`: skyggerentebane, lineær revisjonsmodell per SPEC.md 8.2
+- [x] `src/models/inflation_components.py`: komponentmodell for KPI-JAE per SPEC.md 8.3
+- [x] `src/models/nav_to_aku.py`: NAV-til-AKU nowcast-bro per SPEC.md 8.4
+- [x] 71/71 tester grønne
+
+## Hva er på plass — Fase 2 (fullfort)
 
 - [x] `src/anchors/__init__.py`: `Anchor` + `AnchorStore` med vintage-lagring
 - [x] `src/news/__init__.py`: `NewsEngine` med `compute_news()`, `latest_news()`, `news_dataframe()`
@@ -80,8 +101,9 @@ Fase 2 — ankerbane-infrastruktur. Kodebase er på plass. Venter på første MP
 
 ## Hva gjenstår / apne sporsmal
 
-- SSB Konjunkturtendensene som anker (ssb_kt): apent sporsmal, anbefalt etter Fase 3
-- Fase 3 kan starte: skyggerentebane og komponentmodell for inflasjon
+- SSB Konjunkturtendensene som anker (ssb_kt): apent sporsmal, anbefalt i Fase 4
+- `registrert_ledige` (NAV): legges til data_catalog.yaml og pipeline i Fase 4 eller separat
+- KPI-JAE-delkomponenter (tjenester, importert osv.): ikke i pipeline ennå — komponentmodellen degraderer grasiøst til total KPI-JAE
 
 ## Datakildestatus
 
@@ -147,6 +169,8 @@ Følgende er ekskludert fra dagens repo og hentes senere:
 
 | Dato | Endring | Av |
 |---|---|---|
+| 2026-04-30 | Fase 4 fullfort: Aksel-dashboard (7 sider), GitHub Pages deploy-workflow, situasjonsbilde.json regenerert med riktig beta_eurnok. | Claude Code |
+| 2026-04-30 | Fase 3 fullfort: shadow_rate.py, inflation_components.py, nav_to_aku.py. 71 tester grønne. | Claude Code |
 | 2026-04-30 | Situasjonsbilde: KPI/KPI-JAE nær anker, NOK styrket seg -0.36/-0.26 siden PPR 1/26. | Claude Code |
 | 2026-04-30 | PPR-dato korrigert: PPR 1/2026 publisert 26. mars (ikke 27.). | Claude Code |
 | 2026-04-30 | Fase 2 fullfort: PPR 4/25 og PPR 1/26 lastet, news-motor verifisert mot KPI. | Claude Code |

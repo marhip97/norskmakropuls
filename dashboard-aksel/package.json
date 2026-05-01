@@ -1,0 +1,26 @@
+{
+  "name": "norskmakropuls-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@navikt/aksel-icons": "^8.10.3",
+    "@navikt/ds-css": "^8.10.3",
+    "@navikt/ds-react": "^8.10.3",
+    "next": "15.3.9",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-is": "^19.2.5",
+    "recharts": "^3.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.7.3"
+  }
+}
