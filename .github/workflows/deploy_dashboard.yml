@@ -55,6 +55,9 @@ jobs:
       - name: Bygg Next.js
         working-directory: dashboard-aksel
         run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Last opp Pages-artefakt
         uses: actions/upload-pages-artifact@v3
