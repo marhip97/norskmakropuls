@@ -1,5 +1,5 @@
 {
-  "generert": "2026-05-01T08:33:38.618561Z",
+  "generert": "2026-05-01T08:57:05.094598Z",
   "anker_vintage": "2026-03-26",
   "variabler": {
     "kpi": {
@@ -9,8 +9,260 @@
       "siste_dato": "2025-12-01T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": {
+        "publikasjon": "2026-03-26",
+        "bane": [
+          {
+            "periode": "2015-01-01",
+            "verdi": 1.97
+          },
+          {
+            "periode": "2015-04-01",
+            "verdi": 2.29
+          },
+          {
+            "periode": "2015-07-01",
+            "verdi": 1.87
+          },
+          {
+            "periode": "2015-10-01",
+            "verdi": 2.52
+          },
+          {
+            "periode": "2016-01-01",
+            "verdi": 3.2
+          },
+          {
+            "periode": "2016-04-01",
+            "verdi": 3.49
+          },
+          {
+            "periode": "2016-07-01",
+            "verdi": 3.95
+          },
+          {
+            "periode": "2016-10-01",
+            "verdi": 3.55
+          },
+          {
+            "periode": "2017-01-01",
+            "verdi": 2.64
+          },
+          {
+            "periode": "2017-04-01",
+            "verdi": 2.21
+          },
+          {
+            "periode": "2017-07-01",
+            "verdi": 1.48
+          },
+          {
+            "periode": "2017-10-01",
+            "verdi": 1.33
+          },
+          {
+            "periode": "2018-01-01",
+            "verdi": 2.02
+          },
+          {
+            "periode": "2018-04-01",
+            "verdi": 2.35
+          },
+          {
+            "periode": "2018-07-01",
+            "verdi": 3.19
+          },
+          {
+            "periode": "2018-10-01",
+            "verdi": 3.4
+          },
+          {
+            "periode": "2019-01-01",
+            "verdi": 2.95
+          },
+          {
+            "periode": "2019-04-01",
+            "verdi": 2.55
+          },
+          {
+            "periode": "2019-07-01",
+            "verdi": 1.6
+          },
+          {
+            "periode": "2019-10-01",
+            "verdi": 1.6
+          },
+          {
+            "periode": "2020-01-01",
+            "verdi": 1.21
+          },
+          {
+            "periode": "2020-04-01",
+            "verdi": 1.1
+          },
+          {
+            "periode": "2020-07-01",
+            "verdi": 1.54
+          },
+          {
+            "periode": "2020-10-01",
+            "verdi": 1.33
+          },
+          {
+            "periode": "2021-01-01",
+            "verdi": 2.91
+          },
+          {
+            "periode": "2021-04-01",
+            "verdi": 2.8
+          },
+          {
+            "periode": "2021-07-01",
+            "verdi": 3.5
+          },
+          {
+            "periode": "2021-10-01",
+            "verdi": 4.63
+          },
+          {
+            "periode": "2022-01-01",
+            "verdi": 3.91
+          },
+          {
+            "periode": "2022-04-01",
+            "verdi": 5.78
+          },
+          {
+            "periode": "2022-07-01",
+            "verdi": 6.72
+          },
+          {
+            "periode": "2022-10-01",
+            "verdi": 6.66
+          },
+          {
+            "periode": "2023-01-01",
+            "verdi": 6.64
+          },
+          {
+            "periode": "2023-04-01",
+            "verdi": 6.35
+          },
+          {
+            "periode": "2023-07-01",
+            "verdi": 4.6
+          },
+          {
+            "periode": "2023-10-01",
+            "verdi": 4.52
+          },
+          {
+            "periode": "2024-01-01",
+            "verdi": 4.39
+          },
+          {
+            "periode": "2024-04-01",
+            "verdi": 3.03
+          },
+          {
+            "periode": "2024-07-01",
+            "verdi": 2.87
+          },
+          {
+            "periode": "2024-10-01",
+            "verdi": 2.49
+          },
+          {
+            "periode": "2025-01-01",
+            "verdi": 2.74
+          },
+          {
+            "periode": "2025-04-01",
+            "verdi": 2.84
+          },
+          {
+            "periode": "2025-07-01",
+            "verdi": 3.45
+          },
+          {
+            "periode": "2025-10-01",
+            "verdi": 3.11
+          },
+          {
+            "periode": "2026-01-01",
+            "verdi": 3.25
+          },
+          {
+            "periode": "2026-04-01",
+            "verdi": 3.54
+          },
+          {
+            "periode": "2026-07-01",
+            "verdi": 3.5
+          },
+          {
+            "periode": "2026-10-01",
+            "verdi": 3.45
+          },
+          {
+            "periode": "2027-01-01",
+            "verdi": 2.67
+          },
+          {
+            "periode": "2027-04-01",
+            "verdi": 2.26
+          },
+          {
+            "periode": "2027-07-01",
+            "verdi": 2.13
+          },
+          {
+            "periode": "2027-10-01",
+            "verdi": 2.25
+          },
+          {
+            "periode": "2028-01-01",
+            "verdi": 2.29
+          },
+          {
+            "periode": "2028-04-01",
+            "verdi": 2.19
+          },
+          {
+            "periode": "2028-07-01",
+            "verdi": 2.12
+          },
+          {
+            "periode": "2028-10-01",
+            "verdi": 2.07
+          },
+          {
+            "periode": "2029-01-01",
+            "verdi": 2.1
+          },
+          {
+            "periode": "2029-04-01",
+            "verdi": 2.08
+          },
+          {
+            "periode": "2029-07-01",
+            "verdi": 2.05
+          },
+          {
+            "periode": "2029-10-01",
+            "verdi": 2.04
+          }
+        ]
+      },
       "enhet": "% ar/ar",
       "gruppe": "inflasjon",
+      "frekvens": "monthly",
+      "kilde": "SSB",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 564,
       "historikk": [
         {
           "dato": "2016-01-01T00:00:00",
@@ -501,8 +753,260 @@
       "siste_dato": "2025-12-01T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": {
+        "publikasjon": "2026-03-26",
+        "bane": [
+          {
+            "periode": "2015-01-01",
+            "verdi": 2.36
+          },
+          {
+            "periode": "2015-04-01",
+            "verdi": 2.62
+          },
+          {
+            "periode": "2015-07-01",
+            "verdi": 2.75
+          },
+          {
+            "periode": "2015-10-01",
+            "verdi": 3.05
+          },
+          {
+            "periode": "2016-01-01",
+            "verdi": 3.25
+          },
+          {
+            "periode": "2016-04-01",
+            "verdi": 3.23
+          },
+          {
+            "periode": "2016-07-01",
+            "verdi": 3.3
+          },
+          {
+            "periode": "2016-10-01",
+            "verdi": 2.74
+          },
+          {
+            "periode": "2017-01-01",
+            "verdi": 1.88
+          },
+          {
+            "periode": "2017-04-01",
+            "verdi": 1.61
+          },
+          {
+            "periode": "2017-07-01",
+            "verdi": 1.04
+          },
+          {
+            "periode": "2017-10-01",
+            "verdi": 1.08
+          },
+          {
+            "periode": "2018-01-01",
+            "verdi": 1.12
+          },
+          {
+            "periode": "2018-04-01",
+            "verdi": 1.24
+          },
+          {
+            "periode": "2018-07-01",
+            "verdi": 1.67
+          },
+          {
+            "periode": "2018-10-01",
+            "verdi": 2.0
+          },
+          {
+            "periode": "2019-01-01",
+            "verdi": 2.51
+          },
+          {
+            "periode": "2019-04-01",
+            "verdi": 2.37
+          },
+          {
+            "periode": "2019-07-01",
+            "verdi": 2.1
+          },
+          {
+            "periode": "2019-10-01",
+            "verdi": 2.04
+          },
+          {
+            "periode": "2020-01-01",
+            "verdi": 2.45
+          },
+          {
+            "periode": "2020-04-01",
+            "verdi": 3.01
+          },
+          {
+            "periode": "2020-07-01",
+            "verdi": 3.5
+          },
+          {
+            "periode": "2020-10-01",
+            "verdi": 3.11
+          },
+          {
+            "periode": "2021-01-01",
+            "verdi": 2.67
+          },
+          {
+            "periode": "2021-04-01",
+            "verdi": 1.56
+          },
+          {
+            "periode": "2021-07-01",
+            "verdi": 1.07
+          },
+          {
+            "periode": "2021-10-01",
+            "verdi": 1.35
+          },
+          {
+            "periode": "2022-01-01",
+            "verdi": 1.85
+          },
+          {
+            "periode": "2022-04-01",
+            "verdi": 3.27
+          },
+          {
+            "periode": "2022-07-01",
+            "verdi": 4.84
+          },
+          {
+            "periode": "2022-10-01",
+            "verdi": 5.79
+          },
+          {
+            "periode": "2023-01-01",
+            "verdi": 6.23
+          },
+          {
+            "periode": "2023-04-01",
+            "verdi": 6.68
+          },
+          {
+            "periode": "2023-07-01",
+            "verdi": 6.11
+          },
+          {
+            "periode": "2023-10-01",
+            "verdi": 5.77
+          },
+          {
+            "periode": "2024-01-01",
+            "verdi": 4.88
+          },
+          {
+            "periode": "2024-04-01",
+            "verdi": 3.9
+          },
+          {
+            "periode": "2024-07-01",
+            "verdi": 3.18
+          },
+          {
+            "periode": "2024-10-01",
+            "verdi": 2.76
+          },
+          {
+            "periode": "2025-01-01",
+            "verdi": 3.2
+          },
+          {
+            "periode": "2025-04-01",
+            "verdi": 2.96
+          },
+          {
+            "periode": "2025-07-01",
+            "verdi": 3.08
+          },
+          {
+            "periode": "2025-10-01",
+            "verdi": 3.16
+          },
+          {
+            "periode": "2026-01-01",
+            "verdi": 3.04
+          },
+          {
+            "periode": "2026-04-01",
+            "verdi": 3.28
+          },
+          {
+            "periode": "2026-07-01",
+            "verdi": 3.36
+          },
+          {
+            "periode": "2026-10-01",
+            "verdi": 3.33
+          },
+          {
+            "periode": "2027-01-01",
+            "verdi": 3.05
+          },
+          {
+            "periode": "2027-04-01",
+            "verdi": 2.87
+          },
+          {
+            "periode": "2027-07-01",
+            "verdi": 2.68
+          },
+          {
+            "periode": "2027-10-01",
+            "verdi": 2.5
+          },
+          {
+            "periode": "2028-01-01",
+            "verdi": 2.36
+          },
+          {
+            "periode": "2028-04-01",
+            "verdi": 2.26
+          },
+          {
+            "periode": "2028-07-01",
+            "verdi": 2.19
+          },
+          {
+            "periode": "2028-10-01",
+            "verdi": 2.14
+          },
+          {
+            "periode": "2029-01-01",
+            "verdi": 2.1
+          },
+          {
+            "periode": "2029-04-01",
+            "verdi": 2.07
+          },
+          {
+            "periode": "2029-07-01",
+            "verdi": 2.05
+          },
+          {
+            "periode": "2029-10-01",
+            "verdi": 2.03
+          }
+        ]
+      },
       "enhet": "% ar/ar",
       "gruppe": "inflasjon",
+      "frekvens": "monthly",
+      "kilde": "SSB",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 265,
       "historikk": [
         {
           "dato": "2016-01-01T00:00:00",
@@ -993,8 +1497,260 @@
       "siste_dato": "2026-04-01T00:00:00",
       "news": -0.07,
       "standardisert_news": null,
+      "forventet": 4.07,
+      "anker_publikasjon": "2026-03-26",
+      "anker_bane": {
+        "publikasjon": "2026-03-26",
+        "bane": [
+          {
+            "periode": "2015-01-01",
+            "verdi": 1.25
+          },
+          {
+            "periode": "2015-04-01",
+            "verdi": 1.22
+          },
+          {
+            "periode": "2015-07-01",
+            "verdi": 0.98
+          },
+          {
+            "periode": "2015-10-01",
+            "verdi": 0.75
+          },
+          {
+            "periode": "2016-01-01",
+            "verdi": 0.71
+          },
+          {
+            "periode": "2016-04-01",
+            "verdi": 0.5
+          },
+          {
+            "periode": "2016-07-01",
+            "verdi": 0.5
+          },
+          {
+            "periode": "2016-10-01",
+            "verdi": 0.5
+          },
+          {
+            "periode": "2017-01-01",
+            "verdi": 0.5
+          },
+          {
+            "periode": "2017-04-01",
+            "verdi": 0.5
+          },
+          {
+            "periode": "2017-07-01",
+            "verdi": 0.5
+          },
+          {
+            "periode": "2017-10-01",
+            "verdi": 0.5
+          },
+          {
+            "periode": "2018-01-01",
+            "verdi": 0.5
+          },
+          {
+            "periode": "2018-04-01",
+            "verdi": 0.5
+          },
+          {
+            "periode": "2018-07-01",
+            "verdi": 0.53
+          },
+          {
+            "periode": "2018-10-01",
+            "verdi": 0.75
+          },
+          {
+            "periode": "2019-01-01",
+            "verdi": 0.78
+          },
+          {
+            "periode": "2019-04-01",
+            "verdi": 1.03
+          },
+          {
+            "periode": "2019-07-01",
+            "verdi": 1.28
+          },
+          {
+            "periode": "2019-10-01",
+            "verdi": 1.5
+          },
+          {
+            "periode": "2020-01-01",
+            "verdi": 1.34
+          },
+          {
+            "periode": "2020-04-01",
+            "verdi": 0.1
+          },
+          {
+            "periode": "2020-07-01",
+            "verdi": 0.0
+          },
+          {
+            "periode": "2020-10-01",
+            "verdi": 0.0
+          },
+          {
+            "periode": "2021-01-01",
+            "verdi": 0.0
+          },
+          {
+            "periode": "2021-04-01",
+            "verdi": 0.0
+          },
+          {
+            "periode": "2021-07-01",
+            "verdi": 0.02
+          },
+          {
+            "periode": "2021-10-01",
+            "verdi": 0.29
+          },
+          {
+            "periode": "2022-01-01",
+            "verdi": 0.52
+          },
+          {
+            "periode": "2022-04-01",
+            "verdi": 0.79
+          },
+          {
+            "periode": "2022-07-01",
+            "verdi": 1.53
+          },
+          {
+            "periode": "2022-10-01",
+            "verdi": 2.45
+          },
+          {
+            "periode": "2023-01-01",
+            "verdi": 2.77
+          },
+          {
+            "periode": "2023-04-01",
+            "verdi": 3.2
+          },
+          {
+            "periode": "2023-07-01",
+            "verdi": 3.89
+          },
+          {
+            "periode": "2023-10-01",
+            "verdi": 4.3
+          },
+          {
+            "periode": "2024-01-01",
+            "verdi": 4.5
+          },
+          {
+            "periode": "2024-04-01",
+            "verdi": 4.5
+          },
+          {
+            "periode": "2024-07-01",
+            "verdi": 4.5
+          },
+          {
+            "periode": "2024-10-01",
+            "verdi": 4.5
+          },
+          {
+            "periode": "2025-01-01",
+            "verdi": 4.5
+          },
+          {
+            "periode": "2025-04-01",
+            "verdi": 4.47
+          },
+          {
+            "periode": "2025-07-01",
+            "verdi": 4.22
+          },
+          {
+            "periode": "2025-10-01",
+            "verdi": 4.0
+          },
+          {
+            "periode": "2026-01-01",
+            "verdi": 4.0
+          },
+          {
+            "periode": "2026-04-01",
+            "verdi": 4.07
+          },
+          {
+            "periode": "2026-07-01",
+            "verdi": 4.26
+          },
+          {
+            "periode": "2026-10-01",
+            "verdi": 4.35
+          },
+          {
+            "periode": "2027-01-01",
+            "verdi": 4.3
+          },
+          {
+            "periode": "2027-04-01",
+            "verdi": 4.26
+          },
+          {
+            "periode": "2027-07-01",
+            "verdi": 4.12
+          },
+          {
+            "periode": "2027-10-01",
+            "verdi": 3.98
+          },
+          {
+            "periode": "2028-01-01",
+            "verdi": 3.83
+          },
+          {
+            "periode": "2028-04-01",
+            "verdi": 3.69
+          },
+          {
+            "periode": "2028-07-01",
+            "verdi": 3.6
+          },
+          {
+            "periode": "2028-10-01",
+            "verdi": 3.54
+          },
+          {
+            "periode": "2029-01-01",
+            "verdi": 3.49
+          },
+          {
+            "periode": "2029-04-01",
+            "verdi": 3.45
+          },
+          {
+            "periode": "2029-07-01",
+            "verdi": 3.42
+          },
+          {
+            "periode": "2029-10-01",
+            "verdi": 3.4
+          }
+        ]
+      },
       "enhet": "%",
       "gruppe": "rente",
+      "frekvens": "monthly",
+      "kilde": "Norges Bank",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 176,
       "historikk": [
         {
           "dato": "2016-05-01T00:00:00",
@@ -1485,8 +2241,16 @@
       "siste_dato": "2026-04-29T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "%",
       "gruppe": "rente",
+      "frekvens": "daily",
+      "kilde": "Norges Bank",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 3667,
       "historikk": [
         {
           "dato": "2015-12-29T00:00:00",
@@ -11897,8 +12661,16 @@
       "siste_dato": "2026-04-30T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "NOK",
       "gruppe": "rente",
+      "frekvens": "daily",
+      "kilde": "Norges Bank",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 6882,
       "historikk": [
         {
           "dato": "2015-12-30T00:00:00",
@@ -22309,8 +23081,16 @@
       "siste_dato": "2026-04-30T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "NOK",
       "gruppe": "rente",
+      "frekvens": "daily",
+      "kilde": "Norges Bank",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 9152,
       "historikk": [
         {
           "dato": "2015-12-30T00:00:00",
@@ -32721,8 +33501,16 @@
       "siste_dato": "2026-04-29T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "%",
       "gruppe": "rente",
+      "frekvens": "daily",
+      "kilde": "Norges Bank",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 1836,
       "historikk": [
         {
           "dato": "2019-01-02T00:00:00",
@@ -40077,8 +40865,16 @@
       "siste_dato": "2026-04-29T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "%",
       "gruppe": "rente",
+      "frekvens": "daily",
+      "kilde": "Norges Bank",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 1836,
       "historikk": [
         {
           "dato": "2019-01-02T00:00:00",
@@ -47433,8 +48229,16 @@
       "siste_dato": "2026-04-30T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "indeks",
       "gruppe": "rente",
+      "frekvens": "daily",
+      "kilde": "Norges Bank",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 9265,
       "historikk": [
         {
           "dato": "2015-12-30T00:00:00",
@@ -57845,8 +58649,16 @@
       "siste_dato": "2025-10-01T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "% ar/ar",
       "gruppe": "aktivitet",
+      "frekvens": "quarterly",
+      "kilde": "SSB",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 188,
       "historikk": [
         {
           "dato": "2016-01-01T00:00:00",
@@ -58017,8 +58829,16 @@
       "siste_dato": "2025-01-01T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "indeks",
       "gruppe": "aktivitet",
+      "frekvens": "quarterly",
+      "kilde": "SSB",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 34,
       "historikk": [
         {
           "dato": "2015-01-01T00:00:00",
@@ -58073,8 +58893,16 @@
       "siste_dato": "2026-03-01T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "% ar/ar",
       "gruppe": "aktivitet",
+      "frekvens": "monthly",
+      "kilde": "SSB",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 472,
       "historikk": [
         {
           "dato": "2016-04-01T00:00:00",
@@ -58565,8 +59393,16 @@
       "siste_dato": "2025-01-01T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "%",
       "gruppe": "arbeidsmarked",
+      "frekvens": "monthly",
+      "kilde": "SSB",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 54,
       "historikk": [
         {
           "dato": "2015-01-01T00:00:00",
@@ -58621,8 +59457,16 @@
       "siste_dato": "2025-01-01T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "% ar/ar",
       "gruppe": "arbeidsmarked",
+      "frekvens": "annual",
+      "kilde": "SSB",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 9,
       "historikk": [
         {
           "dato": "2017-01-01T00:00:00",
@@ -58669,8 +59513,16 @@
       "siste_dato": "2026-04-27T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "USD",
       "gruppe": "internasjonal",
+      "frekvens": "daily",
+      "kilde": "FRED",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 9879,
       "historikk": [
         {
           "dato": "2016-01-28T00:00:00",
@@ -69081,8 +69933,16 @@
       "siste_dato": "2026-04-30T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "%",
       "gruppe": "internasjonal",
+      "frekvens": "daily",
+      "kilde": "FRED",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 9982,
       "historikk": [
         {
           "dato": "2019-03-19T00:00:00",
@@ -79493,8 +80353,16 @@
       "siste_dato": "2026-03-01T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "%",
       "gruppe": "internasjonal",
+      "frekvens": "monthly",
+      "kilde": "FRED",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 861,
       "historikk": [
         {
           "dato": "2016-04-01T00:00:00",
@@ -79985,8 +80853,16 @@
       "siste_dato": "2026-01-01T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "indeks",
       "gruppe": "internasjonal",
+      "frekvens": "quarterly",
+      "kilde": "FRED",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 125,
       "historikk": [
         {
           "dato": "2016-04-01T00:00:00",
@@ -80157,8 +81033,16 @@
       "siste_dato": "2026-04-29T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "%",
       "gruppe": "internasjonal",
+      "frekvens": "daily",
+      "kilde": "FRED",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 16066,
       "historikk": [
         {
           "dato": "2015-12-04T00:00:00",
@@ -90569,8 +91453,16 @@
       "siste_dato": "2026-03-01T00:00:00",
       "news": null,
       "standardisert_news": null,
+      "forventet": null,
+      "anker_publikasjon": null,
+      "anker_bane": null,
       "enhet": "indeks",
       "gruppe": "internasjonal",
+      "frekvens": "monthly",
+      "kilde": "FRED",
+      "status": "A_PROD",
+      "sist_verifisert": "2026-04-30",
+      "antall_rader": 950,
       "historikk": [
         {
           "dato": "2016-03-01T00:00:00",
@@ -91483,6 +92375,7 @@
   "inflasjon_dekomposisjon": {
     "total_surprise": null,
     "komponenter": {},
+    "bidrag_liste": [],
     "dominant_driver": "kpi_jae",
     "manglende_komponenter": [
       "tjenester",
@@ -91490,11 +92383,13 @@
       "mat",
       "husleie",
       "energi"
-    ]
+    ],
+    "anker_publikasjon": null
   },
   "pipeline_status": {
     "siste_kjoring": "2026-05-01",
     "variabler_hentet": 20,
-    "variabler_feil": 0
+    "variabler_feil": 0,
+    "katalog_oppdatert": "2026-04-30"
   }
 }

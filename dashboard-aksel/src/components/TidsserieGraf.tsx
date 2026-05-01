@@ -36,15 +36,18 @@ export default function TidsserieGraf({
   yEtikett,
   hoyde = 300,
 }: Props) {
+  const ariaLabel = `Tidsseriegraf med ${linjer.length} serier`
+
   if (!data || data.length === 0) {
     return (
-      <div style={{ height: hoyde, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--a-bg-subtle)', borderRadius: 'var(--a-border-radius-medium)' }}>
+      <div role="img" aria-label="Ingen data tilgjengelig" style={{ height: hoyde, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--a-bg-subtle)', borderRadius: 'var(--a-border-radius-medium)' }}>
         <span style={{ color: 'var(--a-text-subtle)' }}>Ingen data</span>
       </div>
     )
   }
 
   return (
+    <div role="img" aria-label={ariaLabel}>
     <ResponsiveContainer width="100%" height={hoyde}>
       <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--a-border-subtle)" />
@@ -81,5 +84,6 @@ export default function TidsserieGraf({
         ))}
       </LineChart>
     </ResponsiveContainer>
+    </div>
   )
 }

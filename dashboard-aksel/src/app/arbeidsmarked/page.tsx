@@ -1,13 +1,13 @@
-import { Heading } from '@navikt/ds-react'
-import { loadSituasjonsbilde } from '@/lib/data'
+import { Heading, BodyShort } from '@navikt/ds-react'
+import { loadSituasjonsbilde, formaterDato } from '@/lib/data'
 import VariabelKort from '@/components/VariabelKort'
-import TidsserieGrafKlient from '@/components/TidsserieGrafKlient'
+import AnkerVsFaktiskMedVelger, { VINDU_PRESETS } from '@/components/AnkerVsFaktiskMedVelger'
 
 export default function ArbeidsmarkedPage() {
   const data = loadSituasjonsbilde()
   const variabler = data?.variabler ?? {}
 
-  const akuHistorikk = variabler['ledighet_aku']?.historikk ?? []
+  const aku = variabler['ledighet_aku']
 
   return (
     <>
@@ -21,20 +21,23 @@ export default function ArbeidsmarkedPage() {
         ))}
       </div>
 
-      {akuHistorikk.length > 0 && (
+      {aku && (
         <div className="seksjon">
           <Heading size="medium" level="2" className="seksjon-tittel">
-            AKU-ledighet (%)
+            AKU-ledighet: faktisk vs ankerbane
           </Heading>
-          <TidsserieGrafKlient
-            data={akuHistorikk.slice(-48).map((p) => ({
-              dato: p.dato.slice(0, 7),
-              'AKU-ledighet': p.verdi,
-            }))}
-            xKey="dato"
-            linjer={[{ dataKey: 'AKU-ledighet', farge: '#0067c5', navn: 'AKU-ledighet' }]}
-            yEtikett="%"
-            hoyde={280}
+          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-3)' }}>
+            {aku.anker_bane
+              ? `Anker: PPR ${formaterDato(aku.anker_bane.publikasjon)}`
+              : 'Ankerbane mangler — viser kun faktisk observerte verdier.'}
+          </BodyShort>
+          <AnkerVsFaktiskMedVelger
+            historikk={aku.historikk}
+            ankerBane={aku.anker_bane}
+            enhet="%"
+            navn="AKU-ledighet"
+            vinduer={VINDU_PRESETS.monthly}
+            initielt="5 år"
           />
         </div>
       )}

@@ -40,10 +40,31 @@ export function formaterVerdi(
   return `${formatert} ${enhet}`
 }
 
+/**
+ * Formater et avvik (delta) med eksplisitt fortegn (+/-) og to desimaler.
+ * Konsistent format paa tvers av kort, banner og tabeller.
+ */
+export function formaterDelta(verdi: number | null, enhet?: string): string {
+  if (verdi === null || isNaN(verdi)) return '–'
+  const fortegn = verdi >= 0 ? '+' : ''
+  const tall = verdi.toLocaleString('nb-NO', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+  return enhet ? `${fortegn}${tall} ${enhet}` : `${fortegn}${tall}`
+}
+
+/** Lang norsk dato: "des. 2025" — egnet for lesbar visning paa kort. */
 export function formaterDato(datoStr: string | null): string {
   if (!datoStr) return '–'
   const d = new Date(datoStr)
   return d.toLocaleDateString('nb-NO', { year: 'numeric', month: 'short' })
+}
+
+/** ISO-dato: "2025-12-01" — egnet for tabeller og maskinlesbar kontekst. */
+export function formaterDatoIso(datoStr: string | null): string {
+  if (!datoStr) return '–'
+  return datoStr.slice(0, 10)
 }
 
 export function trendPil(news: number | null, standardisert: number | null): string {

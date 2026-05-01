@@ -1,13 +1,13 @@
-import { Heading } from '@navikt/ds-react'
-import { loadSituasjonsbilde } from '@/lib/data'
+import { Heading, BodyShort } from '@navikt/ds-react'
+import { loadSituasjonsbilde, formaterDato } from '@/lib/data'
 import VariabelKort from '@/components/VariabelKort'
-import TidsserieGrafKlient from '@/components/TidsserieGrafKlient'
+import AnkerVsFaktiskMedVelger, { VINDU_PRESETS } from '@/components/AnkerVsFaktiskMedVelger'
 
 export default function AktivitetPage() {
   const data = loadSituasjonsbilde()
   const variabler = data?.variabler ?? {}
 
-  const bnpHistorikk = variabler['bnp_fastland']?.historikk ?? []
+  const bnp = variabler['bnp_fastland']
 
   return (
     <>
@@ -21,20 +21,23 @@ export default function AktivitetPage() {
         ))}
       </div>
 
-      {bnpHistorikk.length > 0 && (
+      {bnp && (
         <div className="seksjon">
           <Heading size="medium" level="2" className="seksjon-tittel">
-            BNP Fastlands-Norge (% ar/ar)
+            BNP Fastlands-Norge: faktisk vs ankerbane
           </Heading>
-          <TidsserieGrafKlient
-            data={bnpHistorikk.slice(-20).map((p) => ({
-              kvartal: p.dato.slice(0, 7),
-              'BNP Fastlands-Norge': p.verdi,
-            }))}
-            xKey="kvartal"
-            linjer={[{ dataKey: 'BNP Fastlands-Norge', farge: '#0067c5', navn: 'BNP Fastlands-Norge' }]}
-            yEtikett="% ar/ar"
-            hoyde={280}
+          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-3)' }}>
+            {bnp.anker_bane
+              ? `Anker: PPR ${formaterDato(bnp.anker_bane.publikasjon)}`
+              : 'Ankerbane for BNP er ikke i pipelinen ennå — viser kun faktisk observerte verdier.'}
+          </BodyShort>
+          <AnkerVsFaktiskMedVelger
+            historikk={bnp.historikk}
+            ankerBane={bnp.anker_bane}
+            enhet="% år/år"
+            navn="BNP Fastlands-Norge"
+            vinduer={VINDU_PRESETS.quarterly}
+            initielt="5 år"
           />
         </div>
       )}

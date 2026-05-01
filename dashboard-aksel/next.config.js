@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  basePath: '/norskmakropuls',
+  basePath: process.env.BASE_PATH ?? '/norskmakropuls',
   trailingSlash: true,
   images: {
     unoptimized: true,
