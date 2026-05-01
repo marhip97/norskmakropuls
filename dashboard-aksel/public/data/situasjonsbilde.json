@@ -1,5 +1,5 @@
 {
-  "generert": "2026-04-30T20:58:19.574639Z",
+  "generert": "2026-05-01T06:22:21.504117Z",
   "anker_vintage": "2026-03-26",
   "variabler": {
     "kpi": {
@@ -8361,7 +8361,7 @@
     ]
   },
   "pipeline_status": {
-    "siste_kjoring": "2026-04-30",
+    "siste_kjoring": "2026-05-01",
     "variabler_hentet": 20,
     "variabler_feil": 0
   }
