@@ -15,6 +15,11 @@ from src.models.shadow_rate import (
 )
 from src.news import NewsEngine
 
+# PPR 4/2025-stil publikasjonsdato. Velges saa alle ankerperioder (Q1-Q4 2026)
+# er fremtidige relativt til publikasjonen — dermed faar revisjonsmodellen
+# anvendt full demping fra forste fremtidige periode.
+_PUB = date(2025, 12, 1)
+
 
 def _make_rate_anchor(
     pub_date: date,
@@ -50,7 +55,7 @@ def test_shadow_rate_no_news_equals_anchor(tmp_path):
     """Uten news skal skyggebanen være identisk med ankerbanen."""
     store, engine = _build_engine(tmp_path)
     anchor_vals = [4.50, 4.25, 4.00, 3.75]
-    store.save(_make_rate_anchor(date(2026, 3, 26), anchor_vals))
+    store.save(_make_rate_anchor(_PUB, anchor_vals))
 
     model = ShadowRateModel(
         anchor_store=store,
@@ -71,10 +76,10 @@ def test_shadow_rate_positive_kpi_news_raises_rate(tmp_path):
     obs_dir = tmp_path / "obs"
 
     anchor_vals = [4.50, 4.25, 4.00, 3.75]
-    store.save(_make_rate_anchor(date(2026, 3, 26), anchor_vals))
+    store.save(_make_rate_anchor(_PUB, anchor_vals))
 
     # KPI-anker: forventet 3.0; KPI-obs: faktisk 3.5 -> surprise = +0.5
-    kpi_anchor = _make_rate_anchor(date(2026, 3, 26), [3.0, 3.0, 3.0, 3.0], series_id="kpi")
+    kpi_anchor = _make_rate_anchor(_PUB, [3.0, 3.0, 3.0, 3.0], series_id="kpi")
     store.save(kpi_anchor)
     _write_obs(obs_dir, "kpi", [("2026-01-01", 3.5)])
 
@@ -86,7 +91,8 @@ def test_shadow_rate_positive_kpi_news_raises_rate(tmp_path):
     result = model.compute(as_of=date(2026, 4, 30))
 
     assert result is not None
-    # beta_kpi = 0.15 -> delta_r_0 = 0.15 * 0.5 = 0.075
+    # Q1 2026 er forste fremtidige periode etter publikasjon (2025-12-01).
+    # beta_kpi = 0.15 -> delta_r_0 = 0.15 * 0.5 = 0.075, decay^0 = 1.
     assert result.revision[0] == pytest.approx(0.075, abs=1e-3)
     assert result.shadow_values[0] > result.anchor_values[0]
 
@@ -96,9 +102,9 @@ def test_shadow_rate_horizon_decay(tmp_path):
     store, engine = _build_engine(tmp_path)
     obs_dir = tmp_path / "obs"
 
-    store.save(_make_rate_anchor(date(2026, 3, 26), [4.50, 4.25, 4.00, 3.75]))
+    store.save(_make_rate_anchor(_PUB, [4.50, 4.25, 4.00, 3.75]))
 
-    kpi_anchor = _make_rate_anchor(date(2026, 3, 26), [3.0] * 4, series_id="kpi")
+    kpi_anchor = _make_rate_anchor(_PUB, [3.0] * 4, series_id="kpi")
     store.save(kpi_anchor)
     _write_obs(obs_dir, "kpi", [("2026-01-01", 4.0)])
 
@@ -115,14 +121,40 @@ def test_shadow_rate_horizon_decay(tmp_path):
     assert abs(result.revision[1]) > abs(result.revision[2])
 
 
+def test_shadow_rate_historical_periods_have_zero_revision(tmp_path):
+    """Perioder paa eller foer publikasjonsdato skal ikke revideres —
+    de er allerede observert og kan ikke endres av modellen."""
+    store, engine = _build_engine(tmp_path)
+    obs_dir = tmp_path / "obs"
+
+    # Pub mellom Q1 og Q2 2026 -> Q1 er historisk, Q2-Q4 er fremtidige
+    pub = date(2026, 3, 15)
+    store.save(_make_rate_anchor(pub, [4.50, 4.25, 4.00, 3.75]))
+    store.save(_make_rate_anchor(pub, [3.0] * 4, series_id="kpi"))
+    _write_obs(obs_dir, "kpi", [("2026-04-01", 4.0)])
+
+    model = ShadowRateModel(
+        anchor_store=store,
+        news_engine=engine,
+        raw_data_dir=obs_dir,
+    )
+    result = model.compute(as_of=date(2026, 5, 1))
+
+    # Q1 (historisk) -> revision = 0, shadow = anchor
+    assert result.revision[0] == 0.0
+    assert result.shadow_values[0] == result.anchor_values[0]
+    # Q2 (forste fremtidige) -> revision != 0
+    assert result.revision[1] != 0.0
+
+
 def test_shadow_rate_revision_capped(tmp_path):
     """Stor KPI-overraskelse skal kappes av max_revision."""
     store, engine = _build_engine(tmp_path)
     obs_dir = tmp_path / "obs"
 
-    store.save(_make_rate_anchor(date(2026, 3, 26), [4.50, 4.25, 4.00, 3.75]))
+    store.save(_make_rate_anchor(_PUB, [4.50, 4.25, 4.00, 3.75]))
 
-    kpi_anchor = _make_rate_anchor(date(2026, 3, 26), [2.0] * 4, series_id="kpi")
+    kpi_anchor = _make_rate_anchor(_PUB, [2.0] * 4, series_id="kpi")
     store.save(kpi_anchor)
     # Massiv overraskelse: +20 pp -> ville gitt delta >> max_revision
     _write_obs(obs_dir, "kpi", [("2026-01-01", 22.0)])
@@ -135,6 +167,7 @@ def test_shadow_rate_revision_capped(tmp_path):
     )
     result = model.compute(as_of=date(2026, 4, 30))
 
+    # Forste fremtidige periode (Q1 2026) skal kappes
     assert result.revision[0] == pytest.approx(DEFAULT_MAX_REVISION, abs=1e-6)
 
 
@@ -152,7 +185,7 @@ def test_shadow_rate_returns_none_without_anchor(tmp_path):
 def test_shadow_rate_to_dataframe(tmp_path):
     """to_dataframe() skal returnere DataFrame med riktige kolonner."""
     store, engine = _build_engine(tmp_path)
-    store.save(_make_rate_anchor(date(2026, 3, 26), [4.50, 4.25, 4.00, 3.75]))
+    store.save(_make_rate_anchor(_PUB, [4.50, 4.25, 4.00, 3.75]))
 
     model = ShadowRateModel(
         anchor_store=store,
@@ -170,7 +203,7 @@ def test_shadow_rate_to_dataframe(tmp_path):
 def test_shadow_rate_band_upper_above_shadow(tmp_path):
     """Øvre band skal alltid ligge over skyggeverdien."""
     store, engine = _build_engine(tmp_path)
-    store.save(_make_rate_anchor(date(2026, 3, 26), [4.50, 4.25, 4.00, 3.75]))
+    store.save(_make_rate_anchor(_PUB, [4.50, 4.25, 4.00, 3.75]))
 
     model = ShadowRateModel(
         anchor_store=store,

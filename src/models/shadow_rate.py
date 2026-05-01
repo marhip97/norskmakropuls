@@ -106,8 +106,7 @@ class ShadowRateModel:
         self.uncertainty_z = uncertainty_z
         self.raw_data_dir = raw_data_dir or RAW_DATA_DIR
 
-    def _latest_value(self, series_id: str) -> float | None:
-        """Hent siste tilgjengelige verdi for en serie fra data/raw/."""
+    def _load_series(self, series_id: str) -> pd.DataFrame | None:
         series_dir = self.raw_data_dir / series_id
         if not series_dir.exists():
             return None
@@ -118,37 +117,44 @@ class ShadowRateModel:
         if df.empty:
             return None
         df["date"] = pd.to_datetime(df["date"])
-        return float(df.sort_values("date")["value"].iloc[-1])
+        return df.sort_values("date")
+
+    def _latest_value(self, series_id: str) -> float | None:
+        """Hent siste tilgjengelige verdi for en serie fra data/raw/."""
+        df = self._load_series(series_id)
+        if df is None:
+            return None
+        return float(df["value"].iloc[-1])
+
+    def _value_at(self, series_id: str, on_date: date) -> float | None:
+        """Hent verdien som var siste publiserte ved on_date.
+
+        Brukes til a tilnaerme ankerets tekniske forutsetning som markedsnivaet
+        ved publikasjonsdato (PPR antar typisk uendret nivaa fra publikasjonstidspunkt).
+        """
+        df = self._load_series(series_id)
+        if df is None:
+            return None
+        eligible = df[df["date"] <= pd.Timestamp(on_date)]
+        if eligible.empty:
+            return None
+        return float(eligible["value"].iloc[-1])
 
     def _level_deviation(
         self, series_id: str, anchor_assumption: float | None
     ) -> float:
         """Beregn avvik mellom siste verdi og ankerets tekniske forutsetning.
 
-        Hvis anchor_assumption ikke er oppgitt, brukes 12-månedersgjennomsnittet
-        som referanse (MVP-fallback).
+        Hvis anchor_assumption ikke er oppgitt, returneres 0.0 (ingen
+        bidrag). Den eksplisitte forutsetningen settes typisk til
+        markedsnivaet ved ankerets publikasjonsdato.
         """
-        series_dir = self.raw_data_dir / series_id
-        if not series_dir.exists():
+        if anchor_assumption is None:
             return 0.0
-        files = sorted(series_dir.glob("*.parquet"))
-        if not files:
+        latest = self._latest_value(series_id)
+        if latest is None:
             return 0.0
-        df = pd.read_parquet(files[-1]).dropna(subset=["value"])
-        if df.empty:
-            return 0.0
-        df["date"] = pd.to_datetime(df["date"])
-        df = df.sort_values("date")
-        latest = float(df["value"].iloc[-1])
-
-        if anchor_assumption is not None:
-            return latest - anchor_assumption
-
-        cutoff = df["date"].max() - pd.DateOffset(months=12)
-        recent = df[df["date"] >= cutoff]["value"]
-        if recent.empty:
-            return 0.0
-        return latest - float(recent.mean())
+        return latest - anchor_assumption
 
     def _band_width(self) -> float:
         """Estimer usikkerhetsbåndbredde fra historisk KPI-news-volatilitet."""
@@ -171,9 +177,11 @@ class ShadowRateModel:
         Parameters
         ----------
         anchor_eurnok : float, optional
-            PPRs tekniske forutsetning for EUR/NOK. Hvis None: 12-mnd snitt.
+            PPRs tekniske forutsetning for EUR/NOK. Hvis None: bruker
+            markedsnivaet ved ankerets publikasjonsdato som proxy.
         anchor_oljepris : float, optional
-            PPRs tekniske forutsetning for Brent (USD/fat). Hvis None: 12-mnd snitt.
+            PPRs tekniske forutsetning for Brent (USD/fat). Hvis None: bruker
+            markedsnivaet ved ankerets publikasjonsdato som proxy.
         as_of : date, optional
             Punkt-i-tid-dato for ankervalg. Standard: date.today().
 
@@ -197,7 +205,13 @@ class ShadowRateModel:
         surprise_kpi_jae = news_kpi_jae.surprise if news_kpi_jae else 0.0
         surprise_aku = news_aku.surprise if news_aku else 0.0
 
-        # Avvik fra ankerets tekniske forutsetninger for finansielle variabler
+        # Ankerets tekniske forutsetning for finansielle variabler:
+        # bruker markedsnivaet ved publikasjonsdato hvis ikke eksplisitt oppgitt.
+        if anchor_eurnok is None:
+            anchor_eurnok = self._value_at("eurnok", anchor.publication_date)
+        if anchor_oljepris is None:
+            anchor_oljepris = self._value_at("oljepris", anchor.publication_date)
+
         dev_eurnok = self._level_deviation("eurnok", anchor_eurnok)
         dev_oil = self._level_deviation("oljepris", anchor_oljepris)
 
@@ -225,9 +239,19 @@ class ShadowRateModel:
         uppers: list[float] = []
         lowers: list[float] = []
 
-        for i, av in enumerate(anchor_vals):
-            decay = self.horizon_decay ** i
-            delta = float(np.clip(delta_r_0 * decay, -self.max_revision, self.max_revision))
+        # Demping skal regnes fra forste fremtidige periode etter publikasjons-
+        # datoen. Historiske perioder (<= publication_date) revideres ikke;
+        # de er allerede observert og kan ikke "revideres" av modellen.
+        future_idx = 0
+        for period_date, av in zip(periods, anchor_vals):
+            if period_date <= anchor.publication_date:
+                delta = 0.0
+            else:
+                decay = self.horizon_decay ** future_idx
+                delta = float(np.clip(
+                    delta_r_0 * decay, -self.max_revision, self.max_revision
+                ))
+                future_idx += 1
             shadow = av + delta
             revisions.append(round(delta, 4))
             shadows.append(round(shadow, 4))

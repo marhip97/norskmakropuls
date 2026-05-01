@@ -122,10 +122,6 @@ class InflationComponentModel:
         if total_news is None:
             logger.warning("Ingen news for kpi_jae ved %s.", reference_date)
 
-        # Hent ankerverdi for forventet kpi_jae på referansedato
-        # Brukes til å skalere komponentenes forventede verdi
-        anchor_expected = total_news.expected if total_news else None
-
         component_contributions: dict[str, float] = {}
         missing: list[str] = []
 
@@ -140,13 +136,14 @@ class InflationComponentModel:
                 )
                 continue
 
-            # Forventet komponentverdi: ankeret for total KPI-JAE skalert med vekt.
-            # Fallback: bruk komponentens eget forventede verdi fra news-motoren.
-            if anchor_expected is not None:
-                expected_k = anchor_expected * comp.weight
-                contribution = (comp_news.actual - expected_k) * comp.weight
-            else:
-                contribution = comp_news.surprise * comp.weight
+            # Forventet komponentverdi kommer fra komponentens eget anker
+            # via news-motoren (comp_news.expected). Vi multipliserer med
+            # kurvvekten for aa faa komponentens bidrag til total-KPI-JAE.
+            # Det tidligere alternativet "expected_k = anker_total * vekt"
+            # forutsatte at alle komponenter har samme prognoserate som
+            # totalen, noe som er feil og fordreier hvilken komponent som
+            # ser ut til aa drive overraskelsen.
+            contribution = comp_news.surprise * comp.weight
 
             component_contributions[comp.name] = round(contribution, 5)
 

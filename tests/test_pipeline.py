@@ -47,13 +47,27 @@ def test_dummy_source_skipper_eksisterende_vintage(tmp_data_dir):
 
 
 def test_load_config_returnerer_alle_variabler():
+    """variables.yaml skal inneholde alle MVP-variabler katalogen lover."""
     cfg = load_config()
-    ids = [v["id"] for v in cfg]
-    # Sjekk at alle 13 forventede variabler er der
-    assert "kpi" in ids
-    assert "styringsrente" in ids
-    assert "oljepris" in ids
-    assert "ledighet_aku" in ids
+    ids = {v["id"] for v in cfg}
+
+    forventet = {
+        # SSB
+        "bnp_fastland", "kpi", "kpi_jae", "ledighet_aku", "lonnsvekst",
+        "boligprisvekst", "k2_kredittvekst",
+        # Norges Bank
+        "styringsrente", "eurnok", "usd_nok", "nowa", "i44",
+        "gov_yield_3y_no", "gov_yield_10y_no",
+        # FRED
+        "oljepris", "ecb_rente", "handelspartnervekst",
+        "us_10y_yield", "us_2y_yield", "fed_funds", "us_cpi",
+    }
+    mangler = forventet - ids
+    assert not mangler, f"variables.yaml mangler: {sorted(mangler)}"
+    assert len(cfg) == len(forventet), (
+        f"Forventet {len(forventet)} variabler, fant {len(cfg)}: "
+        f"{sorted(ids - forventet)} ekstra, {sorted(mangler)} manglende"
+    )
 
 
 def test_build_source_avviser_ukjent_klasse():

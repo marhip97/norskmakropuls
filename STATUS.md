@@ -1,6 +1,6 @@
 # Status
 
-Sist oppdatert: 2026-04-30 (Fase 4 fullfort: Aksel-dashboard, statisk eksport, deploy til GitHub Pages)
+Sist oppdatert: 2026-05-01 (Kritiske fikser i news-motor, skyggerentebane, inflasjonsdekomposisjon — se endringslogg)
 
 Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne leses på under ett minutt før hver arbeidsøkt og oppdateres etter hver økt der noe vesentlig endres.
 
@@ -8,11 +8,11 @@ Dette dokumentet beskriver hvor prosjektet er **akkurat nå**. Det skal kunne le
 
 ## Nåværende fase
 
-**Fase 4 fullfort — Fase 5 (SMART-modeller) er neste steg.**
+**Fase 4 fullført — Fase 5 (SMART-modeller) er neste steg.**
 
-Fase 0 og 1 fullfort 2026-04-30. Alle 21 variabler A_PROD.
+Fase 0 og 1 fullført 2026-04-30. 21 variabler A_PROD; gov_yield_2y_no D_EXCLUDE (totalt 22 rader i tabellen nedenfor).
 
-Fase 2 fullfort 2026-04-30: ankerbane-infrastruktur på plass, to MPR-vintager
+Fase 2 fullført 2026-04-30: ankerbane-infrastruktur på plass, to MPR-vintager
 lastet, news-motor kjort mot ekte data. Forste situasjonsbilde produsert:
 - KPI og KPI-JAE nær anker ved siste obs (des. 2025)
 - NOK styrket seg merkbart siden PPR 1/26 (USD/NOK -0.36, EUR/NOK -0.26)
@@ -66,7 +66,7 @@ lastet, news-motor kjort mot ekte data. Forste situasjonsbilde produsert:
 
 Ingen aktiv utvikling. Neste: Fase 5 (SMART-modeller som kryssjekk mot ankerbanen).
 
-## Hva er på plass — Fase 4 (fullfort)
+## Hva er på plass — Fase 4 (fullført)
 
 - [x] `dashboard-aksel/`: Next.js 15, statisk eksport (`output: 'export'`), basePath `/norskmakropuls`
 - [x] Aksel designsystem (`@navikt/ds-react` v8.10.3): InternalHeader, Alert, Heading, BodyShort, Tag
@@ -79,7 +79,7 @@ Ingen aktiv utvikling. Neste: Fase 5 (SMART-modeller som kryssjekk mot ankerbane
 
 **Merk:** GitHub Pages ma aktiveres manuelt i repoinnstillingene (kilde: "GitHub Actions") for at deploy-workflow skal virke.
 
-## Hva er på plass — Fase 3 (fullfort)
+## Hva er på plass — Fase 3 (fullført)
 
 - [x] `docs/SPEC.md`: full teknisk spesifikasjon (seksjon 1–10), inkl. seksjon 5.3 og 8.2
 - [x] `src/models/shadow_rate.py`: skyggerentebane, lineær revisjonsmodell per SPEC.md 8.2
@@ -87,7 +87,7 @@ Ingen aktiv utvikling. Neste: Fase 5 (SMART-modeller som kryssjekk mot ankerbane
 - [x] `src/models/nav_to_aku.py`: NAV-til-AKU nowcast-bro per SPEC.md 8.4
 - [x] 71/71 tester grønne
 
-## Hva er på plass — Fase 2 (fullfort)
+## Hva er på plass — Fase 2 (fullført)
 
 - [x] `src/anchors/__init__.py`: `Anchor` + `AnchorStore` med vintage-lagring
 - [x] `src/news/__init__.py`: `NewsEngine` med `compute_news()`, `latest_news()`, `news_dataframe()`
@@ -130,7 +130,7 @@ Pipeline kjørt to ganger: 2026-04-30 (Fase 0) og 2026-04-30 (Fase 1).
 | **us_cpi** | FRED CPIAUCSL | **A_PROD** | 2026-04-30 | 951 rader, 1947–2026 |
 | i44 | Norges Bank EXR | A_PROD | 2026-04-30 | Verifisert pipeline |
 | nowa | Norges Bank SHORT_RATES | A_PROD | 2026-04-30 | Verifisert pipeline |
-| gov_yield_2y_no | — | D_EXCLUDE | — | 2Y finnes ikke i GOVT_GENERIC_RATES |
+| gov_yield_2y_no | — | D_EXCLUDE | 2026-04-30 | 2Y finnes ikke i GOVT_GENERIC_RATES; erstattet av gov_yield_3y_no |
 | gov_yield_3y_no | Norges Bank GOVT_GENERIC_RATES | A_PROD | 2026-04-30 | 3Y proxy, verifisert pipeline |
 | gov_yield_10y_no | Norges Bank GOVT_GENERIC_RATES | A_PROD | 2026-04-30 | Verifisert pipeline |
 
@@ -169,11 +169,12 @@ Følgende er ekskludert fra dagens repo og hentes senere:
 
 | Dato | Endring | Av |
 |---|---|---|
-| 2026-04-30 | Fase 4 fullfort: Aksel-dashboard (7 sider), GitHub Pages deploy-workflow, situasjonsbilde.json regenerert med riktig beta_eurnok. | Claude Code |
-| 2026-04-30 | Fase 3 fullfort: shadow_rate.py, inflation_components.py, nav_to_aku.py. 71 tester grønne. | Claude Code |
+| 2026-05-01 | Kritiske fikser: news-motor henter na anker per observasjonsdato (ikke as_of), bytter 95-dagers-vindu med periode-containment, standardiserer paa surprise-serien. Skyggerentebane bruker markedsnivaa ved publikasjonsdato som teknisk forutsetning og demper kun fra forste fremtidige periode. Inflasjonsdekomposisjonen bruker komponentenes egne ankere. NAV-til-AKU advarer ved residual-drift. lonnsvekst transform satt til level. data_catalog dokumenterer SDMX-noekkel for gov_yield_3y_no. Norges Bank-klient logger advarsel ved fallback-seriekey. Dashboard-formatering differensiert per enhet. _parse_mpr_table.py arkivert. statsmodels/scikit-learn flyttet til requirements-models.txt. 74/74 tester groenne. | Claude Code |
+| 2026-04-30 | Fase 4 fullført: Aksel-dashboard (7 sider), GitHub Pages deploy-workflow, situasjonsbilde.json regenerert med riktig beta_eurnok. | Claude Code |
+| 2026-04-30 | Fase 3 fullført: shadow_rate.py, inflation_components.py, nav_to_aku.py. 71 tester grønne. | Claude Code |
 | 2026-04-30 | Situasjonsbilde: KPI/KPI-JAE nær anker, NOK styrket seg -0.36/-0.26 siden PPR 1/26. | Claude Code |
 | 2026-04-30 | PPR-dato korrigert: PPR 1/2026 publisert 26. mars (ikke 27.). | Claude Code |
-| 2026-04-30 | Fase 2 fullfort: PPR 4/25 og PPR 1/26 lastet, news-motor verifisert mot KPI. | Claude Code |
+| 2026-04-30 | Fase 2 fullført: PPR 4/25 og PPR 1/26 lastet, news-motor verifisert mot KPI. | Claude Code |
 | 2026-04-30 | Fase 2 (delvis): src/anchors/ og src/news/ implementert. 16 nye tester grønne. | Claude Code |
 | 2026-04-30 | Fase 1 fullstendig: NOWA, I44, GOV10Y, GOV3Y verifisert grønn pipeline, satt A_PROD. 21 variabler totalt i A_PROD. | Claude Code |
 | 2026-04-30 | Fase 1 (NB-variabler): NOWA, I44, GOV10Y, GOV3Y implementert med verifiserte series keys. gov_yield_2y_no ekskludert. | Claude Code |

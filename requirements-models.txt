@@ -1,0 +1,6 @@
+# Avhengigheter for modellbygging i Fase 5 (SMART-modeller).
+# Hold disse separat fra kjerneavhengighetene saa MVP-installasjon
+# (datalag + ankerbane + news + dashboard) er rask.
+-r requirements.txt
+statsmodels>=0.14
+scikit-learn>=1.4
