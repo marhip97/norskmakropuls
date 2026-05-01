@@ -88,6 +88,40 @@ class NewsEngine:
         """
         return series.rolling(window=_ROLLING_WINDOW, min_periods=6).std()
 
+    @staticmethod
+    def _match_forecast_period(
+        forecast_dates: pd.DatetimeIndex, obs_ts: pd.Timestamp
+    ) -> int | None:
+        """Finn indeksen i forecast_dates som dekker obs_ts.
+
+        Antar at forecast_dates er sortert stigende og har konstant frekvens.
+        Returnerer indeksen til siste forecast_date <= obs_ts hvis observasjonen
+        ligger innenfor én periodelengde fra denne datoen, ellers None.
+
+        Hindrer feilmatching som "oktober-observasjon mot juli-prognose"
+        som den gamle 95-dagers-vindu-logikken ga.
+        """
+        if len(forecast_dates) == 0:
+            return None
+
+        prior = forecast_dates[forecast_dates <= obs_ts]
+        if len(prior) == 0:
+            return None
+        idx = len(prior) - 1
+        period_start = forecast_dates[idx]
+
+        if idx + 1 < len(forecast_dates):
+            period_end = forecast_dates[idx + 1]
+        elif idx > 0:
+            period_length = forecast_dates[idx] - forecast_dates[idx - 1]
+            period_end = period_start + period_length
+        else:
+            period_end = period_start + pd.DateOffset(months=3)
+
+        if obs_ts >= period_end:
+            return None
+        return idx
+
     def compute_news(
         self,
         series_id: str,
@@ -96,11 +130,16 @@ class NewsEngine:
     ) -> list[News]:
         """Beregn news for series_id for alle observasjoner etter since.
 
-        For hver observasjon: finn det ankeret som var siste offisielle
-        publisert senest as_of (standardverdi: dagens dato). Bruk as_of
-        for punkt-i-tid-korrekthet ved historisk analyse.
+        For hver observasjon brukes det ankeret som var siste offisielle
+        publisert senest min(obs_date, as_of). Dette sikrer at en
+        observasjon fra februar 2026 sammenlignes mot ankeret som var
+        offisielt da, ikke mot et nyere anker som ennå ikke fantes.
 
-        Observasjoner uten tilhørende anker hoppes over med en advarsel.
+        Parameters
+        ----------
+        as_of : date, optional
+            Punkt-i-tid-grense for ankervalg. Standard: dagens dato.
+            Brukes til historisk replay/backtesting.
         """
         reference_date = as_of or date.today()
 
@@ -111,16 +150,15 @@ class NewsEngine:
             logger.info("Ingen observasjoner for '%s' etter %s.", series_id, since)
             return []
 
-        rolling_sd = self._rolling_std(obs["value"].diff())
-
-        results: list[News] = []
+        intermediate: list[dict] = []
 
         for _, row in obs.iterrows():
             obs_date = row["date"].date()
             actual = float(row["value"])
 
+            anchor_lookup_date = min(obs_date, reference_date)
             anchor: Anchor | None = self.anchor_store.latest(
-                series_id, on_date=reference_date
+                series_id, on_date=anchor_lookup_date
             )
             if anchor is None:
                 logger.debug(
@@ -131,35 +169,52 @@ class NewsEngine:
             forecast_dates = anchor.values.index.normalize()
             obs_ts = pd.Timestamp(obs_date)
 
-            if obs_ts not in forecast_dates:
-                closest_idx = (forecast_dates - obs_ts).map(abs).argmin()
-                if abs((forecast_dates[closest_idx] - obs_ts).days) > 95:
-                    logger.debug(
-                        "Ingen nær ankerprognose for '%s' %s — hopper over.",
-                        series_id, obs_date,
-                    )
-                    continue
-                expected = float(anchor.values.iloc[closest_idx])
-            else:
-                expected = float(anchor.values[obs_ts])
+            idx = self._match_forecast_period(forecast_dates, obs_ts)
+            if idx is None:
+                logger.debug(
+                    "Ingen ankerperiode dekker '%s' %s — hopper over.",
+                    series_id, obs_date,
+                )
+                continue
 
+            expected = float(anchor.values.iloc[idx])
             surprise = actual - expected
 
-            idx = obs.index[obs["date"] == row["date"]][0]
-            sd = rolling_sd.get(idx, np.nan)
-            standardised = surprise / sd if (sd and not np.isnan(sd) and sd > 0) else np.nan
+            intermediate.append({
+                "obs_date": obs_date,
+                "actual": actual,
+                "expected": expected,
+                "surprise": surprise,
+                "anchor_publication": anchor.publication_date,
+            })
+
+        if not intermediate:
+            return []
+
+        # Standardiser surprise mot rullende standardavvik av surprise-serien
+        # (ikke diff(value)) — surprise-volatilitet er det relevante målet for
+        # om en gitt overraskelse er stor eller liten i historisk kontekst.
+        surprise_series = pd.Series([r["surprise"] for r in intermediate])
+        rolling_sd = self._rolling_std(surprise_series)
+
+        results: list[News] = []
+        for i, rec in enumerate(intermediate):
+            sd = rolling_sd.iloc[i]
+            if sd is not None and not np.isnan(sd) and sd > 0:
+                standardised = rec["surprise"] / sd
+                std_value = round(float(standardised), 4)
+            else:
+                std_value = float("nan")
 
             results.append(
                 News(
                     series_id=series_id,
-                    observation_date=obs_date,
-                    actual=actual,
-                    expected=expected,
-                    surprise=round(surprise, 6),
-                    standardised_surprise=round(float(standardised), 4)
-                    if not np.isnan(standardised)
-                    else float("nan"),
-                    anchor_publication=anchor.publication_date,
+                    observation_date=rec["obs_date"],
+                    actual=rec["actual"],
+                    expected=rec["expected"],
+                    surprise=round(rec["surprise"], 6),
+                    standardised_surprise=std_value,
+                    anchor_publication=rec["anchor_publication"],
                 )
             )
 

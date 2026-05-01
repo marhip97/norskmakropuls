@@ -91,7 +91,8 @@ variables:
     unit: pct_yoy
     source: SSBDataSource
     frequency: annual
-    transform: yoy_pct
+    # SSB-feltet ArslonnEndring leverer aarsendring direkte, derfor level (ikke yoy_pct).
+    transform: level
     source_params:
       table_id: "11417"
       filters:

@@ -16,6 +16,10 @@ from src.models.inflation_components import (
 )
 from src.news import NewsEngine
 
+# Anker publisert foer Q1 2026, slik at obs paa 2026-01-01 har anker tilgjengelig
+# under per-observasjon-oppslag (jf. SPEC.md 7.2).
+_PUB = date(2025, 12, 15)
+
 
 def _make_kpi_jae_anchor(pub_date: date, values: list[float]) -> Anchor:
     dates = pd.date_range("2026-01-01", periods=len(values), freq="QS")
@@ -49,7 +53,7 @@ def test_total_surprise_without_components(tmp_path):
     store, engine = _build(tmp_path)
     obs_dir = tmp_path / "obs"
 
-    store.save(_make_kpi_jae_anchor(date(2026, 3, 26), [3.0, 3.0, 3.0, 3.0]))
+    store.save(_make_kpi_jae_anchor(_PUB, [3.0, 3.0, 3.0, 3.0]))
     _write_obs(obs_dir, "kpi_jae", [("2026-01-01", 3.5)])
 
     # Ingen komponentserier definert
@@ -68,7 +72,7 @@ def test_missing_components_reported(tmp_path):
     store, engine = _build(tmp_path)
     obs_dir = tmp_path / "obs"
 
-    store.save(_make_kpi_jae_anchor(date(2026, 3, 26), [3.0] * 4))
+    store.save(_make_kpi_jae_anchor(_PUB, [3.0] * 4))
     _write_obs(obs_dir, "kpi_jae", [("2026-01-01", 3.2)])
 
     components = [
@@ -82,38 +86,39 @@ def test_missing_components_reported(tmp_path):
     assert result.components == {}
 
 
-def test_component_contribution_computed(tmp_path):
-    """Komponent med tilgjengelige data skal bidra til dekomposisjonen."""
+def test_component_contribution_uses_component_specific_anchor(tmp_path):
+    """Komponentbidraget skal bruke komponentens eget anker, ikke total-KPI-JAE
+    skalert med kurvvekten — det forutsetter samme prognoserate paa tvers av
+    komponenter, noe som er feil og fordreier dominant_driver-attribusjonen."""
     store, engine = _build(tmp_path)
     obs_dir = tmp_path / "obs"
 
-    # Anker: forventet kpi_jae = 3.0
-    store.save(_make_kpi_jae_anchor(date(2026, 3, 26), [3.0] * 4))
+    # Total kpi_jae-anker = 3.0; tjenester-anker = 4.0 (hoyere enn snitt)
+    store.save(_make_kpi_jae_anchor(_PUB, [3.0] * 4))
     _write_obs(obs_dir, "kpi_jae", [("2026-01-01", 3.0)])
 
-    # Tjenester: faktisk 1.8, forventet (3.0 * 0.6) = 1.8 -> bidrag = 0
-    # Men faktisk 2.4 -> bidrag = (2.4 - 1.8) * 0.6 = 0.36
-    components = [ComponentDefinition("tjenester", "kpi_jae_tjenester", 0.6)]
-
-    # Legg til kpi_jae_tjenester-anker (samme timing som kpi_jae)
     tjenester_anchor = Anchor(
         source="norges_bank_mpr",
-        publication_date=date(2026, 3, 26),
+        publication_date=_PUB,
         series_id="kpi_jae_tjenester",
         values=pd.Series(
-            [1.8] * 4,
+            [4.0] * 4,
             index=pd.date_range("2026-01-01", periods=4, freq="QS"),
             name="value",
         ),
     )
     store.save(tjenester_anchor)
-    _write_obs(obs_dir, "kpi_jae_tjenester", [("2026-01-01", 2.4)])
+    # Faktisk tjenester = 4.5 -> komponent-news = 0.5
+    _write_obs(obs_dir, "kpi_jae_tjenester", [("2026-01-01", 4.5)])
 
+    components = [ComponentDefinition("tjenester", "kpi_jae_tjenester", 0.6)]
     model = InflationComponentModel(news_engine=engine, components=components)
     result = model.compute(as_of=date(2026, 4, 30))
 
+    # Riktig: surprise (0.5) * vekt (0.6) = 0.30 — komponentens egen prognose brukes
+    # Feil (gammel logikk): (faktisk - total*vekt) * vekt = (4.5 - 1.8) * 0.6 = 1.62
     assert "tjenester" in result.components
-    assert result.components["tjenester"] == pytest.approx(0.36, abs=1e-3)
+    assert result.components["tjenester"] == pytest.approx(0.30, abs=1e-3)
     assert result.dominant_driver == "tjenester"
     assert result.is_decomposed()
 
@@ -123,7 +128,7 @@ def test_dominant_driver_largest_absolute(tmp_path):
     store, engine = _build(tmp_path)
     obs_dir = tmp_path / "obs"
 
-    store.save(_make_kpi_jae_anchor(date(2026, 3, 26), [3.0] * 4))
+    store.save(_make_kpi_jae_anchor(_PUB, [3.0] * 4))
     _write_obs(obs_dir, "kpi_jae", [("2026-01-01", 3.0)])
 
     for name, sid, w, actual in [
@@ -132,7 +137,7 @@ def test_dominant_driver_largest_absolute(tmp_path):
     ]:
         a = Anchor(
             source="norges_bank_mpr",
-            publication_date=date(2026, 3, 26),
+            publication_date=_PUB,
             series_id=sid,
             values=pd.Series(
                 [1.5] * 4,

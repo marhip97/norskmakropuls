@@ -147,11 +147,26 @@ class NAVToAKUBridge:
         x = delta_nav.values
         y = delta_aku.values
 
-        # OLS uten konstantledd (differansemetoden forutsetter zero intercept)
+        # OLS uten konstantledd (differansemetoden forutsetter zero intercept).
+        # Forutsetningen krever at delta_AKU og delta_NAV begge har gjennomsnitt
+        # naer null over kalibreringsperioden. Avvik fra null tyder paa
+        # nivaa-drift som modellen uten konstantledd ikke kan fange opp.
         beta = float(np.dot(x, y) / np.dot(x, x)) if np.dot(x, x) != 0 else 0.0
 
         residuals = y - beta * x
         rmse = float(np.sqrt(np.mean(residuals ** 2)))
+
+        mean_delta_aku = float(np.mean(y))
+        mean_delta_nav = float(np.mean(x))
+        if rmse > 0 and (
+            abs(mean_delta_aku) > rmse or abs(mean_delta_nav) > rmse
+        ):
+            logger.warning(
+                "NAV-til-AKU: drift over RMSE-terskel "
+                "(mean(delta_AKU)=%.4f, mean(delta_NAV)=%.4f, RMSE=%.4f). "
+                "Vurder aa legge til konstantledd eller detrend.",
+                mean_delta_aku, mean_delta_nav, rmse,
+            )
 
         logger.info("Kalibrert beta=%.4f, RMSE=%.4f, n=%d", beta, rmse, len(x))
         return beta, rmse, len(x)

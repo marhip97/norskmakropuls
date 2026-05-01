@@ -20,13 +20,24 @@ export function newsSignal(
   return standardisert > 0 ? 'positiv' : 'negativ'
 }
 
+function antallDesimaler(enhet: string): number {
+  const lower = enhet.toLowerCase()
+  if (lower.includes('nok') || lower.includes('usd')) return 4
+  if (lower.includes('indeks')) return 2
+  return 1
+}
+
 export function formaterVerdi(
   verdi: number | null,
   enhet: string
 ): string {
   if (verdi === null || isNaN(verdi)) return '–'
-  const rounded = Math.round(verdi * 10) / 10
-  return `${rounded} ${enhet}`
+  const desimaler = antallDesimaler(enhet)
+  const formatert = verdi.toLocaleString('nb-NO', {
+    minimumFractionDigits: desimaler,
+    maximumFractionDigits: desimaler,
+  })
+  return `${formatert} ${enhet}`
 }
 
 export function formaterDato(datoStr: string | null): string {

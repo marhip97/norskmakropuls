@@ -61,10 +61,6 @@ out/
 .yarn/
 *.log
 
-# Build output
-dist/
-build/
-
 # Data and cache files
 # Note: vintager i data/raw/ committes (følger SMART-praksis); kun midlertidige
 # filer ekskluderes:

@@ -148,9 +148,7 @@ sources:
     license: NLOD-2.0
     status: A_PROD
     required_for_mvp: true
-    transformations:
-      - type: yoy_pct
-        notes: Konfigurert i variables.yaml; SSB-feltet ArslonnEndring leverer årsendring direkte.
+    transformations: []  # ArslonnEndring leverer aarsendring direkte; ingen ekstra transform.
     validation:
       min_date: "1997"
       expected_frequency: annual
@@ -469,12 +467,16 @@ sources:
       expected_frequency: daily_business
       max_missing_recent: 5
     config_filters:
-      series: GOV3Y
+      series: GOV3Y         # alias i src/data/norges_bank.py _SERIES_MAP
+      sdmx_series_key: B.3Y.GBON.
     notes: |
       Norsk statsobligasjonsrente 3-årig løpetid (GBON = government bonds).
       Erstatter planlagt gov_yield_2y_no — 2Y-tenor finnes ikke i GOVT_GENERIC_RATES.
       Series key B.3Y.GBON. verifisert fra Norges Bank Data API.
       Verifisert hentet: 2026-04-30.
+      MERK: variables.yaml bruker det interne aliaset "GOV3Y" som mappes til
+      SDMX-noekkelen B.3Y.GBON. via _SERIES_MAP i src/data/norges_bank.py.
+      Hvis endepunktet endres, oppdater begge stedene.
 
   - series_id: gov_yield_10y_no
     name: Norsk statsobligasjonsrente, 10 år

@@ -114,9 +114,16 @@ def _parse_sdmx_json(data: dict) -> pd.DataFrame:
 
         series_key = max(series_dict, key=lambda k: _count_finite(series_dict[k]["observations"]))
         if len(series_dict) > 1:
-            logger.debug("SHORT_RATES: selected series '%s' (%d obs) from %d candidates.",
-                         series_key, _count_finite(series_dict[series_key]["observations"]),
-                         len(series_dict))
+            # Logg paa WARNING saa skjult endring i Norges Banks rekkefoelge er synlig.
+            # data_catalog.yaml dokumenterer at SIREN bruker tom series_key og at
+            # parseren plukker serien med flest observasjoner.
+            logger.warning(
+                "SDMX-respons inneholder %d serier; valgte '%s' (%d obs). "
+                "Hvis kilden endrer rekkefoelge eller legger til lengre serier, "
+                "kan denne valget endres uten varsel — vurder aa angi series_key eksplisitt.",
+                len(series_dict), series_key,
+                _count_finite(series_dict[series_key]["observations"]),
+            )
         observations = series_dict[series_key]["observations"]
 
         time_periods = data["data"]["structure"]["dimensions"]["observation"]

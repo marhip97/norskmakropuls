@@ -32,30 +32,39 @@ ANCHORS_DIR = ROOT / "data" / "anchors"
 OUT_FILE = ROOT / "dashboard-aksel" / "public" / "data" / "situasjonsbilde.json"
 
 VARIABLER_META: dict[str, dict] = {
-    "kpi":              {"navn": "KPI", "beskrivelse": "Konsumprisindeksen, 12-mnd vekst", "enhet": "% ar/ar", "gruppe": "inflasjon"},
-    "kpi_jae":          {"navn": "KPI-JAE", "beskrivelse": "KPI justert for avgifter og energi", "enhet": "% ar/ar", "gruppe": "inflasjon"},
-    "styringsrente":    {"navn": "Styringsrente", "beskrivelse": "Norges Banks foliorente", "enhet": "%", "gruppe": "rente"},
-    "nowa":             {"navn": "NOWA", "beskrivelse": "Norwegian Overnight Weighted Average", "enhet": "%", "gruppe": "rente"},
-    "eurnok":           {"navn": "EUR/NOK", "beskrivelse": "Valutakurs euro mot krone", "enhet": "NOK", "gruppe": "rente"},
-    "usd_nok":          {"navn": "USD/NOK", "beskrivelse": "Valutakurs dollar mot krone", "enhet": "NOK", "gruppe": "rente"},
-    "gov_yield_3y_no":  {"navn": "3-ar statsrente", "beskrivelse": "Norsk statsobligasjonsrente 3 ar", "enhet": "%", "gruppe": "rente"},
-    "gov_yield_10y_no": {"navn": "10-ar statsrente", "beskrivelse": "Norsk statsobligasjonsrente 10 ar", "enhet": "%", "gruppe": "rente"},
-    "i44":              {"navn": "I-44", "beskrivelse": "Importveid valutakursindeks", "enhet": "indeks", "gruppe": "rente"},
-    "bnp_fastland":     {"navn": "BNP Fastlands-Norge", "beskrivelse": "Volumvekst, sesongjustert", "enhet": "% ar/ar", "gruppe": "aktivitet"},
-    "boligprisvekst":   {"navn": "Boligprisvekst", "beskrivelse": "SSB boligprisindeks", "enhet": "indeks", "gruppe": "aktivitet"},
-    "k2_kredittvekst":  {"navn": "K2-kredittvekst", "beskrivelse": "Innenlandsk kredittvekst, 12-mnd", "enhet": "% ar/ar", "gruppe": "aktivitet"},
-    "ledighet_aku":     {"navn": "AKU-ledighet", "beskrivelse": "Arbeidskraftundersokelsen, 15-74 ar", "enhet": "%", "gruppe": "arbeidsmarked"},
-    "lonnsvekst":       {"navn": "Arslonnsvekst", "beskrivelse": "Alle naringer", "enhet": "% ar/ar", "gruppe": "arbeidsmarked"},
-    "oljepris":         {"navn": "Oljepris Brent", "beskrivelse": "Brent crude, USD per fat", "enhet": "USD", "gruppe": "internasjonal"},
-    "ecb_rente":        {"navn": "ECB-rente", "beskrivelse": "ECB Deposit Facility Rate", "enhet": "%", "gruppe": "internasjonal"},
-    "fed_funds":        {"navn": "Fed Funds Rate", "beskrivelse": "Federal Funds Effective Rate", "enhet": "%", "gruppe": "internasjonal"},
-    "handelspartnervekst": {"navn": "Handelspartnervekst", "beskrivelse": "Eurosone BNP, volum", "enhet": "indeks", "gruppe": "internasjonal"},
-    "us_10y_yield":     {"navn": "US 10-ar rente", "beskrivelse": "Treasury Constant Maturity 10Y", "enhet": "%", "gruppe": "internasjonal"},
-    "us_cpi":           {"navn": "US CPI", "beskrivelse": "Konsumprisindeks USA (CPI-U)", "enhet": "indeks", "gruppe": "internasjonal"},
+    "kpi":              {"navn": "KPI", "beskrivelse": "Konsumprisindeksen, 12-mnd vekst", "enhet": "% ar/ar", "gruppe": "inflasjon", "frekvens": "monthly"},
+    "kpi_jae":          {"navn": "KPI-JAE", "beskrivelse": "KPI justert for avgifter og energi", "enhet": "% ar/ar", "gruppe": "inflasjon", "frekvens": "monthly"},
+    "styringsrente":    {"navn": "Styringsrente", "beskrivelse": "Norges Banks foliorente", "enhet": "%", "gruppe": "rente", "frekvens": "monthly"},
+    "nowa":             {"navn": "NOWA", "beskrivelse": "Norwegian Overnight Weighted Average", "enhet": "%", "gruppe": "rente", "frekvens": "daily"},
+    "eurnok":           {"navn": "EUR/NOK", "beskrivelse": "Valutakurs euro mot krone", "enhet": "NOK", "gruppe": "rente", "frekvens": "daily"},
+    "usd_nok":          {"navn": "USD/NOK", "beskrivelse": "Valutakurs dollar mot krone", "enhet": "NOK", "gruppe": "rente", "frekvens": "daily"},
+    "gov_yield_3y_no":  {"navn": "3-ar statsrente", "beskrivelse": "Norsk statsobligasjonsrente 3 ar", "enhet": "%", "gruppe": "rente", "frekvens": "daily"},
+    "gov_yield_10y_no": {"navn": "10-ar statsrente", "beskrivelse": "Norsk statsobligasjonsrente 10 ar", "enhet": "%", "gruppe": "rente", "frekvens": "daily"},
+    "i44":              {"navn": "I-44", "beskrivelse": "Importveid valutakursindeks", "enhet": "indeks", "gruppe": "rente", "frekvens": "daily"},
+    "bnp_fastland":     {"navn": "BNP Fastlands-Norge", "beskrivelse": "Volumvekst, sesongjustert", "enhet": "% ar/ar", "gruppe": "aktivitet", "frekvens": "quarterly"},
+    "boligprisvekst":   {"navn": "Boligprisvekst", "beskrivelse": "SSB boligprisindeks", "enhet": "indeks", "gruppe": "aktivitet", "frekvens": "quarterly"},
+    "k2_kredittvekst":  {"navn": "K2-kredittvekst", "beskrivelse": "Innenlandsk kredittvekst, 12-mnd", "enhet": "% ar/ar", "gruppe": "aktivitet", "frekvens": "monthly"},
+    "ledighet_aku":     {"navn": "AKU-ledighet", "beskrivelse": "Arbeidskraftundersokelsen, 15-74 ar", "enhet": "%", "gruppe": "arbeidsmarked", "frekvens": "monthly"},
+    "lonnsvekst":       {"navn": "Arslonnsvekst", "beskrivelse": "Alle naringer", "enhet": "% ar/ar", "gruppe": "arbeidsmarked", "frekvens": "annual"},
+    "oljepris":         {"navn": "Oljepris Brent", "beskrivelse": "Brent crude, USD per fat", "enhet": "USD", "gruppe": "internasjonal", "frekvens": "daily"},
+    "ecb_rente":        {"navn": "ECB-rente", "beskrivelse": "ECB Deposit Facility Rate", "enhet": "%", "gruppe": "internasjonal", "frekvens": "daily"},
+    "fed_funds":        {"navn": "Fed Funds Rate", "beskrivelse": "Federal Funds Effective Rate", "enhet": "%", "gruppe": "internasjonal", "frekvens": "monthly"},
+    "handelspartnervekst": {"navn": "Handelspartnervekst", "beskrivelse": "Eurosone BNP, volum", "enhet": "indeks", "gruppe": "internasjonal", "frekvens": "quarterly"},
+    "us_10y_yield":     {"navn": "US 10-ar rente", "beskrivelse": "Treasury Constant Maturity 10Y", "enhet": "%", "gruppe": "internasjonal", "frekvens": "daily"},
+    "us_cpi":           {"navn": "US CPI", "beskrivelse": "Konsumprisindeks USA (CPI-U)", "enhet": "indeks", "gruppe": "internasjonal", "frekvens": "monthly"},
 }
 
+# Maks rader i historikk per frekvens. Hensikten er at dashbordet viser
+# omtrent samme tidshorisont uavhengig av om serien er daglig, manedlig
+# eller kvartalsvis (~10 ars historikk for alle).
 HISTORIKK_GRENSE = date(2015, 1, 1)
-HISTORIKK_MAKS_RADER = 120
+HISTORIKK_MAKS_RADER_PER_FREKVENS: dict[str, int] = {
+    "daily": 2600,        # ~10 aars handledager
+    "monthly": 120,       # ~10 aar
+    "quarterly": 40,      # ~10 aar
+    "annual": 15,
+}
+HISTORIKK_DEFAULT_MAKS_RADER = 120
 
 
 def load_serie(series_id: str) -> pd.DataFrame | None:
@@ -89,10 +98,13 @@ def build_variabel(
     if df is not None and not df.empty:
         siste_verdi = round(float(df["value"].iloc[-1]), 4)
         siste_dato = df["date"].iloc[-1].isoformat()
+        maks_rader = HISTORIKK_MAKS_RADER_PER_FREKVENS.get(
+            meta.get("frekvens", ""), HISTORIKK_DEFAULT_MAKS_RADER
+        )
         historikk = [
             {"dato": row["date"].isoformat(), "verdi": round(float(row["value"]), 4)}
             for _, row in df[df["date"] >= pd.Timestamp(HISTORIKK_GRENSE)].iterrows()
-        ][-HISTORIKK_MAKS_RADER:]
+        ][-maks_rader:]
 
     try:
         latest = news_engine.latest_news(series_id)
