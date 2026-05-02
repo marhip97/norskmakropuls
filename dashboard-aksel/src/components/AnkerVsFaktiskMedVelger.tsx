@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Chips } from '@navikt/ds-react'
+import { Chips, BodyShort } from '@navikt/ds-react'
 import AnkerVsFaktiskGrafKlient from './AnkerVsFaktiskGrafKlient'
 import type { AnkerBane, Historikkpunkt } from '@/lib/types'
 
@@ -11,9 +11,7 @@ interface Props {
   enhet?: string
   navn: string
   hoyde?: number
-  /** Tilgjengelige tidsvinduer i antall observasjoner. */
   vinduer?: { label: string; verdi: number | null }[]
-  /** Forhandsvalgt vindu, matcher vinduer[i].label. */
   initielt?: string
 }
 
@@ -25,7 +23,6 @@ const STANDARD_VINDUER_MAANEDLIG = [
   { label: 'Hele',  verdi: null },
 ]
 
-/** Vinduspresetter etter frekvens (antall observasjoner per periode). */
 export const VINDU_PRESETS = {
   monthly: STANDARD_VINDUER_MAANEDLIG,
   quarterly: [
@@ -49,11 +46,6 @@ export const VINDU_PRESETS = {
   ],
 }
 
-/**
- * Wrapper rundt AnkerVsFaktiskGraf med en tidsvindu-velger over grafen.
- * Holder valgt vindu i klient-state slik at brukeren kan zoome inn paa
- * relevant horisont uten side-reload. Standard er "3 år".
- */
 export default function AnkerVsFaktiskMedVelger({
   historikk,
   ankerBane,
@@ -68,25 +60,36 @@ export default function AnkerVsFaktiskMedVelger({
 
   return (
     <>
-      <Chips style={{ marginBottom: 'var(--a-spacing-3)' }}>
-        {vinduer.map((v) => (
-          <Chips.Toggle
-            key={v.label}
-            selected={v.label === valgt}
-            onClick={() => setValgt(v.label)}
-          >
-            {v.label}
-          </Chips.Toggle>
-        ))}
-      </Chips>
-      <AnkerVsFaktiskGrafKlient
-        historikk={historikk}
-        ankerBane={ankerBane}
-        enhet={enhet}
-        navn={navn}
-        hoyde={hoyde}
-        vinduSiste={aktiv.verdi ?? undefined}
-      />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--a-spacing-4)', flexWrap: 'wrap', marginBottom: 'var(--a-spacing-1)' }}>
+        <Chips>
+          {vinduer.map((v) => (
+            <Chips.Toggle
+              key={v.label}
+              selected={v.label === valgt}
+              onClick={() => setValgt(v.label)}
+            >
+              {v.label}
+            </Chips.Toggle>
+          ))}
+        </Chips>
+      </div>
+      <BodyShort
+        size="small"
+        style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-3)' }}
+      >
+        {aktiv.verdi ? `Viser siste ${aktiv.verdi} observasjoner` : 'Viser hele tidsserien'}
+        {ankerBane ? ` · Anker: PPR ${ankerBane.publikasjon.slice(0, 7)}` : ''}
+      </BodyShort>
+      <div className="graf-panel" style={{ marginTop: 0 }}>
+        <AnkerVsFaktiskGrafKlient
+          historikk={historikk}
+          ankerBane={ankerBane}
+          enhet={enhet}
+          navn={navn}
+          hoyde={hoyde}
+          vinduSiste={aktiv.verdi ?? undefined}
+        />
+      </div>
     </>
   )
 }

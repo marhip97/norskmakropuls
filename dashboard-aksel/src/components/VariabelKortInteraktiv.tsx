@@ -1,17 +1,17 @@
 'use client'
 
-import { Heading, BodyShort, HelpText } from '@navikt/ds-react'
+import { useState } from 'react'
+import { Heading, BodyShort, HelpText, Button } from '@navikt/ds-react'
 import type { VariabelData } from '@/lib/types'
 import { newsSignal, trendPil, formaterVerdi, formaterDato, formaterDelta } from '@/lib/utils'
 import SparklineKlient from './SparklineKlient'
+import AnkerVsFaktiskGrafKlient from './AnkerVsFaktiskGrafKlient'
 
 interface Props {
   serieId: string
   data: VariabelData
 }
 
-// Retningsnoytral fargeskala. Pil og fortegn baerer retningssemantikken;
-// fargen indikerer kun *at* observasjonen avviker meningsfullt fra ankeret.
 const DOMENE_FARGE: Record<string, string> = {
   inflasjon:     'var(--a-orange-500)',
   rente:         'var(--a-deepblue-500)',
@@ -20,7 +20,15 @@ const DOMENE_FARGE: Record<string, string> = {
   internasjonal: 'var(--a-purple-500)',
 }
 
-export default function VariabelKort({ serieId, data }: Props) {
+function vinduSisteForFrekvens(frekvens: string | null): number {
+  if (frekvens === 'daily') return 260
+  if (frekvens === 'quarterly') return 16
+  return 36
+}
+
+export default function VariabelKortInteraktiv({ serieId, data }: Props) {
+  const [ekspandert, setEkspandert] = useState(false)
+
   const signal = newsSignal(data.standardisert_news)
   const pil = trendPil(data.news, data.standardisert_news)
   const harSignal = signal === 'positiv' || signal === 'negativ'
@@ -47,7 +55,6 @@ export default function VariabelKort({ serieId, data }: Props) {
     : domeneFarge
 
   const sparkData = data.historikk.slice(-36)
-
   const newsStr = data.news !== null && !isNaN(data.news)
     ? formaterDelta(data.news, data.enhet)
     : null
@@ -99,12 +106,43 @@ export default function VariabelKort({ serieId, data }: Props) {
         )}
       </BodyShort>
 
-      {/* Sparkline: siste 36 observasjoner */}
-      {sparkData.length >= 3 && (
+      {/* Sparkline når ikke ekspandert */}
+      {!ekspandert && sparkData.length >= 3 && (
         <div style={{ marginTop: 'auto', paddingTop: 'var(--a-spacing-1)' }}>
           <SparklineKlient id={serieId} data={sparkData} farge={sparkFarge} />
         </div>
       )}
+
+      {/* Ekspandert mini-graf */}
+      {ekspandert && (
+        <div style={{ marginTop: 'var(--a-spacing-2)', borderTop: '1px solid var(--a-border-subtle)', paddingTop: 'var(--a-spacing-3)' }}>
+          <AnkerVsFaktiskGrafKlient
+            historikk={data.historikk}
+            ankerBane={data.anker_bane}
+            enhet={data.enhet}
+            navn={data.navn}
+            hoyde={160}
+            vinduSiste={vinduSisteForFrekvens(data.frekvens)}
+          />
+          {data.beskrivelse && (
+            <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginTop: 'var(--a-spacing-2)' }}>
+              {data.beskrivelse}
+            </BodyShort>
+          )}
+        </div>
+      )}
+
+      {/* Vis/skjul historikk */}
+      <div style={{ marginTop: 'var(--a-spacing-2)', paddingTop: 'var(--a-spacing-1)', borderTop: '1px solid var(--a-border-subtle)' }}>
+        <Button
+          size="xsmall"
+          variant="tertiary"
+          onClick={() => setEkspandert(!ekspandert)}
+          style={{ padding: 0, height: 'auto', color: 'var(--a-text-subtle)', fontSize: 12 }}
+        >
+          {ekspandert ? '▲ Skjul' : '▼ Vis historikk'}
+        </Button>
+      </div>
     </div>
   )
 }

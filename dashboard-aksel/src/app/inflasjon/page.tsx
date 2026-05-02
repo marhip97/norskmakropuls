@@ -25,15 +25,21 @@ export default function InflasjonPage() {
       </div>
 
       {kpiJae && (
-        <div className="seksjon">
+        <div className="seksjon-inflasjon">
           <Heading size="medium" level="2" className="seksjon-tittel">
             KPI-JAE: faktisk vs ankerbane
           </Heading>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-3)' }}>
+          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-2)' }}>
             {kpiJae.anker_bane
               ? `Anker: PPR ${formaterDato(kpiJae.anker_bane.publikasjon)}`
               : 'Ankerbane mangler — viser kun faktisk observerte verdier.'}
           </BodyShort>
+          {kpiJae.anker_bane && (
+            <Alert variant="info" size="small" style={{ marginBottom: 'var(--a-spacing-3)' }}>
+              Når den blå flaten ligger over den stiplede oransje linjen, er inflasjonen høyere enn
+              Norges Bank anslo i PPR {kpiJae.anker_bane.publikasjon.slice(0, 7)}.
+            </Alert>
+          )}
           <AnkerVsFaktiskMedVelger
             historikk={kpiJae.historikk}
             ankerBane={kpiJae.anker_bane}
@@ -46,15 +52,21 @@ export default function InflasjonPage() {
       )}
 
       {kpi && (
-        <div className="seksjon">
+        <div className="seksjon-inflasjon">
           <Heading size="medium" level="2" className="seksjon-tittel">
             KPI: faktisk vs ankerbane
           </Heading>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-3)' }}>
+          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-2)' }}>
             {kpi.anker_bane
               ? `Anker: PPR ${formaterDato(kpi.anker_bane.publikasjon)}`
               : 'Ankerbane mangler — viser kun faktisk observerte verdier.'}
           </BodyShort>
+          {kpi.anker_bane && (
+            <Alert variant="info" size="small" style={{ marginBottom: 'var(--a-spacing-3)' }}>
+              KPI inkluderer energi og avgifter. KPI-JAE er den renere kjerneinflasjons-indikatoren
+              Norges Bank vektlegger i pengepolitikken.
+            </Alert>
+          )}
           <AnkerVsFaktiskMedVelger
             historikk={kpi.historikk}
             ankerBane={kpi.anker_bane}
@@ -66,7 +78,7 @@ export default function InflasjonPage() {
         </div>
       )}
 
-      <div className="seksjon">
+      <div className="seksjon-inflasjon">
         <Heading size="medium" level="2" className="seksjon-tittel">
           KPI-JAE-dekomposisjon
         </Heading>
@@ -98,7 +110,7 @@ export default function InflasjonPage() {
               Hver komponent (tjenester, importerte varer, mat, husleie, energi) bidrar til total
               KPI-JAE-overraskelse vektet med kurvandelen. Bidraget = (faktisk – anker) × kurvvekt.
               Når en komponent mangler i pipelinen, vises den som plassholder slik at det er tydelig
-              hvilke deler av nedbrytingen som er utestaaende. Total overraskelse oppgis i
+              hvilke deler av nedbrytingen som er utestående. Total overraskelse oppgis i
               prosentpoeng (pp).
             </ReadMore>
           </>
