@@ -8,6 +8,7 @@ import {
   newsSignal,
 } from '@/lib/data'
 import VariabelKort from '@/components/VariabelKort'
+import VariabelKortInteraktiv from '@/components/VariabelKortInteraktiv'
 import type { VariabelData } from '@/lib/types'
 
 const GRUPPER: { id: string; label: string; serier: string[] }[] = [
@@ -38,9 +39,6 @@ const GRUPPER: { id: string; label: string; serier: string[] }[] = [
   },
 ]
 
-// Banner reflekterer fire-piler-rammeverket: en hovedindikator per domene
-// (inflasjon, rente, aktivitet, arbeidsmarked). Internasjonale variabler
-// horer hjemme paa egen side, ikke i hovedoversikten.
 const NOKKELSERIER = ['kpi_jae', 'styringsrente', 'bnp_fastland', 'ledighet_aku']
 
 const GRUPPE_TIL_LENKE: Record<string, string> = {
@@ -74,7 +72,7 @@ function BannerElement({
     'var(--a-text-subtle)'
 
   return (
-    <div style={{ minWidth: 0 }}>
+    <div style={{ minWidth: 0, flex: 1 }}>
       <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 2 }}>
         {navn}
       </BodyShort>
@@ -83,7 +81,7 @@ function BannerElement({
           {formaterVerdi(verdi, enhet)}
         </Heading>
         {pil && (
-          <span aria-hidden="true" style={{ fontSize: 18, color: aksent, fontWeight: 600 }}>
+          <span aria-hidden="true" style={{ fontSize: 20, color: aksent, fontWeight: 700 }}>
             {pil}
           </span>
         )}
@@ -129,6 +127,9 @@ function ToppTreAvvik({ variabler }: { variabler: Record<string, VariabelData> }
           sig === 'positiv' ? 'var(--a-deepblue-600)' :
           sig === 'negativ' ? 'var(--a-purple-600)' :
           'var(--a-text-subtle)'
+        const std = data.standardisert_news ?? 0
+        const barBredde = Math.min(Math.abs(std) / 2, 1) * 100
+
         return (
           <a
             key={serieId}
@@ -140,8 +141,19 @@ function ToppTreAvvik({ variabler }: { variabler: Record<string, VariabelData> }
               borderRadius: 'var(--a-border-radius-xlarge)',
               padding: 'var(--a-spacing-4)',
               boxShadow: 'var(--a-shadow-small)',
-              borderLeft: `3px solid ${aksent}`,
+              borderLeft: `4px solid ${aksent}`,
               display: 'block',
+              transition: 'box-shadow 0.15s ease, transform 0.15s ease',
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget as HTMLElement
+              el.style.boxShadow = 'var(--a-shadow-medium)'
+              el.style.transform = 'translateY(-2px)'
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget as HTMLElement
+              el.style.boxShadow = 'var(--a-shadow-small)'
+              el.style.transform = 'none'
             }}
           >
             <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 2 }}>
@@ -150,12 +162,24 @@ function ToppTreAvvik({ variabler }: { variabler: Record<string, VariabelData> }
             <Heading size="small" level="3" style={{ marginBottom: 4 }}>
               {formaterVerdi(data.siste_verdi, data.enhet)}
             </Heading>
-            <BodyShort size="small" style={{ color: aksent }}>
+            <BodyShort size="small" style={{ color: aksent, marginBottom: 'var(--a-spacing-2)' }}>
               {formaterDelta(data.news, data.enhet)} ·{' '}
               {data.standardisert_news !== null
                 ? `${formaterDelta(data.standardisert_news)} std`
                 : '—'}
             </BodyShort>
+            {/* Visuell avvik-bar */}
+            <div style={{ background: 'var(--a-border-subtle)', borderRadius: 2, height: 4, overflow: 'hidden' }}>
+              <div
+                style={{
+                  width: `${barBredde}%`,
+                  height: '100%',
+                  background: aksent,
+                  borderRadius: 2,
+                  transition: 'width 0.3s ease',
+                }}
+              />
+            </div>
           </a>
         )
       })}
@@ -173,7 +197,7 @@ export default function MakropulsPage() {
           Makropuls
         </Heading>
         <Alert variant="warning">
-          Ingen situasjonsdata tilgjengelig ennå. Kjor scripts/generate_cache.py for a generere data.
+          Ingen situasjonsdata tilgjengelig ennå. Kjør scripts/generate_cache.py for å generere data.
         </Alert>
       </>
     )
@@ -193,6 +217,7 @@ export default function MakropulsPage() {
         </BodyShort>
       </div>
 
+      {/* Situasjonsbanner: fire-piler-rammeverket */}
       {nokkeldata.length > 0 && (
         <div className="situasjonsbanner">
           {nokkeldata.map((v) => (
@@ -209,33 +234,36 @@ export default function MakropulsPage() {
         </div>
       )}
 
+      {/* Topp-tre avvik fra anker */}
       <div className="seksjon">
         <Heading size="medium" level="2" className="seksjon-tittel">
           Største avvik fra anker
         </Heading>
         <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-3)' }}>
-          Toppen av de standardiserte overraskelsene siden siste offisielle ankerbane ble publisert.
-          Klikk en kort for å gå til detaljsiden.
+          Standardiserte overraskelser siden siste offisielle ankerbane. Klikk for å gå til detaljsiden.
         </BodyShort>
         <ToppTreAvvik variabler={data.variabler} />
         <ReadMore header="Hva betyr standardisert avvik?" size="small" defaultOpen={false} style={{ marginTop: 'var(--a-spacing-3)' }}>
-          Standardisert avvik er overraskelsen (faktisk – anker) delt på den rullende standardavviket
-          til seriens egne overraskelser. En verdi over ±0.5 regnes som meningsfull, og over ±1 som stor.
+          Standardisert avvik er overraskelsen (faktisk – anker) delt på det rullende standardavviket
+          til seriens egne overraskelser. En verdi over ±0,5 regnes som meningsfull, og over ±1 som stor.
           Dette gjør avvikene sammenlignbare på tvers av serier med ulik volatilitet.
         </ReadMore>
       </div>
 
+      {/* Domeneseksjoner — bruker domenespesifikke CSS-klasser for farger */}
       {GRUPPER.map(({ id, label, serier }) => {
         const tilgjengelige = serier.filter((s) => data.variabler[s])
         if (tilgjengelige.length === 0) return null
         return (
-          <div key={id} className="seksjon">
+          <div key={id} className={`seksjon-${id}`}>
             <Heading size="small" level="2" className="seksjon-tittel">
-              {label}
+              <a href={GRUPPE_TIL_LENKE[id] ?? '/'} style={{ color: 'inherit', textDecoration: 'none' }}>
+                {label} →
+              </a>
             </Heading>
             <div className="kortgrid">
               {tilgjengelige.map((serieId) => (
-                <VariabelKort
+                <VariabelKortInteraktiv
                   key={serieId}
                   serieId={serieId}
                   data={data.variabler[serieId]}

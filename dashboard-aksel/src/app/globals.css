@@ -24,15 +24,36 @@ body {
   margin-top: var(--a-spacing-4);
 }
 
+/* Hoverable kort */
+.variabelkort-container {
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.variabelkort-container:hover {
+  box-shadow: var(--a-shadow-medium) !important;
+  transform: translateY(-2px);
+}
+
+/* Situasjonsbanner med deepblue-gradient */
 .situasjonsbanner {
   display: flex;
   gap: var(--a-spacing-8);
-  background: var(--a-surface-default);
+  background: linear-gradient(135deg, var(--a-deepblue-50) 0%, var(--a-surface-default) 65%);
+  border: 1px solid var(--a-deepblue-200);
   border-radius: var(--a-border-radius-xlarge);
-  padding: var(--a-spacing-4) var(--a-spacing-6);
+  padding: var(--a-spacing-5) var(--a-spacing-6);
   margin-bottom: var(--a-spacing-6);
   box-shadow: var(--a-shadow-small);
   flex-wrap: wrap;
+}
+
+/* Hvit graf-panel med skygge */
+.graf-panel {
+  background: var(--a-surface-default);
+  border-radius: var(--a-border-radius-xlarge);
+  padding: var(--a-spacing-5);
+  box-shadow: var(--a-shadow-small);
+  margin-top: var(--a-spacing-4);
 }
 
 .seksjon {
@@ -43,4 +64,45 @@ body {
   margin-bottom: var(--a-spacing-3);
   padding-bottom: var(--a-spacing-2);
   border-bottom: 2px solid var(--a-border-subtle);
+}
+
+/* Domenespesifikke seksjonsklasser — farge etter domene */
+.seksjon-inflasjon {
+  padding: var(--a-spacing-5);
+  border-radius: var(--a-border-radius-xlarge);
+  background: var(--a-orange-50);
+  border-left: 4px solid var(--a-orange-400);
+  margin-top: var(--a-spacing-8);
+}
+
+.seksjon-rente {
+  padding: var(--a-spacing-5);
+  border-radius: var(--a-border-radius-xlarge);
+  background: var(--a-deepblue-50);
+  border-left: 4px solid var(--a-deepblue-400);
+  margin-top: var(--a-spacing-8);
+}
+
+.seksjon-arbeidsmarked {
+  padding: var(--a-spacing-5);
+  border-radius: var(--a-border-radius-xlarge);
+  background: var(--a-green-50);
+  border-left: 4px solid var(--a-green-400);
+  margin-top: var(--a-spacing-8);
+}
+
+.seksjon-aktivitet {
+  padding: var(--a-spacing-5);
+  border-radius: var(--a-border-radius-xlarge);
+  background: var(--a-blue-50);
+  border-left: 4px solid var(--a-blue-400);
+  margin-top: var(--a-spacing-8);
+}
+
+.seksjon-internasjonal {
+  padding: var(--a-spacing-5);
+  border-radius: var(--a-border-radius-xlarge);
+  background: var(--a-purple-50);
+  border-left: 4px solid var(--a-purple-400);
+  margin-top: var(--a-spacing-8);
 }

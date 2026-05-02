@@ -1,4 +1,4 @@
-import { Heading, BodyShort } from '@navikt/ds-react'
+import { Heading, BodyShort, Alert } from '@navikt/ds-react'
 import { loadSituasjonsbilde, formaterDato } from '@/lib/data'
 import VariabelKort from '@/components/VariabelKort'
 import AnkerVsFaktiskMedVelger, { VINDU_PRESETS } from '@/components/AnkerVsFaktiskMedVelger'
@@ -24,14 +24,17 @@ export default function InternasjonalPage() {
       </div>
 
       {olje && (
-        <div className="seksjon">
+        <div className="seksjon-internasjonal">
           <Heading size="medium" level="2" className="seksjon-tittel">
             Oljepris Brent (USD/fat)
           </Heading>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-3)' }}>
-            Eksogen variabel — ankerbanen for oljepris er en teknisk forutsetning i Norges Banks PPR
-            og inngår ikke som egen ankerserie i dette dashbordet.
+          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-2)' }}>
+            Daglige observasjoner siden {formaterDato(olje.historikk[0]?.dato ?? null)}.
           </BodyShort>
+          <Alert variant="info" size="small" style={{ marginBottom: 'var(--a-spending-3)' }}>
+            Oljepris er en eksogen variabel i Norges Banks PPR — det vil si at den brukes som
+            teknisk forutsetning, ikke som en variabel Norges Bank prognoseser. Ingen ankerbane vises.
+          </Alert>
           <AnkerVsFaktiskMedVelger
             historikk={olje.historikk}
             ankerBane={null}
@@ -40,11 +43,6 @@ export default function InternasjonalPage() {
             vinduer={VINDU_PRESETS.daily}
             initielt="1 år"
           />
-          {olje.anker_publikasjon && (
-            <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginTop: 'var(--a-spacing-2)' }}>
-              Sist sammenlignet mot anker fra {formaterDato(olje.anker_publikasjon)}.
-            </BodyShort>
-          )}
         </div>
       )}
     </>

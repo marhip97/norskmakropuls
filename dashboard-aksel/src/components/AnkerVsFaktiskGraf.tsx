@@ -3,6 +3,7 @@
 import {
   ResponsiveContainer,
   ComposedChart,
+  Area,
   Line,
   XAxis,
   YAxis,
@@ -14,38 +15,32 @@ import {
 import type { AnkerBane, Historikkpunkt } from '@/lib/types'
 
 interface Props {
-  /** Faktisk observerte verdier for serien. */
   historikk: Historikkpunkt[]
-  /** Ankerbane som var siste offisielle, eller null. */
   ankerBane: AnkerBane | null
-  /** Enhet (vises som y-akselabel). */
   enhet?: string
-  /** Navn paa serien (vises i legenden for faktisk-linjen). */
   navn: string
-  /** Hoyde paa grafen i px. */
   hoyde?: number
-  /** Tilskjaering: antall siste punkter aa vise. */
   vinduSiste?: number
 }
 
-/**
- * Plotter en faktisk observert tidsserie sammen med den ankerbanen som var
- * siste offisielle. Visualiserer kjernen i produktprinsippet:
- * "oppdatert anslag = anker + revisjon" — brukeren ser direkte hvor faktiske
- * tall ligger i forhold til den prognosen som var offentlig naar vi sammenlignet.
- *
- * En vertikal referanselinje markerer ankerets publikasjonsdato slik at man
- * skiller historikk (foer publikasjon) fra prognose (etter publikasjon).
- */
+const MND = ['jan','feb','mar','apr','mai','jun','jul','aug','sep','okt','nov','des']
+
+function formaterXTick(v: string): string {
+  const parts = v.split('-')
+  if (parts.length < 2) return v
+  const mndIdx = parseInt(parts[1]) - 1
+  if (mndIdx < 0 || mndIdx > 11) return v
+  return `${MND[mndIdx]} '${parts[0].slice(2)}`
+}
+
 export default function AnkerVsFaktiskGraf({
   historikk,
   ankerBane,
-  enhet,
+  enhet = '',
   navn,
   hoyde = 320,
   vinduSiste,
 }: Props) {
-  // Bygg sammenslaatt datasett indeksert paa periode (YYYY-MM).
   const punkter = new Map<string, { dato: string; faktisk?: number; anker?: number }>()
   for (const p of historikk) {
     const n = p.dato.slice(0, 7)
@@ -83,23 +78,37 @@ export default function AnkerVsFaktiskGraf({
 
   const ariaLabel = ankerBane
     ? `Tidsseriegraf for ${navn} med faktiske observasjoner og ankerbane fra ${ankerBane.publikasjon}`
-    : `Tidsseriegraf for ${navn}, ankerbane mangler`
+    : `Tidsseriegraf for ${navn}`
 
   return (
-    <figure
-      aria-label={ariaLabel}
-      style={{ margin: 0 }}
-    >
+    <figure aria-label={ariaLabel} style={{ margin: 0 }}>
       <ResponsiveContainer width="100%" height={hoyde}>
-        <ComposedChart data={visningsdata} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--a-border-subtle)" />
+        <ComposedChart data={visningsdata} margin={{ top: 10, right: 16, left: 0, bottom: 8 }}>
+          <defs>
+            <linearGradient id="gradFaktisk" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" style={{ stopColor: 'var(--a-deepblue-700)', stopOpacity: 0.22 }} />
+              <stop offset="95%" style={{ stopColor: 'var(--a-deepblue-700)', stopOpacity: 0 }} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--a-border-subtle)" vertical={false} />
           <XAxis
             dataKey="dato"
-            tick={{ fontSize: 12, fill: 'var(--a-text-subtle)' }}
+            tickFormatter={formaterXTick}
+            tick={{ fontSize: 11, fill: 'var(--a-text-subtle)' }}
+            axisLine={{ stroke: 'var(--a-border-subtle)' }}
+            tickLine={false}
+            interval="preserveStartEnd"
           />
           <YAxis
-            tick={{ fontSize: 12, fill: 'var(--a-text-subtle)' }}
-            label={enhet ? { value: enhet, angle: -90, position: 'insideLeft', fontSize: 12, fill: 'var(--a-text-subtle)' } : undefined}
+            tick={{ fontSize: 11, fill: 'var(--a-text-subtle)' }}
+            axisLine={false}
+            tickLine={false}
+            width={enhet ? 48 : 36}
+            label={
+              enhet
+                ? { value: enhet, angle: -90, position: 'insideLeft', fontSize: 11, fill: 'var(--a-text-subtle)', dx: 14 }
+                : undefined
+            }
           />
           <Tooltip
             contentStyle={{
@@ -107,40 +116,61 @@ export default function AnkerVsFaktiskGraf({
               border: '1px solid var(--a-border-default)',
               borderRadius: 'var(--a-border-radius-medium)',
               fontSize: 13,
+              boxShadow: 'var(--a-shadow-small)',
             }}
+            formatter={(value, name) => {
+              const v = typeof value === 'number' ? value.toFixed(2) : value
+              const label =
+                name === 'anker'
+                  ? `Anker (PPR ${ankerBane?.publikasjon?.slice(0, 7) ?? '—'})`
+                  : navn
+              return [`${v}${enhet ? ` ${enhet}` : ''}`, label]
+            }}
+            labelFormatter={(label) => formaterXTick(String(label))}
           />
-          <Legend wrapperStyle={{ fontSize: 13 }} />
-          {ankerBane && (
-            <Line
-              type="monotone"
-              dataKey="anker"
-              name={`Anker (PPR ${ankerBane.publikasjon.slice(0, 7)})`}
-              stroke="var(--a-blue-500)"
-              strokeWidth={2}
-              strokeDasharray="5 5"
-              dot={false}
-              connectNulls
-            />
-          )}
-          <Line
+          <Legend
+            wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+            formatter={(value) =>
+              value === 'anker'
+                ? `Anker PPR ${ankerBane?.publikasjon?.slice(0, 7) ?? ''}`
+                : navn
+            }
+          />
+          {/* Faktisk serie med gradient-fill */}
+          <Area
             type="monotone"
             dataKey="faktisk"
             name={navn}
             stroke="var(--a-deepblue-700)"
             strokeWidth={2.5}
+            fill="url(#gradFaktisk)"
             dot={false}
-            activeDot={{ r: 4 }}
+            activeDot={{ r: 5, fill: 'var(--a-deepblue-700)', stroke: 'white', strokeWidth: 2 }}
             connectNulls
           />
+          {/* Ankerbane: stiplet oransje linje uten fill */}
+          {ankerBane && (
+            <Line
+              type="monotone"
+              dataKey="anker"
+              name="anker"
+              stroke="var(--a-orange-500)"
+              strokeWidth={2}
+              strokeDasharray="6 4"
+              dot={false}
+              activeDot={{ r: 4, fill: 'var(--a-orange-500)' }}
+              connectNulls
+            />
+          )}
           {ankerPubMaaned && (
             <ReferenceLine
               x={ankerPubMaaned}
               stroke="var(--a-border-strong)"
               strokeDasharray="2 4"
               label={{
-                value: 'Anker pub.',
+                value: 'PPR',
                 position: 'top',
-                fontSize: 11,
+                fontSize: 10,
                 fill: 'var(--a-text-subtle)',
               }}
             />
@@ -148,8 +178,8 @@ export default function AnkerVsFaktiskGraf({
         </ComposedChart>
       </ResponsiveContainer>
       {ankerBane && (
-        <figcaption style={{ marginTop: 'var(--a-spacing-2)', fontSize: 13, color: 'var(--a-text-subtle)' }}>
-          Stiplet linje viser PPR-banen som var offisiell ved sammenligning. Vertikal markor angir publikasjonsdato.
+        <figcaption style={{ marginTop: 'var(--a-spacing-2)', fontSize: 12, color: 'var(--a-text-subtle)' }}>
+          Blå flate = faktisk observert. Stiplet oransje linje = PPR-anker. Vertikal markør = publikasjonsdato.
         </figcaption>
       )}
     </figure>
