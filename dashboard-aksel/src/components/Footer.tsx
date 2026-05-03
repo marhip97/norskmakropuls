@@ -1,53 +1,40 @@
-import { BodyShort, Link as AkselLink } from '@navikt/ds-react'
-
 interface Props {
   generertTidspunkt?: string | null
 }
 
 export default function Footer({ generertTidspunkt }: Props) {
   return (
-    <footer
-      style={{
-        marginTop: 'var(--a-spacing-16)',
-        padding: 'var(--a-spacing-6)',
-        borderTop: '1px solid var(--a-border-subtle)',
-        background: 'var(--a-surface-subtle)',
-      }}
-    >
-      <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 'var(--a-spacing-6)', justifyContent: 'space-between' }}>
-        <div style={{ minWidth: 220 }}>
-          <BodyShort weight="semibold" size="small">norskmakropuls</BodyShort>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)' }}>
-            Automatisert situasjonsbilde av norsk makroøkonomi.
-          </BodyShort>
+    <footer className="footer">
+      <div className="footer-inner">
+        <div style={{ minWidth: 200 }}>
+          <p className="footer-col-title">norskmakropuls</p>
+          <p className="footer-col-text">Automatisert situasjonsbilde av norsk makroøkonomi.</p>
           {generertTidspunkt && (
-            <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginTop: 'var(--a-spacing-1)' }}>
+            <p className="footer-col-text" style={{ marginTop: 4 }}>
               Sist oppdatert: {generertTidspunkt.slice(0, 10)}
-            </BodyShort>
+            </p>
           )}
         </div>
-
-        <div style={{ minWidth: 220 }}>
-          <BodyShort weight="semibold" size="small">Datakilder</BodyShort>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)' }}>SSB Statistikkbanken (NLOD-2.0)</BodyShort>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)' }}>Norges Bank Data API</BodyShort>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)' }}>FRED (St. Louis Fed)</BodyShort>
+        <div style={{ minWidth: 200 }}>
+          <p className="footer-col-title">Datakilder</p>
+          <p className="footer-col-text">SSB Statistikkbanken (NLOD-2.0)</p>
+          <p className="footer-col-text">Norges Bank Data API</p>
+          <p className="footer-col-text">FRED (St. Louis Fed)</p>
         </div>
-
-        <div style={{ minWidth: 220 }}>
-          <BodyShort weight="semibold" size="small">Metodikk</BodyShort>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)' }}>
+        <div style={{ minWidth: 200 }}>
+          <p className="footer-col-title">Metodikk</p>
+          <p className="footer-col-text">
             Datakatalog og spesifikasjon i{' '}
-            <AkselLink href="https://github.com/marhip97/norskmakropuls/blob/main/docs/SPEC.md" target="_blank" rel="noopener">
+            <a className="footer-link" href="https://github.com/marhip97/norskmakropuls/blob/main/docs/SPEC.md" target="_blank" rel="noopener">
               docs/SPEC.md
-            </AkselLink>
-          </BodyShort>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)' }}>
+            </a>
+          </p>
+          <p className="footer-col-text">
             Lisens:{' '}
-            <AkselLink href="https://data.norge.no/nlod/no/2.0" target="_blank" rel="noopener">
+            <a className="footer-link" href="https://data.norge.no/nlod/no/2.0" target="_blank" rel="noopener">
               NLOD 2.0
-            </AkselLink>
-          </BodyShort>
+            </a>
+          </p>
         </div>
       </div>
     </footer>

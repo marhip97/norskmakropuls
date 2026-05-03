@@ -1,4 +1,3 @@
-import { Heading, BodyShort, Alert } from '@navikt/ds-react'
 import { loadSituasjonsbilde, formaterDato } from '@/lib/data'
 import VariabelKort from '@/components/VariabelKort'
 import AnkerVsFaktiskMedVelger, { VINDU_PRESETS } from '@/components/AnkerVsFaktiskMedVelger'
@@ -6,14 +5,13 @@ import AnkerVsFaktiskMedVelger, { VINDU_PRESETS } from '@/components/AnkerVsFakt
 export default function AktivitetPage() {
   const data = loadSituasjonsbilde()
   const variabler = data?.variabler ?? {}
-
   const bnp = variabler['bnp_fastland']
 
   return (
     <>
-      <Heading size="xlarge" level="1" style={{ marginBottom: 'var(--a-spacing-6)' }}>
+      <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.25rem)', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 'var(--s-6)' }}>
         Aktivitet
-      </Heading>
+      </h1>
 
       <div className="kortgrid">
         {['bnp_fastland', 'boligprisvekst', 'k2_kredittvekst'].filter((s) => variabler[s]).map((s) => (
@@ -23,19 +21,17 @@ export default function AktivitetPage() {
 
       {bnp && (
         <div className="seksjon-aktivitet">
-          <Heading size="medium" level="2" className="seksjon-tittel">
-            BNP Fastlands-Norge: faktisk vs ankerbane
-          </Heading>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-2)' }}>
+          <h2 className="seksjon-tittel">BNP Fastlands-Norge: faktisk vs ankerbane</h2>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: 'var(--s-2)' }}>
             {bnp.anker_bane
               ? `Anker: PPR ${formaterDato(bnp.anker_bane.publikasjon)}`
               : 'Ankerbane for BNP er ikke i pipelinen ennå — viser kun faktisk observerte verdier.'}
-          </BodyShort>
+          </p>
           {!bnp.anker_bane && (
-            <Alert variant="info" size="small" style={{ marginBottom: 'var(--a-spacing-3)' }}>
-              BNP Fastlands-Norge er ikke blant ankerserienes i gjeldende PPR-seed. Grafen viser
+            <div className="alert alert-info" style={{ marginBottom: 'var(--s-3)' }}>
+              BNP Fastlands-Norge er ikke blant ankerseriene i gjeldende PPR-seed. Grafen viser
               historisk utvikling uten sammenligning mot prognose.
-            </Alert>
+            </div>
           )}
           <AnkerVsFaktiskMedVelger
             historikk={bnp.historikk}

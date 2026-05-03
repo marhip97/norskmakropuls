@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   const data = loadSituasjonsbilde()
   return (
-    <html lang="nb" data-theme="light">
+    <html lang="nb">
       <body>
         <NavBar />
         <main className="innhold">{children}</main>

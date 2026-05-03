@@ -1,4 +1,3 @@
-import { Heading, BodyShort, Alert, ReadMore } from '@navikt/ds-react'
 import { loadSituasjonsbilde, formaterDato } from '@/lib/data'
 import TidsserieGrafKlient from '@/components/TidsserieGrafKlient'
 import VariabelKort from '@/components/VariabelKort'
@@ -25,9 +24,9 @@ export default function RentePage() {
 
   return (
     <>
-      <Heading size="xlarge" level="1" style={{ marginBottom: 'var(--a-spacing-6)' }}>
+      <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.25rem)', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 'var(--s-6)' }}>
         Rente og finansielle forhold
-      </Heading>
+      </h1>
 
       <div className="kortgrid">
         {renteSerier.filter(s => variabler[s]).map(s => (
@@ -36,12 +35,12 @@ export default function RentePage() {
       </div>
 
       <div className="seksjon-rente">
-        <Heading size="medium" level="2" className="seksjon-tittel">Skyggerentebane</Heading>
+        <h2 className="seksjon-tittel">Skyggerentebane</h2>
         {skygge ? (
           <>
-            <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-3)' }}>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: 'var(--s-3)' }}>
               Anker: PPR {formaterDato(skygge.anker_publikasjon)} · Shaded område viser 50 % konfidensintervall
-            </BodyShort>
+            </p>
             <figure aria-label={`Skyggerentebane mot anker fra ${skygge.anker_publikasjon}`} style={{ margin: 0 }}>
               <div className="graf-panel" style={{ marginTop: 0 }}>
                 <TidsserieGrafKlient
@@ -54,50 +53,51 @@ export default function RentePage() {
                   }))}
                   xKey="periode"
                   linjer={[
-                    { dataKey: 'Anker', farge: 'var(--a-orange-500)', navn: 'PPR-anker', stiplet: true },
-                    { dataKey: 'Skygge', farge: 'var(--a-deepblue-700)', navn: 'Skyggerentebane' },
+                    { dataKey: 'Anker', farge: '#f97316', navn: 'PPR-anker', stiplet: true },
+                    { dataKey: 'Skygge', farge: '#1d4ed8', navn: 'Skyggerentebane' },
                   ]}
-                  omraade={{ dataKeyOver: 'Ovre', dataKeyUnder: 'Nedre', farge: 'var(--a-blue-400)' }}
+                  omraade={{ dataKeyOver: 'Ovre', dataKeyUnder: 'Nedre', farge: '#93c5fd' }}
                   yEtikett="%"
                   hoyde={320}
                 />
               </div>
             </figure>
 
-            <Heading size="xsmall" level="3" style={{ marginTop: 'var(--a-spacing-6)', marginBottom: 'var(--a-spacing-2)' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginTop: 'var(--s-6)', marginBottom: 'var(--s-2)' }}>
               Reviderte perioder
-            </Heading>
-            <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-3)' }}>
+            </h3>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: 'var(--s-3)' }}>
               Kun perioder med revisjon eller etter publikasjonsdato. Historiske nullrevisjoner er skjult.
-            </BodyShort>
+            </p>
             <SkyggeTabell rader={aktiveRader} />
 
             {alleRader.length > aktiveRader.length && (
-              <ReadMore
-                header={`Vis hele banen (${alleRader.length} perioder)`}
-                size="small"
-                defaultOpen={false}
-                style={{ marginTop: 'var(--a-spacing-3)' }}
-              >
-                <SkyggeTabell rader={alleRader} />
-              </ReadMore>
+              <details className="readmore" style={{ marginTop: 'var(--s-3)' }}>
+                <summary>Vis hele banen ({alleRader.length} perioder)</summary>
+                <div className="readmore-body">
+                  <SkyggeTabell rader={alleRader} />
+                </div>
+              </details>
             )}
 
-            <ReadMore header="Hva er en skyggerentebane?" size="small" defaultOpen={false} style={{ marginTop: 'var(--a-spacing-3)' }}>
-              Skyggerentebanen tar utgangspunkt i Norges Banks publiserte rentebane (anker) og legger
-              på en modellert revisjon basert på nyhetene siden publikasjonen — overraskelser i KPI,
-              KPI-JAE, ledighet, valutakurs og oljepris. Revisjonen demper seg eksponentielt utover
-              horisonten. Historiske perioder revideres ikke. Det shaded området viser et 50 %
-              konfidensintervall rundt skyggebanen.
-            </ReadMore>
+            <details className="readmore" style={{ marginTop: 'var(--s-3)' }}>
+              <summary>Hva er en skyggerentebane?</summary>
+              <div className="readmore-body">
+                Skyggerentebanen tar utgangspunkt i Norges Banks publiserte rentebane (anker) og legger
+                på en modellert revisjon basert på nyhetene siden publikasjonen — overraskelser i KPI,
+                KPI-JAE, ledighet, valutakurs og oljepris. Revisjonen demper seg eksponentielt utover
+                horisonten. Historiske perioder revideres ikke. Det shaded området viser et 50 %
+                konfidensintervall rundt skyggebanen.
+              </div>
+            </details>
           </>
         ) : (
-          <Alert variant="info">Skyggerentebane ikke tilgjengelig. Kjør scripts/generate_cache.py.</Alert>
+          <div className="alert alert-info">Skyggerentebane ikke tilgjengelig. Kjør scripts/generate_cache.py.</div>
         )}
       </div>
 
       <div className="seksjon-rente">
-        <Heading size="medium" level="2" className="seksjon-tittel">Valutakurser</Heading>
+        <h2 className="seksjon-tittel">Valutakurser</h2>
         <div className="kortgrid">
           {['eurnok', 'usd_nok', 'i44'].filter(s => variabler[s]).map(s => (
             <VariabelKort key={s} serieId={s} data={variabler[s]} />

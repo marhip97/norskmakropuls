@@ -1,4 +1,3 @@
-import { Heading, BodyShort, Alert } from '@navikt/ds-react'
 import { loadSituasjonsbilde, formaterDato } from '@/lib/data'
 import VariabelKort from '@/components/VariabelKort'
 import AnkerVsFaktiskMedVelger, { VINDU_PRESETS } from '@/components/AnkerVsFaktiskMedVelger'
@@ -6,14 +5,13 @@ import AnkerVsFaktiskMedVelger, { VINDU_PRESETS } from '@/components/AnkerVsFakt
 export default function InternasjonalPage() {
   const data = loadSituasjonsbilde()
   const variabler = data?.variabler ?? {}
-
   const olje = variabler['oljepris']
 
   return (
     <>
-      <Heading size="xlarge" level="1" style={{ marginBottom: 'var(--a-spacing-6)' }}>
+      <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.25rem)', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 'var(--s-6)' }}>
         Internasjonal
-      </Heading>
+      </h1>
 
       <div className="kortgrid">
         {['oljepris', 'ecb_rente', 'fed_funds', 'handelspartnervekst', 'us_10y_yield', 'us_cpi']
@@ -25,16 +23,14 @@ export default function InternasjonalPage() {
 
       {olje && (
         <div className="seksjon-internasjonal">
-          <Heading size="medium" level="2" className="seksjon-tittel">
-            Oljepris Brent (USD/fat)
-          </Heading>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-2)' }}>
+          <h2 className="seksjon-tittel">Oljepris Brent (USD/fat)</h2>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: 'var(--s-2)' }}>
             Daglige observasjoner siden {formaterDato(olje.historikk[0]?.dato ?? null)}.
-          </BodyShort>
-          <Alert variant="info" size="small" style={{ marginBottom: 'var(--a-spending-3)' }}>
+          </p>
+          <div className="alert alert-info" style={{ marginBottom: 'var(--s-3)' }}>
             Oljepris er en eksogen variabel i Norges Banks PPR — det vil si at den brukes som
-            teknisk forutsetning, ikke som en variabel Norges Bank prognoseser. Ingen ankerbane vises.
-          </Alert>
+            teknisk forutsetning, ikke som en variabel Norges Bank prognoserer. Ingen ankerbane vises.
+          </div>
           <AnkerVsFaktiskMedVelger
             historikk={olje.historikk}
             ankerBane={null}

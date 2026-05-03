@@ -67,11 +67,11 @@ export default function AnkerVsFaktiskGraf({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'var(--a-bg-subtle)',
-          borderRadius: 'var(--a-border-radius-medium)',
+          background: 'var(--surface-muted)',
+          borderRadius: 'var(--r-md)',
         }}
       >
-        <span style={{ color: 'var(--a-text-subtle)' }}>Ingen data</span>
+        <span style={{ color: 'var(--text-faint)', fontSize: '0.875rem' }}>Ingen data</span>
       </div>
     )
   }
@@ -86,37 +86,37 @@ export default function AnkerVsFaktiskGraf({
         <ComposedChart data={visningsdata} margin={{ top: 10, right: 16, left: 0, bottom: 8 }}>
           <defs>
             <linearGradient id="gradFaktisk" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" style={{ stopColor: 'var(--a-deepblue-700)', stopOpacity: 0.22 }} />
-              <stop offset="95%" style={{ stopColor: 'var(--a-deepblue-700)', stopOpacity: 0 }} />
+              <stop offset="5%"  style={{ stopColor: '#1d4ed8', stopOpacity: 0.2 }} />
+              <stop offset="95%" style={{ stopColor: '#1d4ed8', stopOpacity: 0 }} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--a-border-subtle)" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
           <XAxis
             dataKey="dato"
             tickFormatter={formaterXTick}
-            tick={{ fontSize: 11, fill: 'var(--a-text-subtle)' }}
-            axisLine={{ stroke: 'var(--a-border-subtle)' }}
+            tick={{ fontSize: 11, fill: '#64748b' }}
+            axisLine={{ stroke: '#e2e8f0' }}
             tickLine={false}
             interval="preserveStartEnd"
           />
           <YAxis
-            tick={{ fontSize: 11, fill: 'var(--a-text-subtle)' }}
+            tick={{ fontSize: 11, fill: '#64748b' }}
             axisLine={false}
             tickLine={false}
             width={enhet ? 48 : 36}
             label={
               enhet
-                ? { value: enhet, angle: -90, position: 'insideLeft', fontSize: 11, fill: 'var(--a-text-subtle)', dx: 14 }
+                ? { value: enhet, angle: -90, position: 'insideLeft', fontSize: 11, fill: '#64748b', dx: 14 }
                 : undefined
             }
           />
           <Tooltip
             contentStyle={{
-              background: 'var(--a-surface-default)',
-              border: '1px solid var(--a-border-default)',
-              borderRadius: 'var(--a-border-radius-medium)',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
               fontSize: 13,
-              boxShadow: 'var(--a-shadow-small)',
+              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.07)',
             }}
             formatter={(value, name) => {
               const v = typeof value === 'number' ? value.toFixed(2) : value
@@ -136,50 +136,43 @@ export default function AnkerVsFaktiskGraf({
                 : navn
             }
           />
-          {/* Faktisk serie med gradient-fill */}
           <Area
             type="monotone"
             dataKey="faktisk"
             name={navn}
-            stroke="var(--a-deepblue-700)"
+            stroke="#1d4ed8"
             strokeWidth={2.5}
             fill="url(#gradFaktisk)"
             dot={false}
-            activeDot={{ r: 5, fill: 'var(--a-deepblue-700)', stroke: 'white', strokeWidth: 2 }}
+            activeDot={{ r: 5, fill: '#1d4ed8', stroke: '#ffffff', strokeWidth: 2 }}
             connectNulls
           />
-          {/* Ankerbane: stiplet oransje linje uten fill */}
           {ankerBane && (
             <Line
               type="monotone"
               dataKey="anker"
               name="anker"
-              stroke="var(--a-orange-500)"
+              stroke="#f97316"
               strokeWidth={2}
               strokeDasharray="6 4"
               dot={false}
-              activeDot={{ r: 4, fill: 'var(--a-orange-500)' }}
+              activeDot={{ r: 4, fill: '#f97316' }}
               connectNulls
             />
           )}
           {ankerPubMaaned && (
             <ReferenceLine
               x={ankerPubMaaned}
-              stroke="var(--a-border-strong)"
+              stroke="#94a3b8"
               strokeDasharray="2 4"
-              label={{
-                value: 'PPR',
-                position: 'top',
-                fontSize: 10,
-                fill: 'var(--a-text-subtle)',
-              }}
+              label={{ value: 'PPR', position: 'top', fontSize: 10, fill: '#94a3b8' }}
             />
           )}
         </ComposedChart>
       </ResponsiveContainer>
       {ankerBane && (
-        <figcaption style={{ marginTop: 'var(--a-spacing-2)', fontSize: 12, color: 'var(--a-text-subtle)' }}>
-          Blå flate = faktisk observert. Stiplet oransje linje = PPR-anker. Vertikal markør = publikasjonsdato.
+        <figcaption style={{ marginTop: 'var(--s-2)', fontSize: 12, color: 'var(--text-faint)' }}>
+          Blå flate = faktisk observert · Stiplet oransje = PPR-anker · Vertikal markør = publikasjonsdato
         </figcaption>
       )}
     </figure>

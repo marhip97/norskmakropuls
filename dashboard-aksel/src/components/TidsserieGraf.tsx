@@ -29,7 +29,6 @@ interface Props {
   data: Record<string, unknown>[]
   xKey: string
   linjer: Linje[]
-  /** Shaded konfidensband mellom to datanokler. */
   omraade?: Omraade
   xEtikett?: string
   yEtikett?: string
@@ -67,11 +66,11 @@ export default function TidsserieGraf({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'var(--a-bg-subtle)',
-          borderRadius: 'var(--a-border-radius-medium)',
+          background: 'var(--surface-muted)',
+          borderRadius: 'var(--r-md)',
         }}
       >
-        <span style={{ color: 'var(--a-text-subtle)' }}>Ingen data</span>
+        <span style={{ color: 'var(--text-faint)', fontSize: '0.875rem' }}>Ingen data</span>
       </div>
     )
   }
@@ -80,18 +79,18 @@ export default function TidsserieGraf({
     <div role="img" aria-label={ariaLabel}>
       <ResponsiveContainer width="100%" height={hoyde}>
         <ComposedChart data={data} margin={{ top: 10, right: 16, left: 0, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--a-border-subtle)" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
           <XAxis
             dataKey={xKey}
             tickFormatter={formaterXTick}
-            tick={{ fontSize: 11, fill: 'var(--a-text-subtle)' }}
-            axisLine={{ stroke: 'var(--a-border-subtle)' }}
+            tick={{ fontSize: 11, fill: '#64748b' }}
+            axisLine={{ stroke: '#e2e8f0' }}
             tickLine={false}
             interval="preserveStartEnd"
             label={xEtikett ? { value: xEtikett, position: 'insideBottom', offset: -4, fontSize: 11 } : undefined}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: 'var(--a-text-subtle)' }}
+            tick={{ fontSize: 11, fill: '#64748b' }}
             axisLine={false}
             tickLine={false}
             width={40}
@@ -99,17 +98,16 @@ export default function TidsserieGraf({
           />
           <Tooltip
             contentStyle={{
-              background: 'var(--a-surface-default)',
-              border: '1px solid var(--a-border-default)',
-              borderRadius: 'var(--a-border-radius-medium)',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
               fontSize: 13,
-              boxShadow: 'var(--a-shadow-small)',
+              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.07)',
             }}
             labelFormatter={(label) => formaterXTick(String(label))}
           />
           <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
 
-          {/* Shaded konfidensband — rendres foer linjene slik at de havner bakerst */}
           {omraade && (
             <>
               <Area
@@ -127,7 +125,7 @@ export default function TidsserieGraf({
                 type="monotone"
                 dataKey={omraade.dataKeyUnder}
                 stroke="none"
-                fill="var(--a-surface-default)"
+                fill="#ffffff"
                 fillOpacity={1}
                 legendType="none"
                 name="Nedre band"
@@ -137,7 +135,6 @@ export default function TidsserieGraf({
             </>
           )}
 
-          {/* Linjer i forgrunnen */}
           {linjer.map((l) => (
             <Line
               key={l.dataKey}
