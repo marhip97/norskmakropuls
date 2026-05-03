@@ -1,6 +1,5 @@
 'use client'
 
-import { Table, Tag } from '@navikt/ds-react'
 import type { SkyggerentePunkt } from '@/lib/types'
 import { formaterDelta } from '@/lib/utils'
 
@@ -10,40 +9,36 @@ interface Props {
 
 export default function SkyggeTabell({ rader }: Props) {
   return (
-    <div style={{ overflowX: 'auto' }}>
-      <Table size="small" zebraStripes>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
-            <Table.HeaderCell scope="col" style={{ textAlign: 'right' }}>Anker</Table.HeaderCell>
-            <Table.HeaderCell scope="col" style={{ textAlign: 'right' }}>Skygge</Table.HeaderCell>
-            <Table.HeaderCell scope="col" style={{ textAlign: 'right' }}>Revisjon</Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
+    <div className="data-table-wrap">
+      <table className="data-table">
+        <thead>
+          <tr>
+            <th>Periode</th>
+            <th style={{ textAlign: 'right' }}>Anker</th>
+            <th style={{ textAlign: 'right' }}>Skygge</th>
+            <th style={{ textAlign: 'right' }}>Revisjon</th>
+          </tr>
+        </thead>
+        <tbody>
           {rader.map((p) => {
             const rev = p.skygge - p.anker
             const harRevisjon = Math.abs(rev) > 1e-4
-            const tagVariant = !harRevisjon ? 'neutral' : rev > 0 ? 'info' : 'warning'
+            const badgeCls = !harRevisjon ? 'badge badge-neutral' : rev > 0 ? 'badge badge-info' : 'badge badge-warning'
             return (
-              <Table.Row key={p.periode}>
-                <Table.DataCell>{p.periode.slice(0, 7)}</Table.DataCell>
-                <Table.DataCell style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                  {p.anker.toFixed(2)}
-                </Table.DataCell>
-                <Table.DataCell style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                  {p.skygge.toFixed(2)}
-                </Table.DataCell>
-                <Table.DataCell style={{ textAlign: 'right' }}>
-                  <Tag variant={tagVariant} size="xsmall">
+              <tr key={p.periode}>
+                <td>{p.periode.slice(0, 7)}</td>
+                <td className="tr">{p.anker.toFixed(2)}</td>
+                <td className="tr">{p.skygge.toFixed(2)}</td>
+                <td style={{ textAlign: 'right' }}>
+                  <span className={badgeCls}>
                     {harRevisjon ? formaterDelta(rev) : '0.00'}
-                  </Tag>
-                </Table.DataCell>
-              </Table.Row>
+                  </span>
+                </td>
+              </tr>
             )
           })}
-        </Table.Body>
-      </Table>
+        </tbody>
+      </table>
     </div>
   )
 }

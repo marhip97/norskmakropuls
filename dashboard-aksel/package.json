@@ -8,9 +8,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "@navikt/aksel-icons": "^8.10.3",
-    "@navikt/ds-css": "^8.10.3",
-    "@navikt/ds-react": "^8.10.3",
     "next": "15.3.9",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

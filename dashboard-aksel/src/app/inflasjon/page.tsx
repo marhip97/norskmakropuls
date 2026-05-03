@@ -1,4 +1,3 @@
-import { Heading, BodyShort, Alert, ReadMore } from '@navikt/ds-react'
 import { loadSituasjonsbilde, formaterDelta, formaterDato } from '@/lib/data'
 import VariabelKort from '@/components/VariabelKort'
 import AnkerVsFaktiskMedVelger, { VINDU_PRESETS } from '@/components/AnkerVsFaktiskMedVelger'
@@ -14,9 +13,9 @@ export default function InflasjonPage() {
 
   return (
     <>
-      <Heading size="xlarge" level="1" style={{ marginBottom: 'var(--a-spacing-6)' }}>
+      <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.25rem)', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 'var(--s-6)' }}>
         Inflasjon
-      </Heading>
+      </h1>
 
       <div className="kortgrid">
         {['kpi', 'kpi_jae'].filter((s) => variabler[s]).map((s) => (
@@ -26,19 +25,17 @@ export default function InflasjonPage() {
 
       {kpiJae && (
         <div className="seksjon-inflasjon">
-          <Heading size="medium" level="2" className="seksjon-tittel">
-            KPI-JAE: faktisk vs ankerbane
-          </Heading>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-2)' }}>
+          <h2 className="seksjon-tittel">KPI-JAE: faktisk vs ankerbane</h2>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: 'var(--s-2)' }}>
             {kpiJae.anker_bane
               ? `Anker: PPR ${formaterDato(kpiJae.anker_bane.publikasjon)}`
               : 'Ankerbane mangler — viser kun faktisk observerte verdier.'}
-          </BodyShort>
+          </p>
           {kpiJae.anker_bane && (
-            <Alert variant="info" size="small" style={{ marginBottom: 'var(--a-spacing-3)' }}>
+            <div className="alert alert-info" style={{ marginBottom: 'var(--s-3)' }}>
               Når den blå flaten ligger over den stiplede oransje linjen, er inflasjonen høyere enn
               Norges Bank anslo i PPR {kpiJae.anker_bane.publikasjon.slice(0, 7)}.
-            </Alert>
+            </div>
           )}
           <AnkerVsFaktiskMedVelger
             historikk={kpiJae.historikk}
@@ -53,19 +50,17 @@ export default function InflasjonPage() {
 
       {kpi && (
         <div className="seksjon-inflasjon">
-          <Heading size="medium" level="2" className="seksjon-tittel">
-            KPI: faktisk vs ankerbane
-          </Heading>
-          <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-2)' }}>
+          <h2 className="seksjon-tittel">KPI: faktisk vs ankerbane</h2>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: 'var(--s-2)' }}>
             {kpi.anker_bane
               ? `Anker: PPR ${formaterDato(kpi.anker_bane.publikasjon)}`
               : 'Ankerbane mangler — viser kun faktisk observerte verdier.'}
-          </BodyShort>
+          </p>
           {kpi.anker_bane && (
-            <Alert variant="info" size="small" style={{ marginBottom: 'var(--a-spacing-3)' }}>
+            <div className="alert alert-info" style={{ marginBottom: 'var(--s-3)' }}>
               KPI inkluderer energi og avgifter. KPI-JAE er den renere kjerneinflasjons-indikatoren
               Norges Bank vektlegger i pengepolitikken.
-            </Alert>
+            </div>
           )}
           <AnkerVsFaktiskMedVelger
             historikk={kpi.historikk}
@@ -79,12 +74,10 @@ export default function InflasjonPage() {
       )}
 
       <div className="seksjon-inflasjon">
-        <Heading size="medium" level="2" className="seksjon-tittel">
-          KPI-JAE-dekomposisjon
-        </Heading>
+        <h2 className="seksjon-tittel">KPI-JAE-dekomposisjon</h2>
         {dekomp ? (
           <>
-            <BodyShort style={{ marginBottom: 'var(--a-spacing-3)' }}>
+            <p style={{ marginBottom: 'var(--s-3)' }}>
               Total overraskelse:{' '}
               <strong>
                 {dekomp.total_surprise !== null
@@ -94,28 +87,31 @@ export default function InflasjonPage() {
               {dekomp.dominant_driver !== 'kpi_jae' && (
                 <> · Hoveddriver: <strong>{dekomp.dominant_driver}</strong></>
               )}
-            </BodyShort>
+            </p>
             <InflasjonDekomposisjonGrafKlient
               bidrag={dekomp.bidrag_liste}
               manglende={dekomp.manglende_komponenter}
               totalSurprise={dekomp.total_surprise}
             />
             {dekomp.manglende_komponenter.length > 0 && (
-              <Alert variant="info" size="small" style={{ marginTop: 'var(--a-spacing-3)' }}>
+              <div className="alert alert-info" style={{ marginTop: 'var(--s-3)' }}>
                 Komponenter ikke i pipeline ennå: {dekomp.manglende_komponenter.join(', ')}.
                 Plassholdere er vist stiplet i diagrammet.
-              </Alert>
+              </div>
             )}
-            <ReadMore header="Hva betyr dekomposisjonen?" size="small" defaultOpen={false}>
-              Hver komponent (tjenester, importerte varer, mat, husleie, energi) bidrar til total
-              KPI-JAE-overraskelse vektet med kurvandelen. Bidraget = (faktisk – anker) × kurvvekt.
-              Når en komponent mangler i pipelinen, vises den som plassholder slik at det er tydelig
-              hvilke deler av nedbrytingen som er utestående. Total overraskelse oppgis i
-              prosentpoeng (pp).
-            </ReadMore>
+            <details className="readmore" style={{ marginTop: 'var(--s-3)' }}>
+              <summary>Hva betyr dekomposisjonen?</summary>
+              <div className="readmore-body">
+                Hver komponent (tjenester, importerte varer, mat, husleie, energi) bidrar til total
+                KPI-JAE-overraskelse vektet med kurvandelen. Bidraget = (faktisk – anker) × kurvvekt.
+                Når en komponent mangler i pipelinen, vises den som plassholder slik at det er tydelig
+                hvilke deler av nedbrytingen som er utestående. Total overraskelse oppgis i
+                prosentpoeng (pp).
+              </div>
+            </details>
           </>
         ) : (
-          <Alert variant="info">Dekomposisjon ikke tilgjengelig.</Alert>
+          <div className="alert alert-info">Dekomposisjon ikke tilgjengelig.</div>
         )}
       </div>
     </>

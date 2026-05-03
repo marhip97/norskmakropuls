@@ -1,4 +1,3 @@
-import { Heading, BodyShort, Alert, ReadMore } from '@navikt/ds-react'
 import {
   loadSituasjonsbilde,
   formaterDato,
@@ -7,100 +6,54 @@ import {
   trendPil,
   newsSignal,
 } from '@/lib/data'
-import VariabelKort from '@/components/VariabelKort'
 import VariabelKortInteraktiv from '@/components/VariabelKortInteraktiv'
 import type { VariabelData } from '@/lib/types'
 
 const GRUPPER: { id: string; label: string; serier: string[] }[] = [
-  {
-    id: 'inflasjon',
-    label: 'Inflasjon',
-    serier: ['kpi', 'kpi_jae'],
-  },
-  {
-    id: 'rente',
-    label: 'Rente og finansielle forhold',
-    serier: ['styringsrente', 'nowa', 'eurnok', 'usd_nok', 'gov_yield_3y_no', 'gov_yield_10y_no'],
-  },
-  {
-    id: 'aktivitet',
-    label: 'Aktivitet',
-    serier: ['bnp_fastland', 'boligprisvekst', 'k2_kredittvekst'],
-  },
-  {
-    id: 'arbeidsmarked',
-    label: 'Arbeidsmarked',
-    serier: ['ledighet_aku', 'lonnsvekst'],
-  },
-  {
-    id: 'internasjonal',
-    label: 'Internasjonal',
-    serier: ['oljepris', 'ecb_rente', 'handelspartnervekst', 'fed_funds', 'us_10y_yield', 'us_cpi'],
-  },
+  { id: 'inflasjon',     label: 'Inflasjon',                  serier: ['kpi', 'kpi_jae'] },
+  { id: 'rente',         label: 'Rente og finansielle forhold',serier: ['styringsrente', 'nowa', 'eurnok', 'usd_nok', 'gov_yield_3y_no', 'gov_yield_10y_no'] },
+  { id: 'aktivitet',     label: 'Aktivitet',                   serier: ['bnp_fastland', 'boligprisvekst', 'k2_kredittvekst'] },
+  { id: 'arbeidsmarked', label: 'Arbeidsmarked',               serier: ['ledighet_aku', 'lonnsvekst'] },
+  { id: 'internasjonal', label: 'Internasjonal',               serier: ['oljepris', 'ecb_rente', 'handelspartnervekst', 'fed_funds', 'us_10y_yield', 'us_cpi'] },
 ]
 
 const NOKKELSERIER = ['kpi_jae', 'styringsrente', 'bnp_fastland', 'ledighet_aku']
 
 const GRUPPE_TIL_LENKE: Record<string, string> = {
-  inflasjon: '/inflasjon',
-  rente: '/rente',
-  aktivitet: '/aktivitet',
-  arbeidsmarked: '/arbeidsmarked',
-  internasjonal: '/internasjonal',
+  inflasjon: '/inflasjon', rente: '/rente', aktivitet: '/aktivitet',
+  arbeidsmarked: '/arbeidsmarked', internasjonal: '/internasjonal',
 }
 
-function BannerElement({
-  navn,
-  verdi,
-  enhet,
-  news,
-  standardisert,
-  ankerNavn,
-}: {
-  navn: string
-  verdi: number | null
-  enhet: string
-  news: number | null
-  standardisert: number | null
-  ankerNavn: string | null
+function BannerElement({ navn, verdi, enhet, news, standardisert, ankerNavn }: {
+  navn: string; verdi: number | null; enhet: string
+  news: number | null; standardisert: number | null; ankerNavn: string | null
 }) {
   const pil = trendPil(news, standardisert)
   const signal = newsSignal(standardisert)
   const aksent =
-    signal === 'positiv' ? 'var(--a-deepblue-600)' :
-    signal === 'negativ' ? 'var(--a-purple-600)' :
-    'var(--a-text-subtle)'
+    signal === 'positiv' ? 'var(--signal-pos)' :
+    signal === 'negativ' ? 'var(--signal-neg)' :
+    'var(--text-faint)'
 
   return (
     <div style={{ minWidth: 0, flex: 1 }}>
-      <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 2 }}>
-        {navn}
-      </BodyShort>
+      <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: 2 }}>{navn}</p>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-        <Heading size="medium" level="2">
+        <span style={{ fontSize: '1.375rem', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text)' }}>
           {formaterVerdi(verdi, enhet)}
-        </Heading>
-        {pil && (
-          <span aria-hidden="true" style={{ fontSize: 20, color: aksent, fontWeight: 700 }}>
-            {pil}
-          </span>
-        )}
+        </span>
+        {pil && <span aria-hidden="true" style={{ fontSize: 18, color: aksent, fontWeight: 700 }}>{pil}</span>}
       </div>
       {news !== null && !isNaN(news) && (
-        <BodyShort size="small" style={{ color: aksent, marginTop: 2 }}>
-          {formaterDelta(news, enhet)}
-          {ankerNavn ? ` vs ${ankerNavn}` : ' vs anker'}
-        </BodyShort>
+        <p style={{ fontSize: '0.8125rem', color: aksent, marginTop: 2 }}>
+          {formaterDelta(news, enhet)}{ankerNavn ? ` vs ${ankerNavn}` : ' vs anker'}
+        </p>
       )}
     </div>
   )
 }
 
-interface Avvik {
-  serieId: string
-  data: VariabelData
-  std: number
-}
+interface Avvik { serieId: string; data: VariabelData; std: number }
 
 function ToppTreAvvik({ variabler }: { variabler: Record<string, VariabelData> }) {
   const kandidater: Avvik[] = Object.entries(variabler)
@@ -111,10 +64,10 @@ function ToppTreAvvik({ variabler }: { variabler: Record<string, VariabelData> }
 
   if (kandidater.length === 0) {
     return (
-      <Alert variant="info" size="small">
+      <div className="alert alert-info">
         Ingen standardiserte avvik er beregnet ennå — siste observasjoner kan være fra før gjeldende
         ankerbane ble publisert.
-      </Alert>
+      </div>
     )
   }
 
@@ -124,11 +77,10 @@ function ToppTreAvvik({ variabler }: { variabler: Record<string, VariabelData> }
         const lenke = GRUPPE_TIL_LENKE[data.gruppe] ?? '/'
         const sig = newsSignal(data.standardisert_news)
         const aksent =
-          sig === 'positiv' ? 'var(--a-deepblue-600)' :
-          sig === 'negativ' ? 'var(--a-purple-600)' :
-          'var(--a-text-subtle)'
-        const std = data.standardisert_news ?? 0
-        const barBredde = Math.min(Math.abs(std) / 2, 1) * 100
+          sig === 'positiv' ? 'var(--signal-pos)' :
+          sig === 'negativ' ? 'var(--signal-neg)' :
+          'var(--text-faint)'
+        const barBredde = Math.min(Math.abs(data.standardisert_news ?? 0) / 2, 1) * 100
 
         return (
           <a
@@ -137,48 +89,36 @@ function ToppTreAvvik({ variabler }: { variabler: Record<string, VariabelData> }
             style={{
               textDecoration: 'none',
               color: 'inherit',
-              background: 'var(--a-surface-default)',
-              borderRadius: 'var(--a-border-radius-xlarge)',
-              padding: 'var(--a-spacing-4)',
-              boxShadow: 'var(--a-shadow-small)',
+              background: 'var(--surface)',
+              borderRadius: 'var(--r-lg)',
+              padding: 'var(--s-4)',
+              boxShadow: 'var(--shadow-sm)',
+              border: '1px solid var(--border)',
               borderLeft: `4px solid ${aksent}`,
               display: 'block',
-              transition: 'box-shadow 0.15s ease, transform 0.15s ease',
+              transition: 'box-shadow 0.15s, transform 0.15s',
             }}
             onMouseEnter={(e) => {
               const el = e.currentTarget as HTMLElement
-              el.style.boxShadow = 'var(--a-shadow-medium)'
-              el.style.transform = 'translateY(-2px)'
+              el.style.boxShadow = '0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07)'
+              el.style.transform = 'translateY(-1px)'
             }}
             onMouseLeave={(e) => {
               const el = e.currentTarget as HTMLElement
-              el.style.boxShadow = 'var(--a-shadow-small)'
+              el.style.boxShadow = 'var(--shadow-sm)'
               el.style.transform = 'none'
             }}
           >
-            <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 2 }}>
-              {data.navn}
-            </BodyShort>
-            <Heading size="small" level="3" style={{ marginBottom: 4 }}>
+            <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: 2 }}>{data.navn}</p>
+            <p style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: 4, color: 'var(--text)' }}>
               {formaterVerdi(data.siste_verdi, data.enhet)}
-            </Heading>
-            <BodyShort size="small" style={{ color: aksent, marginBottom: 'var(--a-spacing-2)' }}>
+            </p>
+            <p style={{ fontSize: '0.8125rem', color: aksent, marginBottom: 'var(--s-2)' }}>
               {formaterDelta(data.news, data.enhet)} ·{' '}
-              {data.standardisert_news !== null
-                ? `${formaterDelta(data.standardisert_news)} std`
-                : '—'}
-            </BodyShort>
-            {/* Visuell avvik-bar */}
-            <div style={{ background: 'var(--a-border-subtle)', borderRadius: 2, height: 4, overflow: 'hidden' }}>
-              <div
-                style={{
-                  width: `${barBredde}%`,
-                  height: '100%',
-                  background: aksent,
-                  borderRadius: 2,
-                  transition: 'width 0.3s ease',
-                }}
-              />
+              {data.standardisert_news !== null ? `${formaterDelta(data.standardisert_news)} std` : '—'}
+            </p>
+            <div style={{ background: 'var(--border)', borderRadius: 2, height: 3, overflow: 'hidden' }}>
+              <div style={{ width: `${barBredde}%`, height: '100%', background: aksent, borderRadius: 2, transition: 'width 0.3s' }} />
             </div>
           </a>
         )
@@ -193,31 +133,26 @@ export default function MakropulsPage() {
   if (!data) {
     return (
       <>
-        <Heading size="xlarge" level="1" style={{ marginBottom: 'var(--a-spacing-4)' }}>
-          Makropuls
-        </Heading>
-        <Alert variant="warning">
+        <h1 style={{ fontSize: '2rem', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 'var(--s-4)' }}>Makropuls</h1>
+        <div className="alert alert-warning">
           Ingen situasjonsdata tilgjengelig ennå. Kjør scripts/generate_cache.py for å generere data.
-        </Alert>
+        </div>
       </>
     )
   }
 
-  const nokkeldata = NOKKELSERIER
-    .filter((s) => data.variabler[s])
-    .map((s) => ({ id: s, ...data.variabler[s] }))
+  const nokkeldata = NOKKELSERIER.filter((s) => data.variabler[s]).map((s) => ({ id: s, ...data.variabler[s] }))
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 'var(--a-spacing-2)', marginBottom: 'var(--a-spacing-4)' }}>
-        <Heading size="xlarge" level="1">Makropuls</Heading>
-        <BodyShort size="small" style={{ color: 'var(--a-text-subtle)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 'var(--s-2)', marginBottom: 'var(--s-4)' }}>
+        <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.25rem)', fontWeight: 700, letterSpacing: '-0.02em' }}>Makropuls</h1>
+        <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
           Oppdatert {formaterDato(data.generert)}
           {data.anker_vintage && ` · Anker: PPR ${formaterDato(data.anker_vintage)}`}
-        </BodyShort>
+        </p>
       </div>
 
-      {/* Situasjonsbanner: fire-piler-rammeverket */}
       {nokkeldata.length > 0 && (
         <div className="situasjonsbanner">
           {nokkeldata.map((v) => (
@@ -234,40 +169,35 @@ export default function MakropulsPage() {
         </div>
       )}
 
-      {/* Topp-tre avvik fra anker */}
       <div className="seksjon">
-        <Heading size="medium" level="2" className="seksjon-tittel">
-          Største avvik fra anker
-        </Heading>
-        <BodyShort size="small" style={{ color: 'var(--a-text-subtle)', marginBottom: 'var(--a-spacing-3)' }}>
+        <h2 className="seksjon-tittel">Største avvik fra anker</h2>
+        <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: 'var(--s-3)' }}>
           Standardiserte overraskelser siden siste offisielle ankerbane. Klikk for å gå til detaljsiden.
-        </BodyShort>
+        </p>
         <ToppTreAvvik variabler={data.variabler} />
-        <ReadMore header="Hva betyr standardisert avvik?" size="small" defaultOpen={false} style={{ marginTop: 'var(--a-spacing-3)' }}>
-          Standardisert avvik er overraskelsen (faktisk – anker) delt på det rullende standardavviket
-          til seriens egne overraskelser. En verdi over ±0,5 regnes som meningsfull, og over ±1 som stor.
-          Dette gjør avvikene sammenlignbare på tvers av serier med ulik volatilitet.
-        </ReadMore>
+        <details className="readmore" style={{ marginTop: 'var(--s-3)' }}>
+          <summary>Hva betyr standardisert avvik?</summary>
+          <div className="readmore-body">
+            Standardisert avvik er overraskelsen (faktisk – anker) delt på det rullende standardavviket
+            til seriens egne overraskelser. En verdi over ±0,5 regnes som meningsfull, og over ±1 som stor.
+            Dette gjør avvikene sammenlignbare på tvers av serier med ulik volatilitet.
+          </div>
+        </details>
       </div>
 
-      {/* Domeneseksjoner — bruker domenespesifikke CSS-klasser for farger */}
       {GRUPPER.map(({ id, label, serier }) => {
         const tilgjengelige = serier.filter((s) => data.variabler[s])
         if (tilgjengelige.length === 0) return null
         return (
           <div key={id} className={`seksjon-${id}`}>
-            <Heading size="small" level="2" className="seksjon-tittel">
-              <a href={GRUPPE_TIL_LENKE[id] ?? '/'} style={{ color: 'inherit', textDecoration: 'none' }}>
+            <h2 className="seksjon-tittel">
+              <a href={GRUPPE_TIL_LENKE[id] ?? '/'} style={{ textDecoration: 'none', color: 'inherit' }}>
                 {label} →
               </a>
-            </Heading>
+            </h2>
             <div className="kortgrid">
               {tilgjengelige.map((serieId) => (
-                <VariabelKortInteraktiv
-                  key={serieId}
-                  serieId={serieId}
-                  data={data.variabler[serieId]}
-                />
+                <VariabelKortInteraktiv key={serieId} serieId={serieId} data={data.variabler[serieId]} />
               ))}
             </div>
           </div>
